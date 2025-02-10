@@ -19,12 +19,12 @@ ABaseMonster::ABaseMonster()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// Death Effect Load
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(
-		TEXT("/Script/Engine.ParticleSystem'/Game/_Resource/FX/Realistic_Starter_VFX_Pack_Vol2/Particles/Destruction/P_Destruction_Electric.P_Destruction_Electric'"));
-	if (ParticleAsset.Succeeded())
-	{
-		DeathEffect = ParticleAsset.Object;
-	}
+	//static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(
+	//	TEXT("/Script/Engine.ParticleSystem'/Game/_Resource/FX/Realistic_Starter_VFX_Pack_Vol2/Particles/Destruction/P_Destruction_Electric.P_Destruction_Electric'"));
+	//if (ParticleAsset.Succeeded())
+	//{
+	//	DeathEffect = ParticleAsset.Object;
+	//}
 }
 
 // Called when the game starts or when spawned

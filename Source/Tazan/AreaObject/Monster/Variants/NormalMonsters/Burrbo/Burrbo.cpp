@@ -19,11 +19,11 @@ ABurrbo::ABurrbo()
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(50.f);
 	
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/_Resource/Monster/Burrbo/Burrbo.Burrbo'"));
-	if (tempMesh.Succeeded())
-	{
-		GetMesh()->SetSkeletalMesh(tempMesh.Object);
-	}
+	//ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/_Resource/Monster/Burrbo/Burrbo.Burrbo'"));
+	//if (tempMesh.Succeeded())
+	//{
+	//	GetMesh()->SetSkeletalMesh(tempMesh.Object);
+	//}
 	GetMesh()->SetRelativeScale3D(FVector(0.3f));
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f,0.0f,-50.0f),FRotator(0.0f,-90.0f,0.0f));
 	

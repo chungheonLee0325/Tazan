@@ -24,6 +24,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -36,14 +37,47 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
-
+	
 	virtual void NotifyControllerChanged() override;
+
+	// Input Action
+	/** Called for movement input */
+	void OnMove(const FInputActionValue& Value);
+	/** Called for looking input */
+	void OnLook(const FInputActionValue& Value);
+	/** Called for attack input */
+	void On_Attack_Common_Pressed(const FInputActionValue& InputActionValue);
+	void On_Attack_Strong_Pressed(const FInputActionValue& InputActionValue);
+	/** Called for parry input */
+	void On_Parry_Pressed(const FInputActionValue& InputActionValue);
+	/** Called for evade input */
+	void On_Evade_Pressed(const FInputActionValue& InputActionValue);
+
+	// Animation Notify Handlers
+	UFUNCTION(BlueprintCallable)
+	void OnParryActivated();
+
+	UFUNCTION(BlueprintCallable)
+	void OnParryDeactivated();
+
+	UFUNCTION(BlueprintCallable)
+	void OnPerfectParryActivated();
+
+	UFUNCTION(BlueprintCallable)
+	void OnPerfectParryDeactivated();
+	
+	UFUNCTION(BlueprintCallable)
+	void OnAttackHitStart();
+
+	UFUNCTION(BlueprintCallable)
+	void OnAttackHitEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void OnDodgeInvincibilityStart();
+
+	UFUNCTION(BlueprintCallable)
+	void OnDodgeInvincibilityEnd();
+	
 
 private:
 	// Camera Setting

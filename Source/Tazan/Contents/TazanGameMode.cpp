@@ -16,10 +16,15 @@ ATazanGameMode::ATazanGameMode()
 	SoundDataMap.Empty();
 
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));
-	if (PlayerPawnBPClass.Class != NULL)
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Script/Engine.Blueprint'/Game/_BluePrints/AreaObject/Player/BP_Player_Kazan.BP_Player_Kazan_c'"));
+	if (PlayerPawnBPClass.Succeeded())
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
+	}
+	static ConstructorHelpers::FClassFinder<AController> PlayerControllerBPClass(TEXT("/Script/Engine.Blueprint'/Game/_BluePrints/AreaObject/Player/BP_KazanPlayerController.BP_KazanPlayerController_c'"));
+	if (PlayerControllerBPClass.Succeeded())
+	{
+		PlayerControllerClass = PlayerControllerBPClass.Class;
 	}
 }
 

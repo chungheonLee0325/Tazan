@@ -24,6 +24,16 @@ APlayer_Kazan::APlayer_Kazan()
 	// Set Size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
+	// Set Mesh
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempSkeletalMesh(
+		TEXT("/Script/Engine.SkeletalMesh'/Game/_Resource/Kazan/SM_Kazan.SM_Kazan'"));
+	if (tempSkeletalMesh.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(tempSkeletalMesh.Object);
+		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -97.f), FRotator(0, -90, 0));
+		GetMesh()->SetRelativeScale3D(FVector(0.4f));
+	}
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -56,37 +66,44 @@ APlayer_Kazan::APlayer_Kazan()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	// Enhanced Input Setting
-	ConstructorHelpers::FObjectFinder<UInputMappingContext> tempInputMapping(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/_Input/IMC_Kazan.IMC_Kazan'"));
+	ConstructorHelpers::FObjectFinder<UInputMappingContext> tempInputMapping(
+		TEXT("/Script/EnhancedInput.InputMappingContext'/Game/_Input/IMC_Kazan.IMC_Kazan'"));
 	if (tempInputMapping.Succeeded())
 	{
 		DefaultMappingContext = tempInputMapping.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UInputAction> tempMoveAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanMove.IA_KazanMove'"));
+	ConstructorHelpers::FObjectFinder<UInputAction> tempMoveAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanMove.IA_KazanMove'"));
 	if (tempMoveAction.Succeeded())
 	{
 		MoveAction = tempMoveAction.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UInputAction> tempLookAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanLook.IA_KazanLook'"));
+	ConstructorHelpers::FObjectFinder<UInputAction> tempLookAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanLook.IA_KazanLook'"));
 	if (tempLookAction.Succeeded())
 	{
 		LookAction = tempLookAction.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UInputAction> tempAttackCAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_C.IA_KazanAttack_C'"));
+	ConstructorHelpers::FObjectFinder<UInputAction> tempAttackCAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_C.IA_KazanAttack_C'"));
 	if (tempAttackCAction.Succeeded())
 	{
 		AttackCAction = tempAttackCAction.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UInputAction> tempAttackSAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_S.IA_KazanAttack_S'"));
+	ConstructorHelpers::FObjectFinder<UInputAction> tempAttackSAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_S.IA_KazanAttack_S'"));
 	if (tempAttackSAction.Succeeded())
 	{
 		AttackSAction = tempAttackSAction.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UInputAction> tempParryAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanParry.IA_KazanParry'"));
+	ConstructorHelpers::FObjectFinder<UInputAction> tempParryAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanParry.IA_KazanParry'"));
 	if (tempParryAction.Succeeded())
 	{
 		ParryAction = tempParryAction.Object;
 	}
-	ConstructorHelpers::FObjectFinder<UInputAction> tempEvadeAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanEvade.IA_KazanEvade'"));
+	ConstructorHelpers::FObjectFinder<UInputAction> tempEvadeAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanEvade.IA_KazanEvade'"));
 	if (tempEvadeAction.Succeeded())
 	{
 		EvadeAction = tempEvadeAction.Object;
@@ -126,11 +143,22 @@ void APlayer_Kazan::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayer_Kazan::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayer_Kazan::OnMove);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayer_Kazan::Look);
-		 
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayer_Kazan::OnLook);
+
+		// Attack
+		EnhancedInputComponent->BindAction(AttackCAction, ETriggerEvent::Started, this,
+		                                   &APlayer_Kazan::On_Attack_Common_Pressed);
+		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Started, this,
+		                                   &APlayer_Kazan::On_Attack_Strong_Pressed);
+
+		// Parry
+		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Started, this, &APlayer_Kazan::On_Parry_Pressed);
+
+		// Evade
+		EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Started, this, &APlayer_Kazan::On_Evade_Pressed);
 	}
 	else
 	{
@@ -141,7 +169,7 @@ void APlayer_Kazan::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	}
 }
 
-void APlayer_Kazan::Move(const FInputActionValue& Value)
+void APlayer_Kazan::OnMove(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -154,7 +182,7 @@ void APlayer_Kazan::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -164,15 +192,63 @@ void APlayer_Kazan::Move(const FInputActionValue& Value)
 	}
 }
 
-void APlayer_Kazan::Look(const FInputActionValue& Value)
+void APlayer_Kazan::OnLook(const FInputActionValue& Value)
 {
-		// input is a Vector2D
-		FVector2D LookAxisVector = Value.Get<FVector2D>();
+	// input is a Vector2D
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-		if (Controller != nullptr)
-		{
-			// add yaw and pitch input to controller
-			AddControllerYawInput(LookAxisVector.X);
-			AddControllerPitchInput(LookAxisVector.Y);
-		}
+	if (Controller != nullptr)
+	{
+		// add yaw and pitch input to controller
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void APlayer_Kazan::On_Attack_Common_Pressed(const FInputActionValue& InputActionValue)
+{
+}
+
+void APlayer_Kazan::On_Attack_Strong_Pressed(const FInputActionValue& InputActionValue)
+{
+}
+
+void APlayer_Kazan::On_Parry_Pressed(const FInputActionValue& InputActionValue)
+{
+}
+
+void APlayer_Kazan::On_Evade_Pressed(const FInputActionValue& InputActionValue)
+{
+}
+
+void APlayer_Kazan::OnParryActivated()
+{
+}
+
+void APlayer_Kazan::OnParryDeactivated()
+{
+}
+
+void APlayer_Kazan::OnPerfectParryActivated()
+{
+}
+
+void APlayer_Kazan::OnPerfectParryDeactivated()
+{
+}
+
+void APlayer_Kazan::OnAttackHitStart()
+{
+}
+
+void APlayer_Kazan::OnAttackHitEnd()
+{
+}
+
+void APlayer_Kazan::OnDodgeInvincibilityStart()
+{
+}
+
+void APlayer_Kazan::OnDodgeInvincibilityEnd()
+{
 }
