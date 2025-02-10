@@ -2,7 +2,7 @@
 
 
 #include "Player_Kazan.h"
-
+#include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
@@ -54,6 +54,43 @@ APlayer_Kazan::APlayer_Kazan()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	// Enhanced Input Setting
+	ConstructorHelpers::FObjectFinder<UInputMappingContext> tempInputMapping(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/_Input/IMC_Kazan.IMC_Kazan'"));
+	if (tempInputMapping.Succeeded())
+	{
+		DefaultMappingContext = tempInputMapping.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> tempMoveAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanMove.IA_KazanMove'"));
+	if (tempMoveAction.Succeeded())
+	{
+		MoveAction = tempMoveAction.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> tempLookAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanLook.IA_KazanLook'"));
+	if (tempLookAction.Succeeded())
+	{
+		LookAction = tempLookAction.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> tempAttackCAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_C.IA_KazanAttack_C'"));
+	if (tempAttackCAction.Succeeded())
+	{
+		AttackCAction = tempAttackCAction.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> tempAttackSAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_S.IA_KazanAttack_S'"));
+	if (tempAttackSAction.Succeeded())
+	{
+		AttackSAction = tempAttackSAction.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> tempParryAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanParry.IA_KazanParry'"));
+	if (tempParryAction.Succeeded())
+	{
+		ParryAction = tempParryAction.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> tempEvadeAction(TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanEvade.IA_KazanEvade'"));
+	if (tempEvadeAction.Succeeded())
+	{
+		EvadeAction = tempEvadeAction.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -93,6 +130,7 @@ void APlayer_Kazan::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayer_Kazan::Look);
+		 
 	}
 	else
 	{
