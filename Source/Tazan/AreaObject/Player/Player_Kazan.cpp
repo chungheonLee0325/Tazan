@@ -36,7 +36,7 @@ APlayer_Kazan::APlayer_Kazan()
 	}
 
 	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponComponent->SetupAttachment(GetMesh(),TEXT("Weapon_R_BackPack_GSword"));
+	WeaponComponent->SetupAttachment(GetMesh(),TEXT("Weapon_R"));
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempWeaponSkeletalMesh(TEXT(
 		"/Script/Engine.SkeletalMesh'/Game/_Resource/Weapon/Gsword_C_I_GSword_Ruins001.Gsword_C_I_GSword_Ruins001'"));
@@ -71,57 +71,13 @@ APlayer_Kazan::APlayer_Kazan()
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	// Camera Lagging
 	CameraBoom->bEnableCameraLag = true;
-	CameraBoom->CameraLagSpeed = 3.0f;
+	CameraBoom->CameraLagSpeed = 10.0f;
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
-	//// Enhanced Input Setting
-	//static ConstructorHelpers::FObjectFinder<UInputMappingContext> tempInputMapping(
-	//	TEXT("/Script/EnhancedInput.InputMappingContext'/Game/_Input/IMC_Kazan.IMC_Kazan'"));
-	//if (tempInputMapping.Succeeded())
-	//{
-	//	DefaultMappingContext = tempInputMapping.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UInputAction> tempMoveAction(
-	//	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanMove.IA_KazanMove'"));
-	//if (tempMoveAction.Succeeded())
-	//{
-	//	MoveAction = tempMoveAction.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UInputAction> tempLookAction(
-	//	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanLook.IA_KazanLook'"));
-	//if (tempLookAction.Succeeded())
-	//{
-	//	LookAction = tempLookAction.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UInputAction> tempAttackCAction(
-	//	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_C.IA_KazanAttack_C'"));
-	//if (tempAttackCAction.Succeeded())
-	//{
-	//	AttackCAction = tempAttackCAction.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UInputAction> tempAttackSAction(
-	//	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_S.IA_KazanAttack_S'"));
-	//if (tempAttackSAction.Succeeded())
-	//{
-	//	AttackSAction = tempAttackSAction.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UInputAction> tempParryAction(
-	//	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanParry.IA_KazanParry'"));
-	//if (tempParryAction.Succeeded())
-	//{
-	//	ParryAction = tempParryAction.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UInputAction> tempEvadeAction(
-	//	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanEvade.IA_KazanEvade'"));
-	//if (tempEvadeAction.Succeeded())
-	//{
-	//	EvadeAction = tempEvadeAction.Object;
-	//}
 }
 
 // Called when the game starts or when spawned
@@ -175,7 +131,6 @@ void APlayer_Kazan::Look(const FVector2D LookAxisVector)
 		AddControllerPitchInput(pitchInput);
 
 		CurrentPitchAngle = newPitchAngle;
-		//AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
 

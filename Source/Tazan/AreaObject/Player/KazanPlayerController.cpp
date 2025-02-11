@@ -52,6 +52,8 @@ AKazanPlayerController::AKazanPlayerController()
 	{
 		EvadeAction = tempEvadeAction.Object;
 	}
+	
+	Kazan = nullptr;
 }
 
 void AKazanPlayerController::BeginPlay()

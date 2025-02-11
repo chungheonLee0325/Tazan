@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Tazan/ResourceManager/HarioGameType.h"
+#include "Tazan/ResourceManager/KazanGameType.h"
 #include "BaseAiFSM.generated.h"
 
 class ABaseMonster;
