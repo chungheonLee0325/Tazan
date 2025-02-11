@@ -24,10 +24,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
@@ -37,21 +33,28 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-	virtual void NotifyControllerChanged() override;
 
-	// Input Action
+public:
+	// Movement
 	/** Called for movement input */
-	void OnMove(const FInputActionValue& Value);
+	void Move(FVector2D MovementVector);
+
+	// Rotation
 	/** Called for looking input */
-	void OnLook(const FInputActionValue& Value);
+	void Look(FVector2D LookAxisVector);
+
+private:
 	/** Called for attack input */
-	void On_Attack_Common_Pressed(const FInputActionValue& InputActionValue);
-	void On_Attack_Strong_Pressed(const FInputActionValue& InputActionValue);
+	void On_Attack_Common_Pressed();
+	void On_Attack_Strong_Pressed();
 	/** Called for parry input */
-	void On_Parry_Pressed(const FInputActionValue& InputActionValue);
+	void On_Parry_Pressed();
+	void On_Parry_Released();
 	/** Called for evade input */
-	void On_Evade_Pressed(const FInputActionValue& InputActionValue);
+	void On_Evade_Pressed();
+	/** Called for run input */
+	void On_Run_Pressed();
+	void On_Run_Released();
 
 	// Animation Notify Handlers
 	UFUNCTION(BlueprintCallable)
@@ -65,7 +68,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void OnPerfectParryDeactivated();
-	
+
 	UFUNCTION(BlueprintCallable)
 	void OnAttackHitStart();
 
@@ -77,48 +80,29 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void OnDodgeInvincibilityEnd();
-	
 
 private:
 	// Weapon Setting
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* WeaponComponent;
-	
+
 	// Camera Setting
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
-
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-
-	// Input Setting
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* DefaultMappingContext;
-
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MoveAction;
-
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* LookAction;
-
-	/** Attack_C Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* AttackCAction;
-
-	/** Attack_S Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* AttackSAction;
-
-	/** Parry Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ParryAction;
-
-	/** Evade Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* EvadeAction;
+	// 카메라 민감도 설정
+	UPROPERTY(EditAnywhere, Category = "Camera|Controls")
+	float LookSensitivityX = 0.25f;
+	UPROPERTY(EditAnywhere, Category = "Camera|Controls")
+	float LookSensitivityY = 0.15f;
+	// 수직 각도 제한
+	UPROPERTY(EditAnywhere, Category = "Camera|Limits")
+	float MinPitchAngle = -10.0f; // 위쪽 제한
+	UPROPERTY(EditAnywhere, Category = "Camera|Limits")
+	float MaxPitchAngle = 40.0f; // 아래쪽 제한
+	// 현재 피치 각도를 추적
+	float CurrentPitchAngle = 0.0f;
 };
