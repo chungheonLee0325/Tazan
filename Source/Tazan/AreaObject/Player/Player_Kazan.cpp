@@ -34,6 +34,19 @@ APlayer_Kazan::APlayer_Kazan()
 		GetMesh()->SetRelativeScale3D(FVector(0.4f));
 	}
 
+	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+	WeaponComponent->SetupAttachment(GetMesh(),TEXT("Weapon_R_BackPack_GSword"));
+	
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempWeaponSkeletalMesh(TEXT(
+		"/Script/Engine.SkeletalMesh'/Game/_Resource/Weapon/Gsword_C_I_GSword_Ruins001.Gsword_C_I_GSword_Ruins001'"));
+	if (tempWeaponSkeletalMesh.Succeeded())
+	{
+		WeaponComponent->SetSkeletalMesh(tempWeaponSkeletalMesh.Object);
+		WeaponComponent->SetRelativeScale3D(FVector(0.4f));
+		//FTransform attachTransform = GetMesh()->GetSocketTransform(TEXT("Weapon_R_BackPack_GSword"));
+		//WeaponComponent->SetRelativeTransform(attachTransform);
+	}
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
