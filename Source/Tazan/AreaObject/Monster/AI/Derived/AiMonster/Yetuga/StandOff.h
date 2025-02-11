@@ -1,0 +1,28 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
+#include "StandOff.generated.h"
+
+class AYetuga;
+/**
+ * 
+ */
+UCLASS()
+class TAZAN_API UStandOff : public UBaseAiState
+{
+	GENERATED_BODY()
+	
+public:
+	virtual void InitState() override;
+	virtual void Enter() override;
+	virtual void Execute(float DeltaTime) override;
+	virtual void Exit() override;
+
+private:
+	float CurTime;
+	float AttackDuration = 2.0f;
+	AYetuga* Yetuga;
+};
