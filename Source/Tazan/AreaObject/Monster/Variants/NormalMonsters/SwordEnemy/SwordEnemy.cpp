@@ -16,6 +16,7 @@ ASwordEnemy::ASwordEnemy()
 	{
 		GetMesh()->SetSkeletalMesh(TempMesh.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+		GetMesh()->SetRelativeScale3D(FVector(0.5f));
 	}
 }
 
@@ -37,12 +38,3 @@ void ASwordEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
-
-void ASwordEnemy::ResizeCharacterMesh(FVector NewScale)
-{
-	if (GetMesh())
-	{
-		// 스케일을 정확히 0.5로 설정
-		GetMesh()->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-	}
-};
