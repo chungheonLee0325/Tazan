@@ -13,10 +13,16 @@ AYetuga::AYetuga()
 	m_AiFSM = AYetuga::CreateFSM();
 }
 
+float AYetuga::DistToPlayer()
+{
+	return GetDistanceTo(Player);
+}
+
+
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
-	Player = Cast<APlayer_Kazan>(GetWorld()->GetFirstPlayerController());
+	Player = Cast<APlayer_Kazan>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
 UBaseAiFSM* AYetuga::CreateFSM()
@@ -34,28 +40,26 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AYetuga::WeaveingAttack(uint8 idx)
+void AYetuga::PlayAnimMontage(EYetugaAnimType animType)
 {
-	UE_LOG(LogTemp, Display, TEXT("%d"),idx);
-	GetMesh()->GetAnimInstance()->Montage_Play(amMovingAtk);
-	
-	if (idx == 0)
+	if (UAnimMontage* Montage = GetAnimMontage(animType))
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(amMovingAtk);
-	}
-	else if (idx == 1)
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(amSweapAtk);
-	}
-	else if (idx == 2)
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(amThrowRockAtk);
-	}
-	else if (idx == 3)
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(amRoar);
+		if (GetMesh() && GetMesh()->GetAnimInstance())
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+		}
 	}
 }
+
+UAnimMontage* AYetuga::GetAnimMontage(EYetugaAnimType animType)
+{
+	if (const TObjectPtr<UAnimMontage>* MontagePtr = AnimMontageMap.Find(animType))
+	{
+		return *MontagePtr;
+	}
+	return nullptr;
+}
+
 
 void AYetuga::ShortAttack()
 {

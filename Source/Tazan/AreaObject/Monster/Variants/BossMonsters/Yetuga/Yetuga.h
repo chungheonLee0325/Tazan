@@ -8,6 +8,17 @@
 
 class APlayer_Kazan;
 
+UENUM(BlueprintType)
+enum class EYetugaAnimType : uint8
+{
+	MovingAtk		UMETA(DisplayName = "MovingAtk"),
+	SweapAtk		UMETA(DisplayName = "SweepAtk"),
+	FastBallAtk		UMETA(DisplayName = "FastBallAtk"),
+	Roar			UMETA(DisplayName = "Roar"),
+	BackMoved		UMETA(DisplayName = "BackMove"),
+	NormalAtk		UMETA(DisplayName = "NormalAtk")
+};
+
 UCLASS()
 class TAZAN_API AYetuga : public ABaseMonster
 {
@@ -18,13 +29,8 @@ public:
 	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
 
 	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
-	TObjectPtr<UAnimMontage> amMovingAtk;
-	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
-	TObjectPtr<UAnimMontage> amSweapAtk;
-	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
-	TObjectPtr<UAnimMontage> amThrowRockAtk;
-	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
-	TObjectPtr<UAnimMontage> amRoar;
+	TMap<EYetugaAnimType, TObjectPtr<UAnimMontage>> AnimMontageMap;
+
 
 private:
 	UPROPERTY()
@@ -37,7 +43,12 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void WeaveingAttack(uint8 idx);
+	
+	float DistToPlayer();
+
+	void PlayAnimMontage(EYetugaAnimType animType);
+	UAnimMontage* GetAnimMontage(EYetugaAnimType animType); 
+	
 	void ShortAttack();
 	void LongAtk();
 };
