@@ -39,6 +39,7 @@ BaseMonster System
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Containers/Queue.h"
+#include "Tazan/Utilities/LogMacro.h"
 #include "BaseMonster.generated.h"
 
 class UBaseAiFSM;
