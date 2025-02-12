@@ -46,8 +46,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	float DistToPlayer();
-
-	void PlayAnimMontage(EYetugaAnimType animType);
+	bool IsPlayerForward();
+	
 	UAnimMontage* GetAnimMontage(EYetugaAnimType animType); 
 	
 	void ShortAttack();
