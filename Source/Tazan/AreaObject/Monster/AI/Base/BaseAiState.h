@@ -28,6 +28,9 @@ public:
 	virtual void Enter() PURE_VIRTUAL(UBaseAiState::Enter,);
 	virtual void Execute(float dt) PURE_VIRTUAL(UAiState::Excute,);
 	virtual void Exit() PURE_VIRTUAL(UBaseAiState::Exit,);
+	
+	void AnimMontagePlay(ABaseMonster* baseMonster, UAnimMontage* montage);
+	virtual void AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted);
 
 protected:
 	EAiStateType m_AiStateType;
