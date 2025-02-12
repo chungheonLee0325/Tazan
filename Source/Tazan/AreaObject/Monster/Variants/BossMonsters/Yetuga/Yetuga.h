@@ -15,7 +15,7 @@ enum class EYetugaAnimType : uint8
 	SweapAtk		UMETA(DisplayName = "SweepAtk"),
 	FastBallAtk		UMETA(DisplayName = "FastBallAtk"),
 	Roar			UMETA(DisplayName = "Roar"),
-	BackMoved		UMETA(DisplayName = "BackMove"),
+	BackMove		UMETA(DisplayName = "BackMove"),
 	NormalAtk		UMETA(DisplayName = "NormalAtk")
 };
 
@@ -31,6 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
 	TMap<EYetugaAnimType, TObjectPtr<UAnimMontage>> AnimMontageMap;
 
+	bool bIsHit = false;
 
 private:
 	UPROPERTY()

@@ -36,7 +36,6 @@ void UYetugaFSM::InitStatePool()
 
 	// Wait 
 	auto StandOff = CreateState<UStandOff>(this, m_Owner, EAiStateType::Wait);
-	StandOff->SetNextState(EAiStateType::Attack);
 	AddState(EAiStateType::Wait, StandOff);
 	ChangeState(EAiStateType::Attack);
 	
@@ -46,10 +45,8 @@ void UYetugaFSM::InitStatePool()
 
 	// Attack
 	auto Attack = CreateState<UAttack>(this, m_Owner, EAiStateType::Attack);
-	Attack->SetNextState(EAiStateType::Wait);
 	AddState(EAiStateType::Attack, Attack);
 
-	ChangeState(EAiStateType::Wait);
-
+	ChangeState(EAiStateType::Attack);
 }
 

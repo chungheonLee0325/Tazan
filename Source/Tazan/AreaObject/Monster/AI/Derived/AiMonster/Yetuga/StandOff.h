@@ -7,9 +7,7 @@
 #include "StandOff.generated.h"
 
 class AYetuga;
-/**
- * 
- */
+
 UCLASS()
 class TAZAN_API UStandOff : public UBaseAiState
 {
@@ -20,9 +18,12 @@ public:
 	virtual void Enter() override;
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
+	// virtual void AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted) override;
 
 private:
-	float CurTime;
-	float AttackDuration = 2.0f;
+	UPROPERTY()
 	AYetuga* Yetuga;
+
+public:
+	bool IsPlayerForward();
 };

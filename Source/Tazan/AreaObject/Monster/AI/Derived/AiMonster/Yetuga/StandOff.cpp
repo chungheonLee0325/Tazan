@@ -3,9 +3,11 @@
 
 #include "StandOff.h"
 
+#include "Chaos/Utilities.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
+#include "Tazan/AreaObject/Player/Player_Kazan.h"
 
 void UStandOff::InitState()
 {
@@ -14,29 +16,67 @@ void UStandOff::InitState()
 void UStandOff::Enter()
 {
 	Yetuga = Cast<AYetuga>(m_Owner);
-	float dist = m_Owner->GetDistanceTo((GetWorld()->GetFirstPlayerController())->GetPawn());
-	if (dist < 300.0f)
+	m_NextState = EAiStateType::Attack;
+	AnimMontagePlay(Yetuga,Yetuga->GetAnimMontage(EYetugaAnimType::Roar));
+	//TODO: 플레이어가 탈진 상태인가?
+	if (0) 
 	{
-		float n = FMath::RandRange(0,1);
-		Yetuga->WeaveingAttack(n);
+		//강한 공격
+		return;
+	}
+	//플레이어가 정면이라면
+	if (IsPlayerForward()) 
+	{
+		//TODO: 플레이어한테 맞고 있나?
+		if (Yetuga->bIsHit)
+		{
+			AnimMontagePlay(Yetuga,Yetuga->GetAnimMontage(EYetugaAnimType::BackMove));
+		}
+		else
+		{
+			m_AiFSM->ChangeState(EAiStateType::Attack);
+		}
 	}
 	else
 	{
-		float n = FMath::RandRange(2,3);
-		Yetuga->WeaveingAttack(n);
+		//TODO: 플레이어가 내 뒤인가?
+		if (0) 
+		{
+			//등 공격
+		}
+		//위치 재정비
 	}
 }
 
 void UStandOff::Execute(float DeltaTime)
 {
-	CurTime += DeltaTime;
-	if (CurTime > AttackDuration)
+	//위치 재정비
+	//TODO: 플레이어가 날 때리고 있나?
+	if (0) 
 	{
-		m_AiFSM->ChangeState(m_NextState);
+		//백무브
+		return;
 	}
+	//플레이어의 정면을 보도록
 }
 
 void UStandOff::Exit()
 {
-	CurTime = 0.0f;
+	LOG_SCREEN("대기 종료");
 }
+
+bool UStandOff::IsPlayerForward()
+{
+	// GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorForwardVector();
+	FVector dir = Yetuga->GetPlayer_Kazan()->GetActorLocation() - Yetuga->GetActorLocation();
+	dir.Normalize();
+	float dot = FVector::DotProduct(dir,Yetuga->GetActorForwardVector());
+
+	LOG_SCREEN("플레이어 정면, %f", dot);
+	if (dot > 0.4)
+	{
+		return true;
+	}
+	return false;
+}
+
