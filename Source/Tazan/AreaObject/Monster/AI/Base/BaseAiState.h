@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "Tazan/ResourceManager/HarioGameType.h"
+#include "Tazan/ResourceManager/KazanGameType.h"
 #include "BaseAiState.generated.h"
 
 class ABaseMonster;

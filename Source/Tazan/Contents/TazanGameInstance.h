@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "Tazan/ResourceManager/HarioGameType.h"
+#include "Tazan/ResourceManager/KazanGameType.h"
 #include "TazanGameInstance.generated.h"
 
 /**
@@ -15,17 +15,16 @@ class TAZAN_API UTazanGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
-
-
 public:
 	FAreaObjectData* GetDataAreaObject(int AreaObjectID);
-	
-	TMap<int32, FAreaObjectData> dt_AreaObject;
+	FSkill_Data* GetDataSkill(int SkillID);
 
-	UPROPERTY(EditAnywhere)	
+	TMap<int32, FAreaObjectData> dt_AreaObject;
+	TMap<int32, FSkill_Data> dt_Skill;
+
+	UPROPERTY(EditAnywhere)
 	TMap<int, USoundBase*> SoundDataMap;
 
 protected:
 	virtual void Init() override;
-	
 };
