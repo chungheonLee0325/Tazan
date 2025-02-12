@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Tazan/AreaObject/Attribute/Condition.h"
 #include "Tazan/AreaObject/Attribute/Health.h"
-#include "Tazan/ResourceManager/HarioGameType.h"
+#include "Tazan/ResourceManager/KazanGameType.h"
 #include "AreaObject.generated.h"
 
 class UCondition;

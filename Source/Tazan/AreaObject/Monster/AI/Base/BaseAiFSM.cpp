@@ -3,7 +3,7 @@
 
 #include "BaseAiState.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
-#include "Tazan/ResourceManager/HarioGameType.h"
+#include "Tazan/ResourceManager/KazanGameType.h"
 
 
 // Sets default values for this component's properties
