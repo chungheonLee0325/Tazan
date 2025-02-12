@@ -17,13 +17,13 @@ public:
 	AYetuga();
 	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
 
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Anim | Weaving Skill")
+	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
 	TObjectPtr<UAnimMontage> amMovingAtk;
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Anim | Weaving Skill")
+	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
 	TObjectPtr<UAnimMontage> amSweapAtk;
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Anim | Weaving Skill")
+	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
 	TObjectPtr<UAnimMontage> amThrowRockAtk;
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Anim | Weaving Skill")
+	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
 	TObjectPtr<UAnimMontage> amRoar;
 
 private:

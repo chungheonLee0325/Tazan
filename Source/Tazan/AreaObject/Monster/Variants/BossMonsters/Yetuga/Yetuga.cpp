@@ -17,7 +17,6 @@ void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = Cast<APlayer_Kazan>(GetWorld()->GetFirstPlayerController());
-	GetMesh()->GetAnimInstance()->Montage_Play(amMovingAtk);
 }
 
 UBaseAiFSM* AYetuga::CreateFSM()
