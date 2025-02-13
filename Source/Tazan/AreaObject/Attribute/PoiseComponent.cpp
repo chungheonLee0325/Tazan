@@ -41,7 +41,7 @@ void UPoiseComponent::ProcessAttack(const FAttackData& AttackData)
 	{
 		return;
 	}
-	
+
 	// Poise 값 비교 - 공격 vs 방어
 	const int32 defensePoise = CalculateTotalDefensePoise();
 	if (AttackData.PoiseBreakAmount <= defensePoise)
@@ -117,7 +117,20 @@ void UPoiseComponent::AddPoiseModifier(int32 Value, float Duration)
 }
 
 
-void UPoiseComponent::SetAnimationPoiseBonus(int32 Bonus)
+void UPoiseComponent::SetAnimationPoiseBonus(int32 Bonus, float Duration)
 {
 	AnimationPoiseBonus = FMath::Max(0, Bonus);
+
+	// Todo : @@LCH 없어질수도 있을듯.. Animation Montage에서 Release 함수로 직접 제거
+	TWeakObjectPtr<UPoiseComponent> weakThis = this;
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [weakThis]()
+	                                       {
+		                                       UPoiseComponent* strongThis = weakThis.Get();
+		                                       if (strongThis != nullptr)
+		                                       {
+			                                       strongThis->AnimationPoiseBonus = 0;
+		                                       }
+	                                       }
+	                                       , Duration, false);
 }

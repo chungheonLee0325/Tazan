@@ -37,7 +37,7 @@ public:
 
 	// 애니메이션 강인도 설정
 	UFUNCTION(BlueprintCallable)
-	void SetAnimationPoiseBonus(int32 Bonus);
+	void SetAnimationPoiseBonus(int32 Bonus, float Duration);
 
 	// 스태거 실제 적용
 	UFUNCTION(BlueprintCallable)
