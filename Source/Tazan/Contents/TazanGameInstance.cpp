@@ -37,7 +37,7 @@ void UTazanGameInstance::Init()
 
 		for (const FName& RowName : RowNames)
 		{
-			FSkill_Data* Row = SkillTable->FindRow<FSkill_Data>(RowName, TEXT(""));
+			FSkillData* Row = SkillTable->FindRow<FSkillData>(RowName, TEXT(""));
 			if (nullptr != Row)
 			{
 				dt_Skill.Add(Row->SkillID, *Row);
@@ -74,9 +74,9 @@ FAreaObjectData* UTazanGameInstance::GetDataAreaObject(const int AreaObjectID)
 	return nullptr;
 }
 
-FSkill_Data* UTazanGameInstance::GetDataSkill(int SkillID)
+FSkillData* UTazanGameInstance::GetDataSkill(int SkillID)
 {
-	if (FSkill_Data* data = dt_Skill.Find(SkillID))
+	if (FSkillData* data = dt_Skill.Find(SkillID))
 	{
 		return data;
 	}

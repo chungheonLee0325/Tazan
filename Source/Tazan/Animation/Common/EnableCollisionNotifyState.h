@@ -23,7 +23,7 @@ public:
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkillData)
-	FSkill_Data SkillData;
+	FSkillData SkillData;
 
 	// 디버그 드로잉 옵션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
