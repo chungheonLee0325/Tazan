@@ -13,10 +13,12 @@ enum class EYetugaAnimType : uint8
 {
 	MovingAtk		UMETA(DisplayName = "MovingAtk"),
 	SweapAtk		UMETA(DisplayName = "SweepAtk"),
+	TurnAtk			UMETA(DisplayName = "TurnAtk"),
 	FastBallAtk		UMETA(DisplayName = "FastBallAtk"),
 	Roar			UMETA(DisplayName = "Roar"),
 	BackMove		UMETA(DisplayName = "BackMove"),
-	NormalAtk		UMETA(DisplayName = "NormalAtk")
+	NormalAtk		UMETA(DisplayName = "NormalAtk"),
+	BackAtk			UMETA(DisplayName = "BackAtk")
 };
 
 UCLASS()
@@ -31,8 +33,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
 	TMap<EYetugaAnimType, TObjectPtr<UAnimMontage>> AnimMontageMap;
 
-	bool bIsHit = false;
-
 private:
 	UPROPERTY()
 	APlayer_Kazan* Player;
@@ -46,7 +46,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	float DistToPlayer();
-	bool IsPlayerForward();
+	float GetPlayerDir();
 	
 	UAnimMontage* GetAnimMontage(EYetugaAnimType animType); 
 	
