@@ -38,7 +38,7 @@ bool US_Wait::ISMoveToPlayer()
 	FVector dir = SwordEnemy->GetPlayer_Kazan()->GetActorLocation() - SwordEnemy->GetActorLocation();
 	dir.Normalize();
 	float dot = FVector::DotProduct(dir,SwordEnemy->GetActorForwardVector());
-	FVector SetActorLocation(dot,speed);
+	//FVector SetActorLocation(dot,speed);
 	if (dot > 0.4)
 	{
 		return true;
