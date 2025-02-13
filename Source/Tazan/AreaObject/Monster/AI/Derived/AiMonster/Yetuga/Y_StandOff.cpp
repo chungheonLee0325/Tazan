@@ -3,11 +3,9 @@
 
 #include "Y_StandOff.h"
 
-#include "Chaos/Utilities.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
-#include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
-#include "Tazan/AreaObject/Player/Player_Kazan.h"
 
 void UY_StandOff::InitState()
 {
@@ -15,53 +13,69 @@ void UY_StandOff::InitState()
 
 void UY_StandOff::Enter()
 {
-	Yetuga = Cast<AYetuga>(m_Owner);
 	m_NextState = EAiStateType::Attack;
-	AnimMontagePlay(Yetuga,Yetuga->GetAnimMontage(EYetugaAnimType::Roar));
+	
 	//TODO: 플레이어가 탈진 상태인가?
 	if (0) 
 	{
 		//강한 공격
 		return;
 	}
-	//플레이어가 정면이라면
-	if (Yetuga->IsPlayerForward()) 
+	APawn* p = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	float dist = m_Owner->GetDistanceTo(p);
+	FVector dir = p->GetActorLocation()-m_Owner->GetActorLocation();
+	dir.Normalize();
+	float playerDir = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
+	LOG_SCREEN("플레이어 방향: %f", playerDir);
+	if (dist < 400.0f)
 	{
-		//TODO: 플레이어한테 맞고 있나?
-		if (Yetuga->bIsHit)
+		// LOG_SCREEN("거리는 가깝고");
+		if (playerDir > 0.7f && playerDir < 1.0f) 
 		{
-			AnimMontagePlay(Yetuga,Yetuga->GetAnimMontage(EYetugaAnimType::BackMove));
+			LOG_SCREEN("정면!");
+			//TODO: 플레이어한테 맞고 있나?
+			if (0)
+			{
+				m_AiFSM->ChangeState(m_NextState);
+			}
+			else
+			{
+				m_AiFSM->ChangeState(m_NextState);
+			}
 		}
 		else
 		{
-			m_AiFSM->ChangeState(EAiStateType::Attack);
+			if (playerDir > -1.0f && playerDir < -0.3) 
+			{
+				LOG_SCREEN("등 뒤!");
+				return;
+			}
+			// AnimMontagePlay(Yetuga,Yetuga->GetAnimMontage(EYetugaAnimType::SweapAtk));
+			m_AiFSM->ChangeState(EAiStateType::Return);
 		}
-	}
-	else
-	{
-		//TODO: 플레이어가 내 뒤인가?
-		if (0) 
-		{
-			//등 공격
-		}
-		//위치 재정비
 	}
 }
 
 void UY_StandOff::Execute(float DeltaTime)
 {
-	//위치 재정비
-	//TODO: 플레이어가 날 때리고 있나?
-	if (0) 
+	//방향 재정비
+	CurTime += DeltaTime;
+	FVector dir = UGameplayStatics::GetPlayerPawn(this,0)->GetActorLocation()-m_Owner->GetActorLocation();
+	dir.Normalize();
+	FRotator rot = dir.Rotation();
+	
+	float rotSpeed = 1.0f;
+	FRotator smoothRot = FMath::RInterpTo(m_Owner->GetActorRotation(), rot, CurTime, rotSpeed);
+	
+	m_Owner->SetActorRotation(smoothRot);
+	if (m_Owner->GetActorRotation().Equals(rot,5.0f))
 	{
-		//백무브
-		return;
+		CurTime = 0.0f;
+		m_AiFSM->ChangeState(m_NextState);
 	}
-	//플레이어의 정면을 보도록
 }
 
 void UY_StandOff::Exit()
 {
-	LOG_SCREEN("대기 종료");
 }
 

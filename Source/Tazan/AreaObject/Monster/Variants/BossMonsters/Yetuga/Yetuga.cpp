@@ -13,12 +13,6 @@ AYetuga::AYetuga()
 	m_AiFSM = AYetuga::CreateFSM();
 }
 
-float AYetuga::DistToPlayer()
-{
-	return GetDistanceTo(Player);
-}
-
-
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
@@ -49,19 +43,17 @@ UAnimMontage* AYetuga::GetAnimMontage(EYetugaAnimType animType)
 	return nullptr;
 }
 
-bool AYetuga::IsPlayerForward()
+float AYetuga::DistToPlayer()
+{
+	return GetDistanceTo(Player);
+}
+
+float AYetuga::GetPlayerDir()
 {
 	// GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorForwardVector();
 	FVector dir = Player->GetActorLocation() - GetActorLocation();
 	dir.Normalize();
-	float dot = FVector::DotProduct(dir,GetActorForwardVector());
-
-	LOG_SCREEN("플레이어 정면, %f", dot);
-	if (dot > 0.4)
-	{
-		return true;
-	}
-	return false;
+	return FVector::DotProduct(dir,GetActorForwardVector());
 }
 
 void AYetuga::ShortAttack()

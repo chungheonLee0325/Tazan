@@ -23,15 +23,10 @@ void UY_Attack::Execute(float dt)
 
 void UY_Attack::Exit()
 {
-	LOG_SCREEN("어택 종료");
 }
 
 void UY_Attack::AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!Yetuga->IsPlayerForward())
-	{
-		m_NextState = EAiStateType::Chase;
-	}
 	Super::AnimMontageEnd(Montage, bInterrupted);
 }
 
