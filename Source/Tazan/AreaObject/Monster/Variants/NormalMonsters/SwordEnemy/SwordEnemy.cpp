@@ -3,6 +3,8 @@
 
 #include "SwordEnemy.h"
 
+#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/SwordMonster/Sword_FSM.h"
+
 
 // Sets default values
 ASwordEnemy::ASwordEnemy()
@@ -16,8 +18,9 @@ ASwordEnemy::ASwordEnemy()
 	{
 		GetMesh()->SetSkeletalMesh(TempMesh.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-		GetMesh()->SetRelativeScale3D(FVector(0.5f));
+		GetMesh()->SetRelativeScale3D(FVector(0.37f));
 	}
+	m_AiFSM = ASwordEnemy::CreateFSM();
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +28,11 @@ void ASwordEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+UBaseAiFSM* ASwordEnemy::CreateFSM()
+{
+	return CreateDefaultSubobject<USword_FSM>(TEXT("AiFSM"));
 }
 
 // Called every frame

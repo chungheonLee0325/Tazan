@@ -13,12 +13,19 @@ class TAZAN_API ASwordEnemy : public ABaseMonster
 
 public:
 	// Sets default values for this character's properties
+	UPROPERTY()
+    	class APlayer_Kazan* Player;
+
 	ASwordEnemy();
+	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
+
+	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	virtual UBaseAiFSM* CreateFSM() override;
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -27,6 +34,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	
+
 	
 }; 
 
