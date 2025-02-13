@@ -4,19 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
-#include "Groggy.generated.h"
+#include "Y_StandOff.generated.h"
 
-/**
- * 
- */
+class AYetuga;
+
 UCLASS()
-class TAZAN_API UGroggy : public UBaseAiState
+class TAZAN_API UY_StandOff : public UBaseAiState
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void InitState() override;
 	virtual void Enter() override;
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
+	// virtual void AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted) override;
+
+private:
+	UPROPERTY()
+	AYetuga* Yetuga;
+
+public:
+	
 };

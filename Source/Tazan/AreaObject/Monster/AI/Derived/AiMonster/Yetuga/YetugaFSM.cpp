@@ -3,11 +3,12 @@
 
 #include "YetugaFSM.h"
 
-#include "Groggy.h"
+#include "Y_Groggy.h"
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
-#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/StandOff.h"
-#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Attack.h"
-#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Groggy.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_StandOff.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_Attack.h"
+// #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_Groggy.h"
+// #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_Chase.h"
 
 
 UYetugaFSM::UYetugaFSM()
@@ -35,17 +36,21 @@ void UYetugaFSM::InitStatePool()
 	if (!yetuga) return;
 
 	// Wait 
-	auto StandOff = CreateState<UStandOff>(this, m_Owner, EAiStateType::Wait);
+	auto StandOff = CreateState<UY_StandOff>(this, m_Owner, EAiStateType::Wait);
 	AddState(EAiStateType::Wait, StandOff);
 	ChangeState(EAiStateType::Attack);
 	
 	// Idle
-	auto Groggy = CreateState<UGroggy>(this, m_Owner, EAiStateType::Idle);
+	auto Groggy = CreateState<UY_Groggy>(this, m_Owner, EAiStateType::Idle);
 	AddState(EAiStateType::Idle, Groggy);
 
 	// Attack
-	auto Attack = CreateState<UAttack>(this, m_Owner, EAiStateType::Attack);
+	auto Attack = CreateState<UY_Attack>(this, m_Owner, EAiStateType::Attack);
 	AddState(EAiStateType::Attack, Attack);
+
+	// // Chase
+	// auto Chase = CreateState<UY_Chase>(this, m_Owner, EAiStateType::Chase);
+	// AddState(EAiStateType::Chase, Chase);
 
 	ChangeState(EAiStateType::Attack);
 }

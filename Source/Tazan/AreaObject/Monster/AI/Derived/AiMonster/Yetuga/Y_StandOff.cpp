@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "StandOff.h"
+#include "Y_StandOff.h"
 
 #include "Chaos/Utilities.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
@@ -9,11 +9,11 @@
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 
-void UStandOff::InitState()
+void UY_StandOff::InitState()
 {
 }
 
-void UStandOff::Enter()
+void UY_StandOff::Enter()
 {
 	Yetuga = Cast<AYetuga>(m_Owner);
 	m_NextState = EAiStateType::Attack;
@@ -25,7 +25,7 @@ void UStandOff::Enter()
 		return;
 	}
 	//플레이어가 정면이라면
-	if (IsPlayerForward()) 
+	if (Yetuga->IsPlayerForward()) 
 	{
 		//TODO: 플레이어한테 맞고 있나?
 		if (Yetuga->bIsHit)
@@ -48,7 +48,7 @@ void UStandOff::Enter()
 	}
 }
 
-void UStandOff::Execute(float DeltaTime)
+void UY_StandOff::Execute(float DeltaTime)
 {
 	//위치 재정비
 	//TODO: 플레이어가 날 때리고 있나?
@@ -60,23 +60,8 @@ void UStandOff::Execute(float DeltaTime)
 	//플레이어의 정면을 보도록
 }
 
-void UStandOff::Exit()
+void UY_StandOff::Exit()
 {
 	LOG_SCREEN("대기 종료");
-}
-
-bool UStandOff::IsPlayerForward()
-{
-	// GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorForwardVector();
-	FVector dir = Yetuga->GetPlayer_Kazan()->GetActorLocation() - Yetuga->GetActorLocation();
-	dir.Normalize();
-	float dot = FVector::DotProduct(dir,Yetuga->GetActorForwardVector());
-
-	LOG_SCREEN("플레이어 정면, %f", dot);
-	if (dot > 0.4)
-	{
-		return true;
-	}
-	return false;
 }
 

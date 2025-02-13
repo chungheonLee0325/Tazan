@@ -40,17 +40,6 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AYetuga::PlayAnimMontage(EYetugaAnimType animType)
-{
-	if (UAnimMontage* Montage = GetAnimMontage(animType))
-	{
-		if (GetMesh() && GetMesh()->GetAnimInstance())
-		{
-			GetMesh()->GetAnimInstance()->Montage_Play(Montage);
-		}
-	}
-}
-
 UAnimMontage* AYetuga::GetAnimMontage(EYetugaAnimType animType)
 {
 	if (const TObjectPtr<UAnimMontage>* MontagePtr = AnimMontageMap.Find(animType))
@@ -60,6 +49,20 @@ UAnimMontage* AYetuga::GetAnimMontage(EYetugaAnimType animType)
 	return nullptr;
 }
 
+bool AYetuga::IsPlayerForward()
+{
+	// GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorForwardVector();
+	FVector dir = Player->GetActorLocation() - GetActorLocation();
+	dir.Normalize();
+	float dot = FVector::DotProduct(dir,GetActorForwardVector());
+
+	LOG_SCREEN("플레이어 정면, %f", dot);
+	if (dot > 0.4)
+	{
+		return true;
+	}
+	return false;
+}
 
 void AYetuga::ShortAttack()
 {

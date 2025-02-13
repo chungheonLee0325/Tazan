@@ -1,24 +1,24 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Groggy.h"
+#include "Y_Groggy.h"
 
-void UGroggy::InitState()
+void UY_Groggy::InitState()
 {
 }
 
-void UGroggy::Enter()
+void UY_Groggy::Enter()
 {
 
 	UE_LOG(LogTemp, Display, TEXT("그로기 시작"));
 }
 
-void UGroggy::Execute(float DeltaTime)
+void UY_Groggy::Execute(float DeltaTime)
 {
 
 }
 
-void UGroggy::Exit()
+void UY_Groggy::Exit()
 {
 
 }
