@@ -11,6 +11,7 @@
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
+#include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 
 // Sets default values
 AAreaObject::AAreaObject()
@@ -35,12 +36,13 @@ void AAreaObject::BeginPlay()
 	Super::BeginPlay();
 
 	// 데이터 초기화
-	dt_AreaObject = Cast<UTazanGameInstance>(GetGameInstance())->GetDataAreaObject(m_AreaObjectID);
+	UTazanGameInstance* gameInstance = Cast<UTazanGameInstance>(GetGameInstance());
+	dt_AreaObject = gameInstance->GetDataAreaObject(m_AreaObjectID);
 
 	// Health 초기화 By Data
 	float hpMax = 1.0f;
 	int basePoise = 0;
-	
+
 	if (dt_AreaObject != nullptr)
 	{
 		hpMax = dt_AreaObject->HPMax;
@@ -49,6 +51,17 @@ void AAreaObject::BeginPlay()
 
 	m_Health->InitHealth(hpMax);
 	m_PoiseComponent->InitPoise(basePoise);
+
+	// 스킬 인스턴스 생성
+	for (auto& skill : m_OwnSkillIDSet)
+	{
+		if (FSkillData* skillData = gameInstance->GetDataSkill(skill))
+		{
+			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, skillData->SkillClass);
+			NewSkill->InitSkill(skillData);
+			m_SkillInstanceMap.Add(skill, NewSkill);
+		}
+	}
 
 	// 스태거 적용 바인드
 	m_PoiseComponent->OnStaggerBegin.AddDynamic(this, &AAreaObject::HandleStaggerBegin);
@@ -84,8 +97,8 @@ void AAreaObject::CalcDamage(float Damage, AActor* Caster, AActor* Target, bool 
 	}
 	else
 	{
-		//ToDo : 추가 구현
-		//UGameplayStatics::ApplyPointDamage();
+		// ToDo : 추가 구현
+		// UGameplayStatics::ApplyPointDamage();
 	}
 }
 
@@ -118,6 +131,51 @@ void AAreaObject::OnKill()
 
 void AAreaObject::OnRevival()
 {
+}
+
+UBaseSkill* AAreaObject::GetCurrentSkill()
+{
+	return m_CurrentSkill;
+}
+
+void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
+{
+	if (nullptr == NewSkill)
+	{
+		return;
+	}
+
+	m_CurrentSkill = NewSkill;
+}
+
+UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
+{
+	UBaseSkill** skillPointer = m_SkillInstanceMap.Find(SkillID);
+	return *skillPointer;
+}
+
+bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
+{
+	return Skill && Skill->CanCast(this, Target);
+}
+
+bool AAreaObject::CanCastNextSkill(UBaseSkill* Skill, AAreaObject* Target)
+{
+	return bCanNextSkill && Skill && Skill->CanCast(this, Target);
+}
+
+void AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
+{
+	if (CanCastSkill(Skill, Target))
+	{
+		UpdateCurrentSkill(Skill);
+		Skill->OnCastStart(this, Target);
+	}
+}
+
+void AAreaObject::ClearCurrentSkill()
+{
+	m_CurrentSkill = nullptr;
 }
 
 bool AAreaObject::AddCondition(EConditionBitsType Condition) const
@@ -160,7 +218,7 @@ void AAreaObject::HandleStaggerEnd()
 float AAreaObject::GetStaggerAnimationDuration(EStaggerType Type)
 {
 	// 실제 애니메이션 데이터에서 길이 조회
-	if (UAnimMontage** montage = m_Stagger_AnimMontages.Find(Type))
+	if (UAnimMontage** montage = dt_AreaObject->Stagger_AnimMontages.Find(Type))
 	{
 		if (*montage) // Valid check for UAnimMontage*
 		{
@@ -175,7 +233,7 @@ float AAreaObject::GetStaggerAnimationDuration(EStaggerType Type)
 
 void AAreaObject::PlayStaggerAnimation(EStaggerType Type)
 {
-	if (UAnimMontage** montage = m_Stagger_AnimMontages.Find(Type))
+	if (UAnimMontage** montage = dt_AreaObject->Stagger_AnimMontages.Find(Type))
 	{
 		if (*montage) // Valid check for UAnimMontage*
 		{

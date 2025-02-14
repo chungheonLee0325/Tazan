@@ -9,6 +9,7 @@
 // Enum
 // 언리얼 리플렉션 시스템과 통합하기 위해 UENUM() 매크로를 사용
 
+class UBaseSkill;
 // ConditionBits - 비트마스크를 활용한 죽음, 무적 
 UENUM(Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EConditionBitsType : uint8
@@ -98,6 +99,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	int BasePoise = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	TMap<EStaggerType,UAnimMontage*> Stagger_AnimMontages;
 };
 
 // HitBox 동적으로 생성하기 위한 구조체 정보, FAttackData 멤버 변수
@@ -163,7 +167,7 @@ struct FAttackData
 	FHitBoxData HitBoxData;
 };
 
-// SkillData 테이블 정보, 데미지 정보등 관리
+// m_SkillData 테이블 정보, 데미지 정보등 관리
 USTRUCT(BlueprintType)
 struct FSkillData : public FTableRowBase
 {
@@ -171,14 +175,21 @@ struct FSkillData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int SkillID = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UBaseSkill> SkillClass = nullptr;
+	
 	// 소모 자원(현재는 스태미너 고정 추후 체력등 확장시 enum 추가될듯)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Cost = 0;
 
 	// 스킬 사정거리 (AI 용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SkillRange = 0.0f;
+	float CastRange = 0.0f;
 
+	// 스킬 쿨타임
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CoolTime = 0.0f;
+	
 	// 사용 스킬의 애님 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* Montage = nullptr;
@@ -191,6 +202,9 @@ struct FSkillData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAttackData AttackData;
 
+	// 다음 스킬 ID (플레이어 및 몬스터 콤보 어택)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int NextSkillID = 0;
 	// Todo : AnimMontage & Sound & Cast/Hit FX 관련 항목 추가?
 };
 

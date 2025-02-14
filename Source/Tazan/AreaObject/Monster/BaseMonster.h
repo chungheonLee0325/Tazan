@@ -89,38 +89,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual AActor* GetAggroTarget() const;
 	
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual bool CanCastSkill(UBaseSkill* Skill, const AActor* Target) const;
-	
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void CastSkill(UBaseSkill* Skill, const AActor* Target);
-
-	// Skill Interface
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual UBaseSkill* GetCurrentSkill();
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void UpdateCurrentSkill(UBaseSkill* NewSkill);
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void ClearCurrentSkill();
-	
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void EnQueueSkill(UBaseSkill* Skill);
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual UBaseSkill* DeQueueSkill();
-	
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void ClearQueueSkill();
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual UBaseSkill* FindSkillByClass(TSubclassOf<UBaseSkill> SkillClass);	// 아마 Skill Table 추가되면 SkillID로 찾는 방식으로 변화될듯
-	
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	UBaseSkill* FindSkillByState(EAiStateType StateType) const;
-
-	
 	// State Checks
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsMoving() const;
@@ -160,19 +128,6 @@ protected:
 
 	virtual UBaseAiFSM* CreateFSM();
 	
-	// Skill System
-	UPROPERTY(EditAnywhere, Category = "Skill")
-	TSet<TSubclassOf<UBaseSkill>> m_SkillClasses;
-	
-	UPROPERTY(EditAnywhere, Category = "Skill")
-	TMap<TSubclassOf<UBaseSkill>,UBaseSkill*> m_SkillInstances;
-		
-	UPROPERTY(EditAnywhere, Category = "Skill")
-	TMap<EAiStateType, TSubclassOf<UBaseSkill>> m_StateSkillClasses;
-	
-	UPROPERTY(EditAnywhere, Category = "Skill")
-	TMap<EAiStateType, UBaseSkill*> m_StateSkillInstances;
-	
 	// Combat System
 	UPROPERTY()
 	AActor* m_AggroTarget;
@@ -180,17 +135,8 @@ protected:
 	UPROPERTY()
 	FVector m_SpawnLocation;
 
-public:
-	FVector GetM_SpawnLocation() const;
-
-protected:
 	UPROPERTY()
 	UBaseAiFSM* m_AiFSM;
-
-	UPROPERTY()
-	UBaseSkill* m_CurrentSkill;
-	
-	TQueue<UBaseSkill*> m_SkillQueue;
 
 	// Death Setting
 	UPROPERTY(EditAnywhere, Category = "Death Settings")

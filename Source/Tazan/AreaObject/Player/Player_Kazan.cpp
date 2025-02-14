@@ -80,6 +80,11 @@ APlayer_Kazan::APlayer_Kazan()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	// Skill ID
+	m_OwnSkillIDSet.Add(10);
+	m_OwnSkillIDSet.Add(11);
+	m_OwnSkillIDSet.Add(12);
 }
 
 // Called when the game starts or when spawned
@@ -88,6 +93,7 @@ void APlayer_Kazan::BeginPlay()
 	Super::BeginPlay();
 
 	KazanAnimInstance = Cast<UKazanAniminstance>(GetMesh()->GetAnimInstance());
+	
 }
 
 // Called every frame
