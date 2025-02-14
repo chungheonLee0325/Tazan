@@ -24,4 +24,8 @@ public:
 private:
 	UPROPERTY()
 	class AYetuga* Yetuga;
+
+private:
+	int GetRandomSkill();
+	int GetRandomSkill(int startID, int endID);
 };

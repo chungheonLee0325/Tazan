@@ -20,7 +20,9 @@ public:
 	virtual void Enter() override;
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
-	virtual void AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted) override;
+
+	UPROPERTY()
+	UAnimMontage* AnimMontage;
 
 private:
 	UPROPERTY()

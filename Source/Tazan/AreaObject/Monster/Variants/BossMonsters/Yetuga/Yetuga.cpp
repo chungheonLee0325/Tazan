@@ -11,6 +11,9 @@ AYetuga::AYetuga()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	m_AiFSM = AYetuga::CreateFSM();
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>move(TEXT("/Game/_Resource/Yetuga/Animation/AM_SideMoveAtk_L.AM_SideMoveAtk_L"));
+	
 }
 
 void AYetuga::BeginPlay()

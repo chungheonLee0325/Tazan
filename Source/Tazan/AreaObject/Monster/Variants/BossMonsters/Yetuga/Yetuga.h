@@ -18,6 +18,8 @@ enum class EYetugaAnimType : uint8
 	Roar			UMETA(DisplayName = "Roar"),
 	BackMove		UMETA(DisplayName = "BackMove"),
 	NormalAtk		UMETA(DisplayName = "NormalAtk"),
+	ShortMoveR 		UMETA(DisplayName = "ShortMoveR"),
+	ShortMoveL 		UMETA(DisplayName = "ShortMoveL"),
 	BackAtk			UMETA(DisplayName = "BackAtk")
 };
 
@@ -28,10 +30,11 @@ class TAZAN_API AYetuga : public ABaseMonster
 
 public:
 	AYetuga();
-	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
 
-	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
+	UPROPERTY(EditAnywhere, Category = "Skill Anim")
 	TMap<EYetugaAnimType, TObjectPtr<UAnimMontage>> AnimMontageMap;
+
+	bool bHaveBackAtk = false;
 
 private:
 	UPROPERTY()
@@ -44,7 +47,8 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
+	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
 	float DistToPlayer();
 	float GetPlayerDir();
 	
@@ -52,4 +56,7 @@ public:
 	
 	void ShortAttack();
 	void LongAtk();
+
+private:
+	
 };

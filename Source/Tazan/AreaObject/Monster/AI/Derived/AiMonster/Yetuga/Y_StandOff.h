@@ -20,6 +20,6 @@ public:
 	virtual void Exit() override;
 
 private:
-
+	float bIsAnim = false;
 	float CurTime;
 };

@@ -57,6 +57,6 @@ void UYetugaFSM::InitStatePool()
 	// auto Chase = CreateState<UY_Chase>(this, m_Owner, EAiStateType::Chase);
 	// AddState(EAiStateType::Chase, Chase);
 
-	ChangeState(EAiStateType::Attack);
+	ChangeState(EAiStateType::Wait);
 }
 
