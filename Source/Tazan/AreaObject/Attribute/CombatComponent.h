@@ -24,4 +24,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
+
+	UPROPERTY(EditAnywhere)
+	bool bCanMove;
+	UPROPERTY(EditAnywhere)
+	bool bCanAttack;
+	UPROPERTY(EditAnywhere)
+	bool bCanRotate;
 };

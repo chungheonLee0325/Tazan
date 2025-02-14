@@ -17,10 +17,10 @@ class TAZAN_API UTazanGameInstance : public UGameInstance
 
 public:
 	FAreaObjectData* GetDataAreaObject(int AreaObjectID);
-	FSkill_Data* GetDataSkill(int SkillID);
+	FSkillData* GetDataSkill(int SkillID);
 
 	TMap<int32, FAreaObjectData> dt_AreaObject;
-	TMap<int32, FSkill_Data> dt_Skill;
+	TMap<int32, FSkillData> dt_Skill;
 
 	UPROPERTY(EditAnywhere)
 	TMap<int, USoundBase*> SoundDataMap;

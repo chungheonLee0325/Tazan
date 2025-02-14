@@ -20,7 +20,7 @@ enum class ESkillPhase : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FSkillData
+struct FSkillParam
 {
 	GENERATED_BODY()
 
@@ -91,7 +91,7 @@ public:
 	float GetCooldownProgress() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
-	const FSkillData& GetSkillData() const { return SkillData; }
+	const FSkillParam& GetSkillData() const { return SkillData; }
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	bool IsInRange(const ABaseMonster* Caster, const AActor* Target) const;
@@ -102,7 +102,7 @@ public:
 protected:
 	// 기존 속성들
 	UPROPERTY(EditAnywhere, Category = "Skill Data")
-	FSkillData SkillData;
+	FSkillParam SkillData;
 
 	UPROPERTY()
 	ESkillPhase m_CurrentPhase;

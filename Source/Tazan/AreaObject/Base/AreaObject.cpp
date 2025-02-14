@@ -5,22 +5,27 @@
 
 #include <ThirdParty/ShaderConductor/ShaderConductor/External/DirectXShaderCompiler/include/dxc/DXIL/DxilConstants.h>
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Attribute/Condition.h"
 #include "Tazan/AreaObject/Attribute/Health.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 
 // Sets default values
 AAreaObject::AAreaObject()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
+
 	// Health Component 생성
 	m_Health = CreateDefaultSubobject<UHealth>(TEXT("Health"));
 
 	// Condition Component 생성
 	m_Condition = CreateDefaultSubobject<UCondition>(TEXT("Condition"));
+
+	// Poise Component 생성
+	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
 }
 
 
@@ -34,12 +39,20 @@ void AAreaObject::BeginPlay()
 
 	// Health 초기화 By Data
 	float hpMax = 1.0f;
+	int basePoise = 0;
+	
 	if (dt_AreaObject != nullptr)
 	{
 		hpMax = dt_AreaObject->HPMax;
+		basePoise = dt_AreaObject->BasePoise;
 	}
-	
+
 	m_Health->InitHealth(hpMax);
+	m_PoiseComponent->InitPoise(basePoise);
+
+	// 스태거 적용 바인드
+	m_PoiseComponent->OnStaggerBegin.AddDynamic(this, &AAreaObject::HandleStaggerBegin);
+	m_PoiseComponent->OnStaggerEnd.AddDynamic(this, &AAreaObject::HandleStaggerEnd);
 }
 
 void AAreaObject::PostInitializeComponents()
@@ -51,7 +64,6 @@ void AAreaObject::PostInitializeComponents()
 void AAreaObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -62,14 +74,13 @@ void AAreaObject::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void AAreaObject::CalcDamage(float Damage, AActor* Caster, AActor* Target, bool IsPointDamage)
 {
-	
 	if (false == IsPointDamage)
 	{
 		UGameplayStatics::ApplyDamage(Target,
-			Damage,
-			GetController(),
-			this,
-			UDamageType::StaticClass());
+		                              Damage,
+		                              GetController(),
+		                              this,
+		                              UDamageType::StaticClass());
 	}
 	else
 	{
@@ -81,19 +92,19 @@ void AAreaObject::CalcDamage(float Damage, AActor* Caster, AActor* Target, bool 
 float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
                               AActor* DamageCauser)
 {
-	if (IsDie() || HasCondition(EConditionType::Invincible))
+	if (IsDie() || HasCondition(EConditionBitsType::Invincible))
 		return 0.0f;
-		
+
 	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
-	if ( FMath::IsNearlyZero(IncreaseHP(-ActualDamage)))
+	if (FMath::IsNearlyZero(IncreaseHP(-ActualDamage)))
 	{
-		if(true== ExchangeDead())
+		if (true == ExchangeDead())
 		{
 			OnDie();
 		}
 	}
-	
+
 	return ActualDamage;
 }
 
@@ -109,21 +120,74 @@ void AAreaObject::OnRevival()
 {
 }
 
-bool AAreaObject::AddCondition(EConditionType Condition) const
+bool AAreaObject::AddCondition(EConditionBitsType Condition) const
 {
 	return m_Condition->AddCondition(Condition);
 }
-bool AAreaObject::RemoveCondition(EConditionType Condition) const
+
+bool AAreaObject::RemoveCondition(EConditionBitsType Condition) const
 {
 	return m_Condition->RemoveCondition(Condition);
 }
-bool AAreaObject::HasCondition(EConditionType Condition) const
+
+bool AAreaObject::HasCondition(EConditionBitsType Condition) const
 {
 	return m_Condition->HasCondition(Condition);
 }
+
 bool AAreaObject::ExchangeDead() const
 {
 	return m_Condition->ExchangeDead();
+}
+
+void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
+{
+	// 애니메이션 재생
+	PlayStaggerAnimation(Type);
+
+	// 이동 불가
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	// ToDo : 스킬 사용 불가
+}
+
+void AAreaObject::HandleStaggerEnd()
+{
+	// 이동 불가 해제
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	// ToDo : 스킬 사용 불가 해제
+}
+
+float AAreaObject::GetStaggerAnimationDuration(EStaggerType Type)
+{
+	// 실제 애니메이션 데이터에서 길이 조회
+	if (UAnimMontage** montage = m_Stagger_AnimMontages.Find(Type))
+	{
+		if (*montage) // Valid check for UAnimMontage*
+		{
+			return (*montage)->GetPlayLength();
+		}
+	}
+
+	// 애니메이션이 없거나 유효하지 않을 경우 기본값 반환
+	UE_LOG(LogTemp, Warning, TEXT("GetStaggerAnimationDuration: Montage for %d is null"), (int32)Type);
+	return 0.0f;
+}
+
+void AAreaObject::PlayStaggerAnimation(EStaggerType Type)
+{
+	if (UAnimMontage** montage = m_Stagger_AnimMontages.Find(Type))
+	{
+		if (*montage) // Valid check for UAnimMontage*
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(*montage);
+			// Todo : 종료 바인드?
+		}
+	}
+	else
+	{
+		// 애니메이션이 없거나 유효하지 않을 경우 기본값 반환
+		UE_LOG(LogTemp, Warning, TEXT("GetStaggerAnimationDuration: Montage for %d is null"), (int32)Type);
+	}
 }
 
 float AAreaObject::IncreaseHP(float Delta) const
@@ -140,7 +204,3 @@ float AAreaObject::GetHP() const
 {
 	return m_Health->GetHP();
 }
-
-
-
-
