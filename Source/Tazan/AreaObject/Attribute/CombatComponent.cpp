@@ -3,34 +3,68 @@
 
 #include "CombatComponent.h"
 
-
-// Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	bIsAttacking = false;
+	bCanAttack = true;
+	AttackCooldown = 0.5f;
+	WeakAttackCurrentComboCount = 0;
+	MaxComboCount = 3;
 }
 
-
-// Called when the game starts
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	// ...
+void UCombatComponent::AttackInput(int SkillID)
+{
+	// 공격 중이거나 공격할 수 없는 상태면 입력 무시
+	if (false == bCanAttack)
+	{
+		return;
+	}
+
+	if (false == bIsAttacking)
+	{
+		ExecuteAttack(SkillID);
+	}
+	else if (true == bCanCombo)
+	{
+		if (NextComboIndex > CurrentComboCount)
+		{
+			CurrentComboCount = NextComboIndex;
+			ExecuteAttack(SkillID);
+		}
+	}
+
+}
+
+void UCombatComponent::ExecuteAttack(int SkillID)
+{
+	bIsAttacking = true;
+	bCanAttack = false;
+
+	// 애니메이션 재생 등 실제 공격 로직 구현
+	// ... (여기에 애니메이션 몽타주 재생 코드 추가)
 	
 }
 
-
-// Called every frame
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                     FActorComponentTickFunction* ThisTickFunction)
+void UCombatComponent::EndAttack()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	bCanAttack = true;
+	ResetComboState();
 }
 
+void UCombatComponent::EnableComboState()
+{
+	this->bCanCombo = true;
+	this->NextComboIndex = FMath::Min(CurrentComboCount + 1, MaxComboCount);
+}
+
+void UCombatComponent::ResetComboState()
+{
+	this->bCanCombo = bCanCombo;
+	this->bIsAttacking = false;
+}

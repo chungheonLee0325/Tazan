@@ -13,22 +13,42 @@ class TAZAN_API UCombatComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UCombatComponent();
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	bool bIsAttacking;
 
-	UPROPERTY(EditAnywhere)
-	bool bCanMove;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	bool bCanAttack;
-	UPROPERTY(EditAnywhere)
-	bool bCanRotate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float AttackCooldown;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	int32 WeakAttackCurrentComboCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	int32 MaxComboCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	bool bCanCombo;
+	int NextComboIndex;
+	int CurrentComboCount;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void AttackInput(int SkillID);
+	
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void EnableComboState();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ResetComboState();
+
+private:
+	void ExecuteAttack(int SkillID);
+	void EndAttack();
 };
