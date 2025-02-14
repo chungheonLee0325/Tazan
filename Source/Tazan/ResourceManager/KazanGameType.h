@@ -17,6 +17,7 @@ enum class EConditionBitsType : uint8
 	Dead = 1 << 0, // 0b0001
 	Invincible = 1 << 1, // 0b0010
 };
+
 ENUM_CLASS_FLAGS(EConditionBitsType);
 
 // 체력Bar, 공격 및 피격 판정 확인 등 다양한 상황에서 사용
@@ -66,10 +67,10 @@ UENUM(BlueprintType)
 enum class EStaggerType : uint8
 {
 	None,
-	Weak,       // 약한 데미지 경직
-	Normal,		// 일반 데미지 경직
-	Strong,		// 강한 데미지 경직
-	AirBone		// 넘어짐
+	Weak, // 약한 데미지 경직
+	Normal, // 일반 데미지 경직
+	Strong, // 강한 데미지 경직
+	AirBone // 넘어짐
 };
 
 // Struct
@@ -94,9 +95,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	float HPMax = 1.0f;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
-	int BasePoise = 0; 
+	int BasePoise = 0;
 };
 
 // HitBox 동적으로 생성하기 위한 구조체 정보, FAttackData 멤버 변수
@@ -137,20 +138,27 @@ struct FAttackData
 {
 	GENERATED_USTRUCT_BODY()
 
+	// 체력 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HealthDamageAmount = 0.0f;
 
+	// 스테미나 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float StaminaDamageAmount = 0.0f;
 
 	// 강인도 공격 Level : 0 ~ 15 까지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int PoiseBreakAmount = 1;
+	int PoiseAttackAmount = 1;
 
-	// Stagger 정도 
+	// 강인도 비교에 의해 경직 적용시 Stagger(경직) 타입 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EStaggerType StaggerType = EStaggerType::None;
 
+	// 넉백 거리
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float KnockBackForce = 50.0f;
+
+	// 공격 히트 박스 정보 구조체
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FHitBoxData HitBoxData;
 };
@@ -170,6 +178,14 @@ struct FSkillData : public FTableRowBase
 	// 스킬 사정거리 (AI 용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SkillRange = 0.0f;
+
+	// 사용 스킬의 애님 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* Montage = nullptr;
+
+	// 스킬 시전중 시전자의 강인도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int AnimationPoiseBonusValue = 1;
 
 	// 데미지 관련 데이터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
