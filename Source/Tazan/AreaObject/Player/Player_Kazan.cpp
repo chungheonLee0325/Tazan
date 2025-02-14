@@ -10,6 +10,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Layers/LayersSubsystem.h"
 #include "Tazan/Animation/Player/KazanAniminstance.h"
 
 
@@ -149,7 +150,8 @@ void APlayer_Kazan::Parry_Pressed()
 {
 	// 애니메이션 변수 셋팅
 	KazanAnimInstance->bIsGuard = true;
-
+	
+	// ToDo : @@LCH 고민 바로 적용이 맞는지 Notify로 빼서 적용할지
 	// 플레이어 셋팅
 	b_IsGuard = true;
 	// 이동속도 셋팅
@@ -168,7 +170,6 @@ void APlayer_Kazan::Parry_Released()
 	GetCharacterMovement()->MaxWalkSpeed = MAX_WALK_SPEED;
 	// Rotation Setting
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	
 }
 
 void APlayer_Kazan::On_Evade_Pressed()
@@ -183,11 +184,12 @@ void APlayer_Kazan::On_Run_Released()
 {
 }
 
-void APlayer_Kazan::ParryActivated()
+void APlayer_Kazan::PerfectParryActivated()
 {
+	
 }
 
-void APlayer_Kazan::ParryDeactivated()
+void APlayer_Kazan::PerfectParryDeactivated()
 {
 }
 

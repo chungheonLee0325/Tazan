@@ -62,10 +62,10 @@ private:
 
 	// Animation Notify Handlers
 	UFUNCTION(BlueprintCallable)
-	void ParryActivated();
+	void PerfectParryActivated();
 
 	UFUNCTION(BlueprintCallable)
-	void ParryDeactivated();
+	void PerfectParryDeactivated();
 
 	UFUNCTION(BlueprintCallable)
 	void OnPerfectParryActivated();

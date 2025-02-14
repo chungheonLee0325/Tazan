@@ -44,7 +44,7 @@ void UPoiseComponent::ProcessAttack(const FAttackData& AttackData)
 
 	// Poise 값 비교 - 공격 vs 방어
 	const int32 defensePoise = CalculateTotalDefensePoise();
-	if (AttackData.PoiseBreakAmount <= defensePoise)
+	if (AttackData.PoiseAttackAmount <= defensePoise)
 	{
 		return;
 	}
