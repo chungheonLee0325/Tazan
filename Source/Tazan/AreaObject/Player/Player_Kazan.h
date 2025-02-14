@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Tazan/Animation/Player/KazanAniminstance.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Player_Kazan.generated.h"
 
@@ -43,13 +44,16 @@ public:
 	/** Called for looking input */
 	void Look(FVector2D LookAxisVector);
 
+	// Guard / Parry
+	/** Called for parry input */
+	void Parry_Pressed();
+	void Parry_Released();
+
 private:
 	/** Called for attack input */
 	void On_Attack_Common_Pressed();
 	void On_Attack_Strong_Pressed();
-	/** Called for parry input */
-	void On_Parry_Pressed();
-	void On_Parry_Released();
+
 	/** Called for evade input */
 	void On_Evade_Pressed();
 	/** Called for run input */
@@ -58,10 +62,10 @@ private:
 
 	// Animation Notify Handlers
 	UFUNCTION(BlueprintCallable)
-	void OnParryActivated();
+	void ParryActivated();
 
 	UFUNCTION(BlueprintCallable)
-	void OnParryDeactivated();
+	void ParryDeactivated();
 
 	UFUNCTION(BlueprintCallable)
 	void OnPerfectParryActivated();
@@ -76,10 +80,10 @@ private:
 	void OnAttackHitEnd();
 
 	UFUNCTION(BlueprintCallable)
-	void OnDodgeInvincibilityStart();
+	void DodgeInvincibilityStart();
 
 	UFUNCTION(BlueprintCallable)
-	void OnDodgeInvincibilityEnd();
+	void DodgeInvincibilityEnd();
 
 private:
 	// Weapon Setting
@@ -105,4 +109,13 @@ private:
 	float MaxPitchAngle = 40.0f; // 아래쪽 제한
 	// 현재 피치 각도를 추적
 	float CurrentPitchAngle = 0.0f;
+
+	UPROPERTY()
+	UKazanAniminstance* KazanAnimInstance;
+	
+	bool b_IsGuard;
+
+	// Data
+	const float MAX_WALK_SPEED = 500.f;
+	const float MAX_GUARD_WALK_SPEED = 200.f;
 };

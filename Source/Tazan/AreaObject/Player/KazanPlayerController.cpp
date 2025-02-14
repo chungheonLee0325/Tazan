@@ -108,7 +108,6 @@ void AKazanPlayerController::OnMove(const FInputActionValue& Value)
 
 void AKazanPlayerController::OnLook(const FInputActionValue& Value)
 {
-	
 	Kazan->Look(Value.Get<FVector2D>());
 }
 
@@ -122,10 +121,12 @@ void AKazanPlayerController::On_Attack_Strong_Pressed(const FInputActionValue& I
 
 void AKazanPlayerController::On_Parry_Pressed(const FInputActionValue& InputActionValue)
 {
+	Kazan->Parry_Pressed();
 }
 
 void AKazanPlayerController::On_Parry_Released(const FInputActionValue& InputActionValue)
 {
+	Kazan->Parry_Released();
 }
 
 void AKazanPlayerController::On_Evade_Pressed(const FInputActionValue& InputActionValue)
