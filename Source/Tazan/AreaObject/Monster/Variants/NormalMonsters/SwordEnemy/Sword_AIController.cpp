@@ -22,5 +22,5 @@ void ASword_AIController::BeginPlay()
 void ASword_AIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
+} 
 
