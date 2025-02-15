@@ -28,6 +28,7 @@ public:
 	UCondition* m_Condition;
 	bool bCanNextSkill = false;
 
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -102,6 +103,16 @@ public:
 
 	UPROPERTY(Blueprintable)
 	int m_AreaObjectID;
+
+	FTimerHandle DeathTimerHandle;
+
+	// Death Setting
+	// 죽음 후 destroy 지연 시간
+	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
+	float DestroyDelayTime = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
+	UParticleSystem* DeathEffect;
 
 private:
 	FAreaObjectData* dt_AreaObject;

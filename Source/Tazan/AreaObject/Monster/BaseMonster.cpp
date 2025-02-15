@@ -83,23 +83,6 @@ void ABaseMonster::OnDie()
 	if (nullptr != m_CurrentSkill) m_CurrentSkill->CancelCast();
 	// 움직임 정지
 	StopAll();
-	// 콜리전 전환
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	TWeakObjectPtr<ABaseMonster> WeakThis = this;
-
-	// Delay 후 폭발
-	GetWorld()->GetTimerManager().SetTimer(OnDieHandle, [WeakThis]()
-	{
-		ABaseMonster* StrongThis = WeakThis.Get();
-		// Death Effect
-		UGameplayStatics::SpawnEmitterAtLocation(StrongThis->GetWorld(), StrongThis->DeathEffect,
-		                                         StrongThis->GetActorLocation());
-		if (nullptr != StrongThis)
-		{
-			StrongThis->Destroy();
-		}
-	}, DestroyDelayTime, false);
 }
 
 UBaseAiFSM* ABaseMonster::CreateFSM()

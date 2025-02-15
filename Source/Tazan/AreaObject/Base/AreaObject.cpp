@@ -5,6 +5,7 @@
 
 #include <ThirdParty/ShaderConductor/ShaderConductor/External/DirectXShaderCompiler/include/dxc/DXIL/DxilConstants.h>
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Attribute/Condition.h"
 #include "Tazan/AreaObject/Attribute/Health.h"
@@ -22,9 +23,6 @@ AAreaObject::AAreaObject()
 	// Health Component 생성
 	m_Health = CreateDefaultSubobject<UHealth>(TEXT("Health"));
 
-	// Condition Component 생성
-	m_Condition = CreateDefaultSubobject<UCondition>(TEXT("Condition"));
-
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
 }
@@ -34,6 +32,9 @@ AAreaObject::AAreaObject()
 void AAreaObject::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Condition Component 생성
+	m_Condition = NewObject<UCondition>(this,UCondition::StaticClass());
 
 	// 데이터 초기화
 	UTazanGameInstance* gameInstance = Cast<UTazanGameInstance>(GetGameInstance());
@@ -124,6 +125,28 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 
 void AAreaObject::OnDie()
 {
+	if (UAnimMontage* montage = dt_AreaObject->Die_AnimMontage)
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(montage);
+	}
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	TWeakObjectPtr<AAreaObject> weakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [weakThis]()
+	{
+		AAreaObject* strongThis = weakThis.Get();	// 콜리전 전환
+
+		if (strongThis != nullptr)
+		{
+			// Death Effect
+			if (strongThis->DeathEffect != nullptr)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(strongThis->GetWorld(), strongThis->DeathEffect,
+				                                         strongThis->GetActorLocation());
+			}
+			strongThis->Destroy();
+		}
+	}, DestroyDelayTime, false);
 }
 
 void AAreaObject::OnKill()
