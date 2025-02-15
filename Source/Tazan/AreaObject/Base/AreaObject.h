@@ -26,7 +26,7 @@ public:
 	UPoiseComponent* m_PoiseComponent;
 	UPROPERTY(BlueprintReadWrite)
 	UCondition* m_Condition;
-
+	bool bCanNextSkill = false;
 
 protected:
 	// Called when the game starts or when spawned
@@ -35,28 +35,49 @@ protected:
 	// 초기화 로직
 	virtual void PostInitializeComponents() override;
 
-	UPROPERTY(EditDefaultsOnly)
-	TMap<EStaggerType,UAnimMontage*> m_Stagger_AnimMontages;
-
+	// Skill System
+	UPROPERTY(EditAnywhere, Category = "Skill")
+	TSet<int> m_OwnSkillIDSet;
+	
+	UPROPERTY(EditAnywhere, Category = "Skill")
+	TMap<int, UBaseSkill*> m_SkillInstanceMap;
+	
+	UPROPERTY()
+	UBaseSkill* m_CurrentSkill;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
 	virtual void CalcDamage(float Damage, AActor* Caster, AActor* Target, bool IsPointDamage = false);
-
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
-
 	virtual void OnDie();
-
 	virtual void OnKill();
-
 	virtual void OnRevival();
 
 	bool IsDie() const { return m_Condition->IsDead(); }
+
+	// Skill Interface
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual UBaseSkill* GetCurrentSkill();
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual bool CanCastSkill(UBaseSkill* Skill, AAreaObject* Target);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual bool CanCastNextSkill(UBaseSkill* Skill, AAreaObject* Target);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void CastSkill(UBaseSkill* Skill, AAreaObject* Target);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void UpdateCurrentSkill(UBaseSkill* NewSkill);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual UBaseSkill* GetSkillByID(int SkillID);
+	
+
+	// ToDo : 스킬 사용후 이동, 공격 가능 기능 추가 구현
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void ClearCurrentSkill();
 
 	// Condition 기능 퍼사드 제공
 	bool AddCondition(EConditionBitsType Condition) const;
@@ -83,7 +104,5 @@ public:
 	int m_AreaObjectID;
 
 private:
-
-	// 스마트 포인터 사용?
-	struct FAreaObjectData* dt_AreaObject;
+	FAreaObjectData* dt_AreaObject;
 };
