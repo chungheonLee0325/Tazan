@@ -175,6 +175,12 @@ void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 {
 	UBaseSkill** skillPointer = m_SkillInstanceMap.Find(SkillID);
+	
+	if (skillPointer == nullptr)
+	{
+		return nullptr;
+	}
+	
 	return *skillPointer;
 }
 
