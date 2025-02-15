@@ -87,7 +87,7 @@ public:
 	
 	// Combat Interface
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual AActor* GetAggroTarget() const;
+	virtual AAreaObject* GetAggroTarget() const;
 	
 	// State Checks
 	UFUNCTION(BlueprintPure, Category = "State")
@@ -108,7 +108,7 @@ public:
 
 	// Combat System
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void SetAggroTarget(AActor* NewTarget) { m_AggroTarget = NewTarget; }
+	virtual void SetAggroTarget(AAreaObject* NewTarget) { m_AggroTarget = NewTarget; }
 
 	// Data Access
 	const FMonsterData& GetMonsterData() const { return MonsterData; }
@@ -130,7 +130,7 @@ protected:
 	
 	// Combat System
 	UPROPERTY()
-	AActor* m_AggroTarget;
+	AAreaObject* m_AggroTarget;
 
 	UPROPERTY()
 	FVector m_SpawnLocation;

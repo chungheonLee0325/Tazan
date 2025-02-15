@@ -98,7 +98,7 @@ void ABaseMonster::StopMoving()
 {
 }
 
-AActor* ABaseMonster::GetAggroTarget() const
+AAreaObject* ABaseMonster::GetAggroTarget() const
 {
 	return m_AggroTarget;
 }
