@@ -19,9 +19,11 @@ void UY_Attack::Enter()
 	m_NextState = EAiStateType::Wait;
 
 	//TODO: SkillBag?에서 nextSkill 값가져와서 스킬 실행
+	AAreaObject* areaObj = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	m_Owner->CastSkill(m_Owner->GetCurrentSkill(),areaObj);
+	
 	//TODO: 몽타주 플레이 레거시
-	AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EWeavingSkillAnim::UpperCut));
-	return;
+	// AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EWeavingSkillAnim::UpperCut));
 }
 
 void UY_Attack::Execute(float dt)

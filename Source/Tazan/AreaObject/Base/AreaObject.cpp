@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
+#include "Tazan/Utilities/LogMacro.h"
 
 // Sets default values
 AAreaObject::AAreaObject()
@@ -25,6 +26,7 @@ AAreaObject::AAreaObject()
 
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
+	
 }
 
 
@@ -32,6 +34,13 @@ AAreaObject::AAreaObject()
 void AAreaObject::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// AreaObject ID 는 반드시 셋팅되어야 함!!
+	if (m_AreaObjectID == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Area Object ID is 0!!!"));
+		return;
+	}
 
 	// Condition Component 생성
 	m_Condition = NewObject<UCondition>(this,UCondition::StaticClass());
@@ -62,6 +71,11 @@ void AAreaObject::BeginPlay()
 			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, skillData->SkillClass);
 			NewSkill->InitSkill(skillData);
 			m_SkillInstanceMap.Add(skill, NewSkill);
+		}
+		else
+		{
+			LOG_SCREEN_MY(4.0f,FColor::Red,"%d 해당 아이디의 스킬이 존재하지 않습니다.", skill);
+			UE_LOG(LogTemp, Error, TEXT("Skill ID is 0!!!"));
 		}
 	}
 
@@ -175,6 +189,11 @@ void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 {
 	UBaseSkill** skillPointer = m_SkillInstanceMap.Find(SkillID);
+	
+	if (skillPointer == nullptr)
+	{
+		return nullptr;
+	}
 	return *skillPointer;
 }
 
@@ -194,6 +213,10 @@ void AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
 	{
 		UpdateCurrentSkill(Skill);
 		Skill->OnCastStart(this, Target);
+	}
+	else
+	{
+		LOG_SCREEN("CastSkill실패");
 	}
 }
 

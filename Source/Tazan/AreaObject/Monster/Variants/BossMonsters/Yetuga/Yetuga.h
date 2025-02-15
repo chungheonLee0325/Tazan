@@ -6,6 +6,8 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Yetuga.generated.h"
 
+class UY_SkillRoulette;
+class UY_SelectSkill;
 class APlayer_Kazan;
 
 UENUM(BlueprintType)
@@ -34,7 +36,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Skill Anim | WeavingSkill")
 	TMap<EWeavingSkillAnim, TObjectPtr<UAnimMontage>> AnimMontageMap;
 
-	bool bHaveBackAtk = false;
+	UPROPERTY()
+	UY_SkillRoulette* SkillRoulette;
 
 private:
 	UPROPERTY()
@@ -48,6 +51,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//TODO: AreaObject로 이전?
+	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
+	
 	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
 	float DistToPlayer();
 	float GetPlayerDir();
