@@ -55,6 +55,7 @@ void ABaseMonster::BeginPlay()
 			m_SkillInstances.Add(skillClass, NewSkill);
 		}
 	}
+	// FSM 초기화 - AI 초기화
 	if (m_AiFSM != nullptr)
 	{
 		m_AiFSM->InitStatePool();
