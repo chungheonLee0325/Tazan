@@ -3,6 +3,7 @@
 
 #include "Yetuga.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 
@@ -11,6 +12,13 @@ AYetuga::AYetuga()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	m_AiFSM = AYetuga::CreateFSM();
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage>move(TEXT("/Game/_Resource/Yetuga/Animation/AM_SideMoveAtk_L.AM_SideMoveAtk_L"));
+	if (move.Object)
+	{
+		
+	}
+	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
 }
 
 void AYetuga::BeginPlay()
@@ -34,7 +42,7 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-UAnimMontage* AYetuga::GetAnimMontage(EYetugaAnimType animType)
+UAnimMontage* AYetuga::GetAnimMontage(EWeavingSkillAnim animType)
 {
 	if (const TObjectPtr<UAnimMontage>* MontagePtr = AnimMontageMap.Find(animType))
 	{

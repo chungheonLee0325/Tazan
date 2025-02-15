@@ -33,29 +33,7 @@ void ABaseMonster::BeginPlay()
 	Super::BeginPlay();
 
 	m_SpawnLocation = GetActorLocation();
-
-	// 스킬 인스턴스 생성
-	for (auto& Pair : m_StateSkillClasses)
-	{
-		if (Pair.Value)
-		{
-			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, Pair.Value);
-			if (NewSkill)
-			{
-				m_StateSkillInstances.Add(Pair.Key, NewSkill);
-				m_SkillInstances.Add(Pair.Value, NewSkill);
-			}
-		}
-	}
-	for (auto& skillClass : m_SkillClasses)
-	{
-		if (skillClass)
-		{
-			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, skillClass);
-			m_SkillInstances.Add(skillClass, NewSkill);
-		}
-	}
-	// FSM 초기화 - AI 초기화
+	
 	if (m_AiFSM != nullptr)
 	{
 		m_AiFSM->InitStatePool();
@@ -66,12 +44,6 @@ void ABaseMonster::BeginPlay()
 void ABaseMonster::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// 현재 스킬 업데이트
-	if (m_CurrentSkill)
-	{
-		m_CurrentSkill->OnCastTick(DeltaTime);
-	}
 }
 
 // Called to bind functionality to input
@@ -91,15 +63,6 @@ void ABaseMonster::OnBodyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	//}
 }
 
-UBaseSkill* ABaseMonster::FindSkillByState(EAiStateType StateType) const
-{
-	if (UBaseSkill* const* SkillPtr = m_StateSkillInstances.Find(StateType))
-	{
-		return *SkillPtr;
-	}
-	return nullptr;
-}
-
 bool ABaseMonster::IsMoving() const
 {
 	return true;
@@ -108,16 +71,6 @@ bool ABaseMonster::IsMoving() const
 bool ABaseMonster::IsRotating() const
 {
 	return true;
-}
-
-UBaseSkill* ABaseMonster::FindSkillByClass(TSubclassOf<UBaseSkill> SkillClass)
-{
-	auto skill = m_SkillInstances.Find(SkillClass);
-	if (skill != nullptr)
-	{
-		return *skill;
-	}
-	return nullptr;
 }
 
 void ABaseMonster::OnDie()
@@ -162,67 +115,11 @@ void ABaseMonster::StopMoving()
 {
 }
 
-UBaseSkill* ABaseMonster::GetCurrentSkill()
-{
-	return m_CurrentSkill;
-}
-
-void ABaseMonster::UpdateCurrentSkill(UBaseSkill* NewSkill)
-{
-	if (nullptr == NewSkill)
-	{
-		NewSkill = DeQueueSkill();
-	}
-
-	if (nullptr == NewSkill)
-	{
-		return;
-	}
-
-	m_CurrentSkill = NewSkill;
-}
-
-void ABaseMonster::ClearCurrentSkill()
-{
-	m_CurrentSkill = nullptr;
-}
-
 AActor* ABaseMonster::GetAggroTarget() const
 {
 	return m_AggroTarget;
 }
 
-bool ABaseMonster::CanCastSkill(UBaseSkill* Skill, const AActor* Target) const
-{
-	return Skill && Skill->CanCast(const_cast<ABaseMonster*>(this), Target);
-}
-
-void ABaseMonster::CastSkill(UBaseSkill* Skill, const AActor* Target)
-{
-	if (CanCastSkill(Skill, Target))
-	{
-		UpdateCurrentSkill(Skill);
-		Skill->OnCastStart(this, Target);
-	}
-}
-
-void ABaseMonster::EnQueueSkill(UBaseSkill* Skill)
-{
-	m_SkillQueue.Enqueue(Skill);
-}
-
-UBaseSkill* ABaseMonster::DeQueueSkill()
-{
-	UBaseSkill* Skill = nullptr;
-	m_SkillQueue.Dequeue(Skill);
-
-	return Skill;
-}
-
-void ABaseMonster::ClearQueueSkill()
-{
-	m_SkillQueue.Empty();
-}
 
 void ABaseMonster::StopAll()
 {

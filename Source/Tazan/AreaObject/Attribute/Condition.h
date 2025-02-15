@@ -18,16 +18,16 @@ class TAZAN_API UCondition : public UObject
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Condition")
-	bool IsDead() const { return HasCondition(EConditionType::Dead); }
+	bool IsDead() const { return HasCondition(EConditionBitsType::Dead); }
 
 	UFUNCTION(BlueprintCallable, Category = "Condition")
-	bool AddCondition(EConditionType Condition);
+	bool AddCondition(EConditionBitsType Condition);
 
 	UFUNCTION(BlueprintCallable, Category = "Condition")
-	bool RemoveCondition(EConditionType Condition);
+	bool RemoveCondition(EConditionBitsType Condition);
 
 	UFUNCTION(BlueprintCallable, Category = "Condition")
-	bool HasCondition(EConditionType Condition) const;
+	bool HasCondition(EConditionBitsType Condition) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Condition")
 	bool ExchangeDead();

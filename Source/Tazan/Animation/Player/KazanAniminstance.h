@@ -13,4 +13,13 @@ UCLASS()
 class TAZAN_API UKazanAniminstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
+	float speed = 0;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
+	float direction = 0;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
+	bool bIsGuard;
+	void NativeUpdateAnimation(float DeltaSeconds);
 };

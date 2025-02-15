@@ -3,7 +3,7 @@
 
 #include "Condition.h"
 
-bool UCondition::AddCondition(EConditionType Condition)
+bool UCondition::AddCondition(EConditionBitsType Condition)
 {
 	if (HasCondition(Condition))
 		return false;
@@ -12,7 +12,7 @@ bool UCondition::AddCondition(EConditionType Condition)
 	return true;
 }
 
-bool UCondition::RemoveCondition(EConditionType Condition)
+bool UCondition::RemoveCondition(EConditionBitsType Condition)
 {
 	if (!HasCondition(Condition))
 		return false;
@@ -21,7 +21,7 @@ bool UCondition::RemoveCondition(EConditionType Condition)
 	return true;
 }
 
-bool UCondition::HasCondition(EConditionType Condition) const
+bool UCondition::HasCondition(EConditionBitsType Condition) const
 {
 	//상태 활성화 확인
 	return (((ConditionFlags) & (static_cast<uint8>(Condition))) != 0);
@@ -31,10 +31,10 @@ bool UCondition::HasCondition(EConditionType Condition) const
 //??????????die랑 뭐가 다른지
 bool UCondition::ExchangeDead()
 {
-	if (HasCondition(EConditionType::Dead))
+	if (HasCondition(EConditionBitsType::Dead))
 		return false;
 
-	return AddCondition(EConditionType::Dead);
+	return AddCondition(EConditionBitsType::Dead);
 }
 
 //상태 초기화

@@ -10,6 +10,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Layers/LayersSubsystem.h"
+#include "Tazan/Animation/Player/KazanAniminstance.h"
 
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -59,7 +61,7 @@ APlayer_Kazan::APlayer_Kazan()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // at this rotation rate
 
 	// Movement Setting
-	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	GetCharacterMovement()->MaxWalkSpeed = MAX_WALK_SPEED;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.f;
@@ -78,12 +80,20 @@ APlayer_Kazan::APlayer_Kazan()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	// Skill ID
+	m_OwnSkillIDSet.Add(10);
+	m_OwnSkillIDSet.Add(11);
+	m_OwnSkillIDSet.Add(12);
 }
 
 // Called when the game starts or when spawned
 void APlayer_Kazan::BeginPlay()
 {
 	Super::BeginPlay();
+
+	KazanAnimInstance = Cast<UKazanAniminstance>(GetMesh()->GetAnimInstance());
+	
 }
 
 // Called every frame
@@ -142,12 +152,30 @@ void APlayer_Kazan::On_Attack_Strong_Pressed()
 {
 }
 
-void APlayer_Kazan::On_Parry_Pressed()
+void APlayer_Kazan::Parry_Pressed()
 {
+	// 애니메이션 변수 셋팅
+	KazanAnimInstance->bIsGuard = true;
+	
+	// ToDo : @@LCH 고민 바로 적용이 맞는지 Notify로 빼서 적용할지
+	// 플레이어 셋팅
+	b_IsGuard = true;
+	// 이동속도 셋팅
+	GetCharacterMovement()->MaxWalkSpeed = MAX_GUARD_WALK_SPEED;
+	// Rotation Setting
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
-void APlayer_Kazan::On_Parry_Released()
+void APlayer_Kazan::Parry_Released()
 {
+	KazanAnimInstance->bIsGuard = false;
+	
+	// 플레이어 셋팅
+	b_IsGuard = false;
+	// 이동속도 셋팅
+	GetCharacterMovement()->MaxWalkSpeed = MAX_WALK_SPEED;
+	// Rotation Setting
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void APlayer_Kazan::On_Evade_Pressed()
@@ -162,11 +190,12 @@ void APlayer_Kazan::On_Run_Released()
 {
 }
 
-void APlayer_Kazan::OnParryActivated()
+void APlayer_Kazan::PerfectParryActivated()
 {
+	
 }
 
-void APlayer_Kazan::OnParryDeactivated()
+void APlayer_Kazan::PerfectParryDeactivated()
 {
 }
 
@@ -186,10 +215,10 @@ void APlayer_Kazan::OnAttackHitEnd()
 {
 }
 
-void APlayer_Kazan::OnDodgeInvincibilityStart()
+void APlayer_Kazan::DodgeInvincibilityStart()
 {
 }
 
-void APlayer_Kazan::OnDodgeInvincibilityEnd()
+void APlayer_Kazan::DodgeInvincibilityEnd()
 {
 }
