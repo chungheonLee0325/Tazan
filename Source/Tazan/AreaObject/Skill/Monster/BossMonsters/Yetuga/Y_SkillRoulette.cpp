@@ -14,17 +14,21 @@ UY_SkillRoulette::UY_SkillRoulette()
 void UY_SkillRoulette::BeginPlay()
 {
 	Super::BeginPlay();
-	AYetuga* yetuga = Cast<AYetuga>(GetOwner());
-	if (yetuga)
-	{
-		Skill_IDArray = yetuga->GetSkillInstancesID().Array();
-	}
 }
 
 void UY_SkillRoulette::TickComponent(float DeltaTime, ELevelTick TickType,
                                      FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UY_SkillRoulette::InitSkill()
+{
+	AYetuga* yetuga = Cast<AYetuga>(GetOwner());
+	if (yetuga)
+	{
+		Skill_IDArray = yetuga->GetSkillInstancesID().Array();
+	}
 }
 
 int UY_SkillRoulette::GetAllRandom() const

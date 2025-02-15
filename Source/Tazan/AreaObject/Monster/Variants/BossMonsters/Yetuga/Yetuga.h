@@ -6,6 +6,7 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Yetuga.generated.h"
 
+class UY_SkillRoulette;
 class UY_SelectSkill;
 class APlayer_Kazan;
 
@@ -36,7 +37,7 @@ public:
 	TMap<EWeavingSkillAnim, TObjectPtr<UAnimMontage>> AnimMontageMap;
 
 	UPROPERTY()
-	UY_SelectSkill* SkillRoulette;
+	UY_SkillRoulette* SkillRoulette;
 
 private:
 	UPROPERTY()

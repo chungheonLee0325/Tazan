@@ -44,6 +44,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
+	void InitSkill();
 	int GetAllRandom() const;
 	int GetWeavingSkill() const;
 	int GetShortSkill() const;
