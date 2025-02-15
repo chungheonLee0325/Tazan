@@ -35,6 +35,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void OnDie() override;
+
 public:
 	// Movement
 	/** Called for movement input */
@@ -113,7 +115,10 @@ private:
 	UPROPERTY()
 	UKazanAniminstance* KazanAnimInstance;
 	
-	bool b_IsGuard;
+	bool IsGuard = false;
+	bool CanRotate = true;
+	bool CanMove = true;
+	bool CanSkill = true;
 
 	// Data
 	const float MAX_WALK_SPEED = 500.f;

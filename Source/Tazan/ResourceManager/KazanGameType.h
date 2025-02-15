@@ -101,6 +101,9 @@ public:
 	int BasePoise = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	UAnimMontage* Die_AnimMontage = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	TMap<EStaggerType,UAnimMontage*> Stagger_AnimMontages;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")

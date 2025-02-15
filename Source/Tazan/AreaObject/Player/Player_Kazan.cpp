@@ -91,6 +91,16 @@ void APlayer_Kazan::BeginPlay()
 	
 }
 
+void APlayer_Kazan::OnDie()
+{
+	Super::OnDie();
+	
+	CanMove = false;
+	CanRotate = false;
+	CanSkill = false;
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+}
+
 // Called every frame
 void APlayer_Kazan::Tick(float DeltaTime)
 {
@@ -154,7 +164,7 @@ void APlayer_Kazan::Parry_Pressed()
 	
 	// ToDo : @@LCH 고민 바로 적용이 맞는지 Notify로 빼서 적용할지
 	// 플레이어 셋팅
-	b_IsGuard = true;
+	IsGuard = true;
 	// 이동속도 셋팅
 	GetCharacterMovement()->MaxWalkSpeed = MAX_GUARD_WALK_SPEED;
 	// Rotation Setting
@@ -166,7 +176,7 @@ void APlayer_Kazan::Parry_Released()
 	KazanAnimInstance->bIsGuard = false;
 	
 	// 플레이어 셋팅
-	b_IsGuard = false;
+	IsGuard = false;
 	// 이동속도 셋팅
 	GetCharacterMovement()->MaxWalkSpeed = MAX_WALK_SPEED;
 	// Rotation Setting

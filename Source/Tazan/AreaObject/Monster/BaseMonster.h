@@ -138,13 +138,6 @@ protected:
 	UPROPERTY()
 	UBaseAiFSM* m_AiFSM;
 
-	// Death Setting
-	UPROPERTY(EditAnywhere, Category = "Death Settings")
-	float DestroyDelayTime = 0.4f;
-	
-	UPROPERTY(EditAnywhere, Category = "Death Settings")
-	UParticleSystem* DeathEffect;
-
 private:
 	UPROPERTY()
 	AActor* m_CurrentTarget;
