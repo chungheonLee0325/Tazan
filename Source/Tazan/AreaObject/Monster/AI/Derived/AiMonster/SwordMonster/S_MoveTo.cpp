@@ -17,52 +17,69 @@ void US_MoveTo::InitState()
 
 void US_MoveTo::Enter()
 {
-	// Todo : YT@@ 플레이어가 누군지 찾아보자  
-	if (Target == nullptr)
-	{
-		auto player = UGameplayStatics::GetPlayerPawn(this, 0);
-		Target = Cast<APlayer_Kazan>(player);
-		LOG_SCREEN("찾음");
-	}
-
-
 	
-
 }
-	// Todo : YT@@ 내 반경을 설정해
-	// Todo : YT@@ 설정 반경 안에 플레이어가있는지 체크해
-	// Todo : YT@@ 만약 있다면  공격하러 갈꺼야
-	// Todo : YT@@ 그렇지 않다면 다시 플레이어 방향으로 이동해 
+	//  나중에  dv - 매틱마다 거리를 재야할까? ?? 1초에 한번은 안되나?
+	
 void US_MoveTo::Execute(float DeltaTime)
 {
-	//  나중에  dv - 매틱마다 거리를 재야할까? ?? 1초에 한번은 안되나?
-
-
-	//플레이어한테가는 이동방향구하기 
-	FVector direction = Target->GetActorLocation() - m_Owner->GetActorLocation();
-	direction.Normalize();
-	//반경을 설정했어 
-	float distance = direction.Size();
-
-	// 이동 로직 
-	m_Owner->AddMovementInput(direction);
-	LOG_SCREEN("움직여");
 	
-	// 타겟과의거리가 공격범위보다 작으면 
-	if (distance < AttackRange)
+	
+	LOG_SCREEN("다시 체크해 반경안에있는지");
+	
+	if (!IsPlayerInCheckRadius())
 	{
-		//공격하러간다
-		m_AiFSM->ChangeState(EAiStateType::Attack);
-		LOG_SCREEN("공격하러갈래");
-		
+		m_AiFSM->ChangeState(EAiStateType::Wait);
+		LOG_SCREEN("없다 체크하러가자 ");
+
+	}
+	else if (IsPlayerInAttackRadius())
+	{
+		m_AiFSM->ChangeState(EAiStateType::Wait);
+		LOG_SCREEN("공격범위안에있다 가자 공격하러");
+	}
+	else
+	{
+		MoveToPlayer();
 	}
 	
-	m_Owner->AddMovementInput(direction);
-	LOG_SCREEN("움직여");
 	
 	
 }
 
 void US_MoveTo::Exit()
 {
+}
+
+bool US_MoveTo::IsPlayerInCheckRadius()
+{
+	if (Target)
+	{
+		FVector direction = Target->GetActorLocation() - m_Owner->GetActorLocation();
+		float distance = direction.Size();
+
+		return distance <= CheckRadius;
+	}
+	return false;
+}
+
+bool US_MoveTo::IsPlayerInAttackRadius()
+{
+	if (Target)
+	{
+		FVector direction = Target->GetActorLocation() - m_Owner->GetActorLocation();
+		float distance = direction.Size();
+
+		return distance <= AttackRadius;
+	}
+	return false;
+}
+
+void US_MoveTo::MoveToPlayer()
+{
+	if (Target)
+	{
+		FVector direction = Target->GetActorLocation() - m_Owner->GetActorLocation().GetSafeNormal();
+		m_Owner->AddMovementInput(direction);
+	}
 }

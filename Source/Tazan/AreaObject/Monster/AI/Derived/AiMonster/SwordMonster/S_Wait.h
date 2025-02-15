@@ -22,10 +22,15 @@ public:
 
 	UPROPERTY()
 	 class ASwordEnemy* SwordEnemy;
+
+	UPROPERTY(VisibleAnywhere,category = "S_FSM")
+	class APlayer_Kazan* Target;
 	
-	UPROPERTY(EditDefaultsOnly,Category="S_FSM")
-	float WaitDelayTime = 2;
-	float CurrentTime = 0;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
+	float CheckRadius = 1000.0f;
 	
+	UFUNCTION()
+	bool IsCheckRadius();
 	
+
 };

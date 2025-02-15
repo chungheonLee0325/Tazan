@@ -22,14 +22,20 @@ public:
 
 	UPROPERTY(VisibleAnywhere,category = "S_FSM")
 	class APlayer_Kazan* Target;
-	UPROPERTY(EditDefaultsOnly,category = "S_FSM")
-	float MoveDelayTime = 1;
-	UPROPERTY(EditDefaultsOnly,category = "S_FSM")
-	float AttackRange = 2;
-	UPROPERTY(EditDefaultsOnly,category = "S_FSM")
-	float AttackDelayTime = 3;
-	
-	
 
-	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
+	float CheckRadius = 1000.0f;
+
+	UFUNCTION()
+	bool IsPlayerInCheckRadius();
+
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
+	float AttackRadius = 200.0f;
+
+	UFUNCTION()
+	bool IsPlayerInAttackRadius();
+
+	UFUNCTION()
+	void MoveToPlayer();
 };
