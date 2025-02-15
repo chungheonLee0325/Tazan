@@ -47,7 +47,8 @@ void UY_SelectSkill::Enter()
 
 	if (sk == nullptr)
 	{
-		LOG_SCREEN("셀렉트 스킬 실패!");
+		m_Owner->CastSkill(m_Owner->GetSkillByID(14000),m_Owner->GetAggroTarget());
+		m_AiFSM->ChangeState(EAiStateType::Attack);
 		return;
 	}
 	m_Owner->NextSkill = sk;

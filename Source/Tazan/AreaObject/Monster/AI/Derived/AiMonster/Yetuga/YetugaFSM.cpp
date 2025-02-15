@@ -42,6 +42,7 @@ void UYetugaFSM::InitStatePool()
 	// Wait 
 	auto StandOff = CreateState<UY_StandOff>(this, m_Owner, EAiStateType::Wait);
 	AddState(EAiStateType::Wait, StandOff);
+	StandOff->SetNextState(EAiStateType::SelectSkill);
 	StandOff->SetSkillRoulette(yetuga->SkillRoulette);
 	
 	// Idle
@@ -51,6 +52,7 @@ void UYetugaFSM::InitStatePool()
 	// Attack
 	auto Attack = CreateState<UY_Attack>(this, m_Owner, EAiStateType::Attack);
 	AddState(EAiStateType::Attack, Attack);
+	Attack->SetNextState(EAiStateType::Wait);
 
 	// Return
 	auto Anim = CreateState<UY_Anim>(this, m_Owner, EAiStateType::Return);
@@ -64,5 +66,6 @@ void UYetugaFSM::InitStatePool()
 	// Chase
 	auto Chase = CreateState<UY_Chase>(this, m_Owner, EAiStateType::Chase);
 	AddState(EAiStateType::Chase, Chase);
+	Chase->SetNextState(EAiStateType::Attack);
 }
 

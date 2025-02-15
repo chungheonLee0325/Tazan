@@ -13,11 +13,11 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
-	m_NextState = EAiStateType::Wait;
 }
 
 void UY_Attack::Execute(float dt)
 {
+	
 }
 
 void UY_Attack::Exit()

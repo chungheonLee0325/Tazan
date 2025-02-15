@@ -18,7 +18,6 @@ void UY_StandOff::InitState()
 void UY_StandOff::Enter()
 {
 	LOG_PRINT(TEXT(""));
-	m_NextState = EAiStateType::SelectSkill;
 	
 	//TODO: 플레이어가 탈진 상태인가?
 	
@@ -41,7 +40,7 @@ void UY_StandOff::Enter()
 				return;
 			}
 			m_Owner->CastSkill(m_Owner->GetSkillByID(10400),m_Owner->GetAggroTarget());
-			m_AiFSM->ChangeState(EAiStateType::Return);
+			m_AiFSM->ChangeState(EAiStateType::Attack);
 			return;
 		}
 		

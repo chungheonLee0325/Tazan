@@ -30,6 +30,7 @@ void UY_BaseSkill::OnCastEnd()
 	ABaseMonster* monster = Cast<ABaseMonster>(m_Caster);
 	if (monster)
 	{
+		
 		monster->GetFSM()->ChangeState(EAiStateType::Wait);
 	}
 }
