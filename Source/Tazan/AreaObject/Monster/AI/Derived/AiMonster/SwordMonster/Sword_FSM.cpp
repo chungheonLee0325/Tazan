@@ -59,7 +59,7 @@ void USword_FSM::InitStatePool()
 	auto Attack = CreateState<US_Attack>(this, m_Owner, EAiStateType::Attack);
 	AddState(EAiStateType::Attack, Attack);
 	
-	ChangeState(EAiStateType::Idle);
+	ChangeState(EAiStateType::Wait);
 
 	
 }

@@ -147,7 +147,9 @@ struct FAttackData
 
 	// 체력 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HealthDamageAmount = 0.0f;
+	float HealthDamageAmountMin = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HealthDamageAmountMax = 0.0f;
 
 	// 스테미나 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

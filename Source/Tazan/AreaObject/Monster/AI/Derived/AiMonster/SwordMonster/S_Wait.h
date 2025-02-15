@@ -22,11 +22,10 @@ public:
 
 	UPROPERTY()
 	 class ASwordEnemy* SwordEnemy;
-
-	bool ISMoveToPlayer();
-
-	UPROPERTY()
-	float speed = 500.f;
 	
-
+	UPROPERTY(EditDefaultsOnly,Category="S_FSM")
+	float WaitDelayTime = 2;
+	float CurrentTime = 0;
+	
+	
 };

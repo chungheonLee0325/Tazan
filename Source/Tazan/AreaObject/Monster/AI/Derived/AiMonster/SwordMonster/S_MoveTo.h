@@ -20,6 +20,16 @@ public:
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
 
+	UPROPERTY(VisibleAnywhere,category = "S_FSM")
+	class APlayer_Kazan* Target;
+	UPROPERTY(EditDefaultsOnly,category = "S_FSM")
+	float MoveDelayTime = 1;
+	UPROPERTY(EditDefaultsOnly,category = "S_FSM")
+	float AttackRange = 2;
+	UPROPERTY(EditDefaultsOnly,category = "S_FSM")
+	float AttackDelayTime = 3;
+	
+	
 
 	
 };
