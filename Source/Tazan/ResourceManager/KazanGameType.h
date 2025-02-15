@@ -102,6 +102,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	TMap<EStaggerType,UAnimMontage*> Stagger_AnimMontages;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	TSet<int> SkillList;
 };
 
 // HitBox 동적으로 생성하기 위한 구조체 정보, FAttackData 멤버 변수
