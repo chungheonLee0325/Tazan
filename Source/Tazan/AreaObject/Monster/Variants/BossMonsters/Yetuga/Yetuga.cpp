@@ -3,6 +3,7 @@
 
 #include "Yetuga.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 
@@ -17,7 +18,7 @@ AYetuga::AYetuga()
 	{
 		
 	}
-	
+	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
 }
 
 void AYetuga::BeginPlay()

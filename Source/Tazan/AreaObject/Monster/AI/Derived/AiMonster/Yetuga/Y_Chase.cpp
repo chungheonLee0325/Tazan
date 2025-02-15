@@ -22,7 +22,7 @@ void UY_Chase::Execute(float dt)
 	APawn* p = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	FVector dir = p->GetActorLocation()-m_Owner->GetActorLocation();
 	dir.Normalize();
-	m_Owner->AddMovementInput(dir);
+	m_Owner->AddMovementInput(dir,1.0f);
 	
 	float dist = m_Owner->GetDistanceTo(p);
 	if (dist < SkillRange)
