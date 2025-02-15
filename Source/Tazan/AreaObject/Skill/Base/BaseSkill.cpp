@@ -41,7 +41,6 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 
 	m_CurrentPhase = ESkillPhase::Casting;
 
-	
 	// 애니메이션 몽타주 재생
 	UAnimInstance* AnimInstance = Caster->GetMesh()->GetAnimInstance();
 	if (AnimInstance && m_SkillData->Montage)
@@ -49,23 +48,32 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 		// 기존 델리게이트 해제
 		//AnimInstance->Montage_SetEndDelegate(nullptr, m_SkillData->Montage);
 
-		// ToDo :: @@LCH 델리게이트 동작 안함!!! 1순위
+		// 몽타주 재생
+		Caster->PlayAnimMontage(m_SkillData->Montage);
+		
+		// 쿨타임 적용
+		m_CurrentCoolTime = m_SkillData->CoolTime;
+		
 		// 델리게이트 바인딩
-		//FOnMontageEnded EndDelegate;
-		//EndDelegate.BindUObject(this, &UBaseSkill::OnMontageEnded);
-		//AnimInstance->Montage_SetEndDelegate(EndDelegate, m_SkillData->Montage);
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &UBaseSkill::OnMontageEnded);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, m_SkillData->Montage);
 		//
 		//// 블렌드 아웃
-		//FOnMontageBlendingOutStarted CompleteDelegate;
-		//CompleteDelegate.BindUObject(this, &UBaseSkill::OnMontageBlendOut);
-		//AnimInstance->Montage_SetBlendingOutDelegate(CompleteDelegate, m_SkillData->Montage);
-        
-		Caster->PlayAnimMontage(m_SkillData->Montage);
+		FOnMontageBlendingOutStarted CompleteDelegate;
+		CompleteDelegate.BindUObject(this, &UBaseSkill::OnMontageBlendOut);
+		AnimInstance->Montage_SetBlendingOutDelegate(CompleteDelegate, m_SkillData->Montage);
 	}
+}
+
+void UBaseSkill::OnCastFire()
+{
 }
 
 void UBaseSkill::OnCastEnd()
 {
+	// Casting Phase일때 한번만 처리
+	if (m_CurrentPhase != ESkillPhase::Casting) return;
 	if (!m_Caster || !m_Target) return;
 
 	m_Caster->ClearCurrentSkill();
@@ -88,6 +96,8 @@ void UBaseSkill::OnCastEnd()
 
 void UBaseSkill::CancelCast()
 {
+	// Casting Phase일때 한번만 처리
+	if (m_CurrentPhase != ESkillPhase::Casting) return;
 	if (!m_Caster) return;
 	if (OnSkillComplete.IsBound() == true)
 	{

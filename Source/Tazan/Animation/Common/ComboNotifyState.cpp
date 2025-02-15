@@ -33,5 +33,4 @@ void UComboNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenc
 
 void UComboNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime)
 {
-	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime);
 }
