@@ -17,7 +17,6 @@ enum class ESkillPhase : uint8
 {
 	Ready, // 스킬 사용 가능
 	Casting, // 시전 중
-	PostCast, // 후딜레이
 	CoolTime // 쿨타임
 };
 
@@ -37,15 +36,20 @@ public:
 
 	// 쿨타임 타이머 핸들
 	FTimerHandle CoolTimeTimerHandle;
-	
+
 	virtual bool CanCast(class AAreaObject* Caster, const AAreaObject* Target) const;
 	virtual void OnCastStart(class AAreaObject* Caster, AAreaObject* Target);
+
+	// Notify를 이용한 Cast Fire(투사체, 장판 등)
+	virtual void OnCastFire();
 	// Notify를 이용한 Cast End
 	virtual void OnCastEnd();
+	// 외부에서 호출을 이용한 스킬 cancel
 	virtual void CancelCast();
 
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
 	void OnMontageBlendOut(UAnimMontage* Montage, bool bInterrupted);
 
 	// Getters
@@ -56,13 +60,11 @@ public:
 	// 쿨타임 진행률 반환 함수
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	float GetCooldownProgress() const;
-	
+
 	const FSkillData* GetSkillData() const { return m_SkillData; }
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	bool IsInRange(const AAreaObject* Caster, const AAreaObject* Target) const;
-
-	
 
 protected:
 	// 기존 속성들
@@ -88,7 +90,7 @@ private:
 	void AdjustCoolTime();
 
 	FSkillData* m_SkillData;
-	
+
 	float m_CurrentCoolTime;
 
 	int m_SkillID;
