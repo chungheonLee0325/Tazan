@@ -14,16 +14,14 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
-	Yetuga = Cast<AYetuga>(m_Owner);
+	LOG_SCREEN("어택");
+	AYetuga* yetuga = Cast<AYetuga>(m_Owner);
 	m_NextState = EAiStateType::Wait;
 
-	//랜덤으로 스킬 선택
-	UTazanGameInstance* gi = Cast<UTazanGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	if (gi)
-	{
-		gi->GetDataSkill(100);
-	}
-	AnimMontagePlay(Yetuga,Yetuga->GetAnimMontage(EYetugaAnimType::NormalAtk));
+	//TODO: SkillBag?에서 nextSkill 값가져와서 스킬 실행
+	//TODO: 몽타주 플레이 레거시
+	AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EWeavingSkillAnim::UpperCut));
+	return;
 }
 
 void UY_Attack::Execute(float dt)
@@ -32,21 +30,6 @@ void UY_Attack::Execute(float dt)
 
 void UY_Attack::Exit()
 {
-}
-
-void UY_Attack::AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted)
-{
-	Super::AnimMontageEnd(Montage, bInterrupted);
-}
-
-int UY_Attack::GetRandomSkill()
-{
-	return 100;
-}
-
-int UY_Attack::GetRandomSkill(int startID, int endID)
-{
-	return 100;
 }
 
 

@@ -4,20 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
-#include "Y_Chase.generated.h"
+#include "Y_SelectSkill.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
-class TAZAN_API UY_Chase : public UBaseAiState
+class TAZAN_API UY_SelectSkill : public UBaseAiState
 {
 	GENERATED_BODY()
-	
 public:
 	virtual void InitState() override;
 	virtual void Enter() override;
-	virtual void Execute(float dt) override;
+	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
-
-private:
-	float SkillRange = 400.0f;
 };

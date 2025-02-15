@@ -13,6 +13,10 @@ AYetuga::AYetuga()
 	m_AiFSM = AYetuga::CreateFSM();
 
 	ConstructorHelpers::FObjectFinder<UAnimMontage>move(TEXT("/Game/_Resource/Yetuga/Animation/AM_SideMoveAtk_L.AM_SideMoveAtk_L"));
+	if (move.Object)
+	{
+		
+	}
 	
 }
 
@@ -37,7 +41,7 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-UAnimMontage* AYetuga::GetAnimMontage(EYetugaAnimType animType)
+UAnimMontage* AYetuga::GetAnimMontage(EWeavingSkillAnim animType)
 {
 	if (const TObjectPtr<UAnimMontage>* MontagePtr = AnimMontageMap.Find(animType))
 	{

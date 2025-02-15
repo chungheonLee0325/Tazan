@@ -14,14 +14,10 @@ void UY_StandOff::InitState()
 
 void UY_StandOff::Enter()
 {
-	m_NextState = EAiStateType::Attack;
+	LOG_SCREEN("대기");
+	m_NextState = EAiStateType::SelectSkill;
 	
 	//TODO: 플레이어가 탈진 상태인가?
-	if (0) 
-	{
-		//강한 공격
-		return;
-	}
 	
 	APawn* p = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	float dist = m_Owner->GetDistanceTo(p);
@@ -29,7 +25,7 @@ void UY_StandOff::Enter()
 	dir.Normalize();
 	
 	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
-	LOG_SCREEN("플레이어 앞뒤: %f", forwardDot);
+	LOG_PRINT(TEXT("플레이어 앞뒤: %f"), forwardDot);
 	
 	if (dist < 400.0f)
 	{
@@ -39,33 +35,36 @@ void UY_StandOff::Enter()
 		if (forwardDot > -1.0f && forwardDot < -0.7 && !yetuga->bHaveBackAtk) 
 		{
 			//TODO: 몽타주 플레이 레거시
-			AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EYetugaAnimType::BackAtk));
+			AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EWeavingSkillAnim::BackAtk));
 			bIsAnim = true;
 			m_NextState = EAiStateType::Wait;
 			m_AiFSM->ChangeState(EAiStateType::Return);
 			return;
 		}
 		
-		float rightDot = FVector::DotProduct(dir,m_Owner->GetActorRightVector());
-		LOG_SCREEN("플레이어 좌우: %f", rightDot);
-		
-		if (rightDot < 0.5f)
+		//확률 테스트
+		float probability = FMath::FRand()*100.0f;
+		LOG_PRINT(TEXT("확률: %f"), probability);
+		if (probability > 0.5f)
 		{
-			LOG_SCREEN("우측");
-			//TODO: 몽타주 플레이 레거시
-			AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EYetugaAnimType::ShortMoveL));
-			m_NextState = EAiStateType::Wait;
-			m_AiFSM->ChangeState(EAiStateType::Return);
-			return;
-		}
-		else
-		{
-			LOG_SCREEN("좌측");
-			//TODO: 몽타주 플레이 레거시
-			AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EYetugaAnimType::ShortMoveR));
-			m_NextState = EAiStateType::Wait;
-			m_AiFSM->ChangeState(EAiStateType::Return);
-			return;
+			float rightDot = FVector::DotProduct(dir,m_Owner->GetActorRightVector());
+			LOG_PRINT(TEXT("플레이어 좌우: %f"), rightDot);
+			if (rightDot < 0.5f)
+			{
+				//TODO: 몽타주 플레이 레거시
+				AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EWeavingSkillAnim::ShortMoveL));
+				m_NextState = EAiStateType::Wait;
+				m_AiFSM->ChangeState(EAiStateType::Return);
+				return;
+			}
+			else
+			{
+				//TODO: 몽타주 플레이 레거시
+				AnimMontagePlay(yetuga,yetuga->GetAnimMontage(EWeavingSkillAnim::ShortMoveR));
+				m_NextState = EAiStateType::Wait;
+				m_AiFSM->ChangeState(EAiStateType::Return);
+				return;
+			}
 		}
 	}
 }
@@ -84,7 +83,7 @@ void UY_StandOff::Execute(float DeltaTime)
 	if (m_Owner->GetActorRotation().Equals(rot,5.0f))
 	{
 		CurTime = 0.0f;
-		m_AiFSM->ChangeState(EAiStateType::Attack);
+		m_AiFSM->ChangeState(EAiStateType::SelectSkill);
 	}
 }
 
