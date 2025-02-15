@@ -9,15 +9,17 @@
 class APlayer_Kazan;
 
 UENUM(BlueprintType)
-enum class EYetugaAnimType : uint8
+enum class EWeavingSkillAnim : uint8
 {
 	MovingAtk		UMETA(DisplayName = "MovingAtk"),
 	SweapAtk		UMETA(DisplayName = "SweepAtk"),
 	TurnAtk			UMETA(DisplayName = "TurnAtk"),
-	FastBallAtk		UMETA(DisplayName = "FastBallAtk"),
-	Roar			UMETA(DisplayName = "Roar"),
 	BackMove		UMETA(DisplayName = "BackMove"),
-	NormalAtk		UMETA(DisplayName = "NormalAtk"),
+	ShortMoveR 		UMETA(DisplayName = "ShortMoveR"),
+	ShortMoveAtkR 	UMETA(DisplayName = "ShortMoveAtkR"),
+	ShortMoveL 		UMETA(DisplayName = "ShortMoveL"),
+	ShortMoveAtkL 	UMETA(DisplayName = "ShortMoveAtkL"),
+	UpperCut		UMETA(DisplayName = "UpperCut"),
 	BackAtk			UMETA(DisplayName = "BackAtk")
 };
 
@@ -28,10 +30,11 @@ class TAZAN_API AYetuga : public ABaseMonster
 
 public:
 	AYetuga();
-	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
 
-	UPROPERTY(EditAnywhere, Category = "Skill Anim | Weaving Skill")
-	TMap<EYetugaAnimType, TObjectPtr<UAnimMontage>> AnimMontageMap;
+	UPROPERTY(EditAnywhere, Category = "Skill Anim | WeavingSkill")
+	TMap<EWeavingSkillAnim, TObjectPtr<UAnimMontage>> AnimMontageMap;
+
+	bool bHaveBackAtk = false;
 
 private:
 	UPROPERTY()
@@ -44,12 +47,16 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
+	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
 	float DistToPlayer();
 	float GetPlayerDir();
 	
-	UAnimMontage* GetAnimMontage(EYetugaAnimType animType); 
+	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType); 
 	
 	void ShortAttack();
 	void LongAtk();
+
+private:
+	
 };

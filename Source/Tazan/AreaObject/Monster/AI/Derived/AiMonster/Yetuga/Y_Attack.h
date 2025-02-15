@@ -19,9 +19,4 @@ public:
 	virtual void Enter() override;
 	virtual void Execute(float dt) override;
 	virtual void Exit() override;
-	virtual void AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted) override;
-
-private:
-	UPROPERTY()
-	class AYetuga* Yetuga;
 };
