@@ -47,6 +47,7 @@ void AAreaObject::BeginPlay()
 	{
 		hpMax = dt_AreaObject->HPMax;
 		basePoise = dt_AreaObject->BasePoise;
+		m_OwnSkillIDSet = dt_AreaObject->SkillList;
 	}
 
 	m_Health->InitHealth(hpMax);
