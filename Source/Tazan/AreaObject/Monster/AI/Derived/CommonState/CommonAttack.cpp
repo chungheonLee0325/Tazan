@@ -30,20 +30,20 @@ void UCommonAttack::Execute(float DeltaTime)
 	if (!m_IsSkillStarted)
 	{
 		// 공격 스킬 시작
-		if (UBaseSkill* AttackSkill = m_Owner->FindSkillByState(m_AiStateType))
+	//	if (UBaseSkill* AttackSkill = m_Owner->FindSkillByState(m_AiStateType))
 		{
-			if (m_Owner->CanCastSkill(AttackSkill,Target))
+			//if (m_Owner->CanCastSkill(AttackSkill,Target))
 			{
-				AttackSkill->OnSkillComplete.BindUObject(this,&UCommonAttack::OnSkillCompleted);
-				m_Owner->CastSkill(AttackSkill,Target);
+				//AttackSkill->OnSkillComplete.BindUObject(this,&UCommonAttack::OnSkillCompleted);
+				//m_Owner->CastSkill(AttackSkill,Target);
 				m_IsSkillStarted = true;
 			}
-			else
+			//else
 			{
 				m_AiFSM->ChangeState(EAiStateType::Idle);
 			}
 		}
-		else
+		//else
 		{
 			m_AiFSM->ChangeState(EAiStateType::Idle);
 		}
