@@ -52,7 +52,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-	virtual void CalcDamage(float Damage, AActor* Caster, AActor* Target, bool IsPointDamage = false);
+	virtual void CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Target, FHitResult& HitInfo);
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
 	virtual void OnDie();
@@ -95,8 +95,8 @@ public:
 	void HandleStaggerEnd();
 
 	// ToDo : 종료 Bind 인자 추가?
-	void PlayStaggerAnimation(EStaggerType Type);
-	float GetStaggerAnimationDuration(EStaggerType Type);
+	void PlayStaggerAnimation(EStaggerType Type) const;
+	float GetStaggerAnimationDuration(EStaggerType Type) const;
 
 	// Health 기능 퍼사드 제공
 	float IncreaseHP(float Delta) const;

@@ -26,7 +26,6 @@ AAreaObject::AAreaObject()
 
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
-	
 }
 
 
@@ -43,7 +42,7 @@ void AAreaObject::BeginPlay()
 	}
 
 	// Condition Component 생성
-	m_Condition = NewObject<UCondition>(this,UCondition::StaticClass());
+	m_Condition = NewObject<UCondition>(this, UCondition::StaticClass());
 
 	// 데이터 초기화
 	UTazanGameInstance* gameInstance = Cast<UTazanGameInstance>(GetGameInstance());
@@ -74,7 +73,7 @@ void AAreaObject::BeginPlay()
 		}
 		else
 		{
-			LOG_SCREEN_MY(4.0f,FColor::Red,"%d 해당 아이디의 스킬이 존재하지 않습니다.", skill);
+			LOG_SCREEN_MY(4.0f, FColor::Red, "%d 해당 아이디의 스킬이 존재하지 않습니다.", skill);
 			UE_LOG(LogTemp, Error, TEXT("Skill ID is 0!!!"));
 		}
 	}
@@ -101,21 +100,26 @@ void AAreaObject::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AAreaObject::CalcDamage(float Damage, AActor* Caster, AActor* Target, bool IsPointDamage)
+void AAreaObject::CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Target, FHitResult& HitInfo)
 {
-	if (false == IsPointDamage)
+	float Damage = FMath::RandRange(AttackData.HealthDamageAmountMin, AttackData.HealthDamageAmountMax);
+	if (Target == nullptr || (Damage != 0.f))
 	{
-		UGameplayStatics::ApplyDamage(Target,
-		                              Damage,
-		                              GetController(),
-		                              this,
-		                              UDamageType::StaticClass());
+		return;
 	}
-	else
-	{
-		// ToDo : 추가 구현
-		// UGameplayStatics::ApplyPointDamage();
-	}
+
+	// UGameplayStatics::ApplyDamage(Target,
+	//                              Damage,
+	//                              GetController(),
+	//                              this,
+	//                              UDamageType::StaticClass());
+
+	FCustomDamageEvent DamageEvent;
+	DamageEvent.AttackData = AttackData;
+	DamageEvent.HitInfo = HitInfo;
+	DamageEvent.Damage = Damage;
+
+	Target->TakeDamage(Damage, DamageEvent, GetController(), this);
 }
 
 float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
@@ -126,6 +130,13 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 
 	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
+	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
+	{
+		// point damage event, pass off to helper function
+		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*) &DamageEvent;
+		m_PoiseComponent->PoiseProcess(customDamageEvent->AttackData);
+	}
+		
 	if (FMath::IsNearlyZero(IncreaseHP(-ActualDamage)))
 	{
 		if (true == ExchangeDead())
@@ -144,11 +155,11 @@ void AAreaObject::OnDie()
 		GetMesh()->GetAnimInstance()->Montage_Play(montage);
 	}
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
+
 	TWeakObjectPtr<AAreaObject> weakThis = this;
 	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [weakThis]()
 	{
-		AAreaObject* strongThis = weakThis.Get();	// 콜리전 전환
+		AAreaObject* strongThis = weakThis.Get(); // 콜리전 전환
 
 		if (strongThis != nullptr)
 		{
@@ -194,7 +205,7 @@ void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 {
 	UBaseSkill** skillPointer = m_SkillInstanceMap.Find(SkillID);
-	
+
 	if (skillPointer == nullptr)
 	{
 		return nullptr;
@@ -207,7 +218,7 @@ bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
 	// ToDo : Cost 소모 확인
 	if (Skill == nullptr) LOG_PRINT(TEXT("Skill is Empty"));
 	if (Target == nullptr) LOG_PRINT(TEXT("Target is Empty"));
-	
+
 	return Skill && Skill->CanCast(this, Target);
 }
 
@@ -225,7 +236,7 @@ void AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
 	}
 	else
 	{
-		LOG_SCREEN_ERROR(this,"CastSkill Failed");
+		LOG_SCREEN_ERROR(this, "CastSkill Failed");
 	}
 }
 
@@ -262,7 +273,7 @@ bool AAreaObject::ExchangeDead() const
 	return m_Condition->ExchangeDead();
 }
 
-void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
+void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration) 
 {
 	// 애니메이션 재생
 	PlayStaggerAnimation(Type);
@@ -272,14 +283,14 @@ void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
 	// ToDo : 스킬 사용 불가
 }
 
-void AAreaObject::HandleStaggerEnd()
+void AAreaObject::HandleStaggerEnd() 
 {
 	// 이동 불가 해제
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	// ToDo : 스킬 사용 불가 해제
 }
 
-float AAreaObject::GetStaggerAnimationDuration(EStaggerType Type)
+float AAreaObject::GetStaggerAnimationDuration(EStaggerType Type) const
 {
 	// 실제 애니메이션 데이터에서 길이 조회
 	if (UAnimMontage** montage = dt_AreaObject->Stagger_AnimMontages.Find(Type))
@@ -295,7 +306,7 @@ float AAreaObject::GetStaggerAnimationDuration(EStaggerType Type)
 	return 0.0f;
 }
 
-void AAreaObject::PlayStaggerAnimation(EStaggerType Type)
+void AAreaObject::PlayStaggerAnimation(EStaggerType Type) const
 {
 	if (UAnimMontage** montage = dt_AreaObject->Stagger_AnimMontages.Find(Type))
 	{

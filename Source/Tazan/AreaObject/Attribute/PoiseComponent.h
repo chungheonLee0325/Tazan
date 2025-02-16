@@ -29,7 +29,7 @@ public:
 
 	// 공격 처리
 	UFUNCTION(BlueprintCallable)
-	void ProcessAttack(const FAttackData& AttackData);
+	void PoiseProcess(const FAttackData& AttackData);
 
 	// 강인도 수정자 추가
 	UFUNCTION(BlueprintCallable)

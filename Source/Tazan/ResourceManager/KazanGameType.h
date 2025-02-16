@@ -2,6 +2,7 @@
 
 #include <Engine/DataTable.h>
 #include "CoreMinimal.h"
+#include "Engine/DamageEvents.h"
 #include "UObject/ObjectMacros.h"
 #include "KazanGameType.generated.h"
 
@@ -215,6 +216,32 @@ struct FSkillData : public FTableRowBase
 	int NextSkillID = 0;
 	// Todo : Sound & Cast/Hit FX 관련 항목 추가? -> Anim Notify로 처리할듯
 };
+
+// Unreal Damage 프레임워크 안에서 Attack 정보를 넘기기위한 구조체
+USTRUCT(BlueprintType)
+struct FCustomDamageEvent : public FPointDamageEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FAttackData AttackData;
+    
+	// FDamageEvent 인터페이스 구현
+	virtual bool IsOfType(int32 InID) const override;
+	virtual int32 GetTypeID() const override;
+    
+	static const int32 ClassID = 0; // 유니크한 ID 할당
+};
+
+inline bool FCustomDamageEvent::IsOfType(int32 InID) const
+{
+	return InID == ClassID;
+}
+
+inline int32 FCustomDamageEvent::GetTypeID() const
+{
+	return ClassID;
+}
 
 // SoundDataTable 데이터, GameMode에서 관리
 // Why Not GameInstance? AudioComponent가질수없음 -> BGM 관리 불가

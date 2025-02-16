@@ -87,7 +87,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 				HitResults,
 				StartLocation,
 				EndLocation,
-				ECC_Pawn,
+				ECC_GameTraceChannel1,
 				QueryParams
 			);
 			break;
@@ -100,7 +100,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 				StartLocation,
 				EndLocation,
 				FQuat::Identity,
-				ECC_Pawn,
+				ECC_GameTraceChannel1,
 				FCollisionShape::MakeSphere(AttackData->HitBoxData.Radius),
 				QueryParams
 			);
@@ -114,7 +114,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 				StartLocation,
 				EndLocation,
 				SocketRotation.Quaternion(),
-				ECC_Pawn,
+				ECC_GameTraceChannel1,
 				FCollisionShape::MakeCapsule(AttackData->HitBoxData.Radius,
 				                             AttackData->HitBoxData.HalfHeight),
 				QueryParams
@@ -129,7 +129,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 				StartLocation,
 				EndLocation,
 				SocketRotation.Quaternion(),
-				ECC_Pawn,
+				ECC_GameTraceChannel1,
 				FCollisionShape::MakeBox(AttackData->HitBoxData.BoxExtent),
 				QueryParams
 			);
@@ -147,7 +147,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 	{
 		return;
 	}
-	for (const FHitResult& Hit : HitResults)
+	for (FHitResult& Hit : HitResults)
 	{
 		AActor* hitActor = Hit.GetActor();
 		// 이미 히트한 액터는 스킵, AreaObject 말고 BreakableObject도 존재할수 있으므로 별도 처리
@@ -160,7 +160,9 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 		AAreaObject* hitAreaObject = Cast<AAreaObject>(Hit.GetActor());
 		if (hitAreaObject != nullptr)
 		{
-			// Calc Point Damage
+			// ToDo : Calc Point Damage
+			m_Owner->CalcDamage(*AttackData,m_Owner,hitActor,Hit);
+			
 		}
 	}
 }

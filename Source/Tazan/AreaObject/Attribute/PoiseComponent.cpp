@@ -31,7 +31,7 @@ int32 UPoiseComponent::CalculateTotalDefensePoise() const
 	//return FMath::Max(0, m_BasePoise + AnimationPoiseBonus + TotalModifiers);
 }
 
-void UPoiseComponent::ProcessAttack(const FAttackData& AttackData)
+void UPoiseComponent::PoiseProcess(const FAttackData& AttackData)
 {
 	// 우선순위 비교 로직
 	EStaggerType staggerType = AttackData.StaggerType;
