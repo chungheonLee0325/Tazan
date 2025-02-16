@@ -14,7 +14,7 @@ void UY_StandOff::InitState()
 
 void UY_StandOff::Enter()
 {
-	LOG_SCREEN("대기");
+	LOG_PRINT(TEXT("스탠드오프::Enter()"));
 	m_NextState = EAiStateType::SelectSkill;
 	
 	//TODO: 플레이어가 탈진 상태인가?

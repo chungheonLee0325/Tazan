@@ -119,7 +119,8 @@ public:
 
 	UPROPERTY()
 	FTimerHandle OnDieHandle;
-
+	
+	UBaseAiFSM* GetFSM() const {return m_AiFSM;}
 
 protected:
 	virtual void OnDie() override;

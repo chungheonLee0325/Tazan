@@ -14,7 +14,7 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
-	LOG_SCREEN("어택");
+	LOG_PRINT(TEXT("어택::Enter()"));
 	AYetuga* yetuga = Cast<AYetuga>(m_Owner);
 	m_NextState = EAiStateType::Wait;
 

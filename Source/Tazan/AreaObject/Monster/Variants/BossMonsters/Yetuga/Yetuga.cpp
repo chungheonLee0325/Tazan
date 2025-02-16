@@ -32,7 +32,7 @@ void AYetuga::BeginPlay()
 	SkillRoulette->InitSkill();
 
 	m_CurrentSkill = GetSkillByID(11000);
-	m_AiFSM->ChangeState(EAiStateType::Attack);
+	m_AiFSM->ChangeState(EAiStateType::SelectSkill);
 }
 
 UBaseAiFSM* AYetuga::CreateFSM()
