@@ -89,6 +89,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual AAreaObject* GetAggroTarget() const;
 	
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	float GetDistToTarget();
+	
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	FVector GetDirToTarget();
+	
 	// State Checks
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsMoving() const;
