@@ -12,6 +12,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Layers/LayersSubsystem.h"
 #include "Tazan/Animation/Player/KazanAniminstance.h"
+#include "Tazan/Utilities/LogMacro.h"
 
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -48,6 +49,19 @@ APlayer_Kazan::APlayer_Kazan()
 		WeaponComponent->SetRelativeScale3D(FVector(0.4f));
 		//FTransform attachTransform = GetMesh()->GetSocketTransform(TEXT("Weapon_R_BackPack_GSword"));
 		//WeaponComponent->SetRelativeTransform(attachTransform);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> tempDodgeAnimMontage(TEXT(
+		"/Script/Engine.AnimMontage'/Game/_Resource/Kazan/Animation/GSword/CA_P_Kazan_GSword_Dodge_F_Montage.CA_P_Kazan_GSword_Dodge_F_Montage'"));
+	if (tempDodgeAnimMontage.Succeeded())
+	{
+		DodgeAnimMontage = tempDodgeAnimMontage.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> tempBackDodgeAnimMontage(TEXT(
+		"/Script/Engine.AnimMontage'/Game/_Resource/Kazan/Animation/GSword/CA_P_Kazan_GSword_Dodge_B_Montage.CA_P_Kazan_GSword_Dodge_B_Montage'"));
+	if (tempBackDodgeAnimMontage.Succeeded())
+	{
+		BackDodgeAnimMontage = tempBackDodgeAnimMontage.Object;
 	}
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
@@ -88,23 +102,103 @@ void APlayer_Kazan::BeginPlay()
 	Super::BeginPlay();
 
 	KazanAnimInstance = Cast<UKazanAniminstance>(GetMesh()->GetAnimInstance());
-	
 }
 
 void APlayer_Kazan::OnDie()
 {
 	Super::OnDie();
-	
-	CanMove = false;
-	CanRotate = false;
-	CanSkill = false;
-	GetCharacterMovement()->SetMovementMode(MOVE_None);
+
+	//GetCharacterMovement()->SetMovementMode(MOVE_None);
 }
 
 // Called every frame
 void APlayer_Kazan::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void APlayer_Kazan::InitializeStateRestrictions()
+{
+	// 일반 상태 - 모든 행동 가능
+	FActionRestrictions NormalRestrictions;
+	StateRestrictions.Add(EPlayerState::NORMAL, NormalRestrictions);
+
+	// 스킬 준비 중 - 이동, 회전 제한
+	FActionRestrictions SkillPrepareRestrictions;
+	SkillPrepareRestrictions.bCanMove = false;
+	SkillPrepareRestrictions.bCanRotate = false;
+	StateRestrictions.Add(EPlayerState::SKILL_PREPARE, SkillPrepareRestrictions);
+
+	// 스킬 시전 중 - 이동, 회전 제한
+	FActionRestrictions SkillCastingRestrictions;
+	SkillCastingRestrictions.bCanMove = false;
+	SkillCastingRestrictions.bCanRotate = false;
+	StateRestrictions.Add(EPlayerState::SKILL_PREPARE, SkillCastingRestrictions);
+
+	// 가드 중 - 달리기, 공격 제한
+	FActionRestrictions GuardingRestrictions;
+	GuardingRestrictions.bCanAttack = false;
+	GuardingRestrictions.bCanUseSkills = false;
+	StateRestrictions.Add(EPlayerState::GUARDING, GuardingRestrictions);
+
+	// 회피 중 - 대부분의 행동 제한
+	FActionRestrictions EvadingRestrictions;
+	EvadingRestrictions.bCanAttack = false;
+	EvadingRestrictions.bCanGuard = false;
+	EvadingRestrictions.bCanUseSkills = false;
+	StateRestrictions.Add(EPlayerState::EVADING, EvadingRestrictions);
+
+	// 스턴 상태 - 모든 행동 제한 (카메라만 가능)
+	FActionRestrictions StagerRestrictions;
+	StagerRestrictions.bCanMove = false;
+	StagerRestrictions.bCanRotate = false;
+	StagerRestrictions.bCanAttack = false;
+	StagerRestrictions.bCanGuard = false;
+	StagerRestrictions.bCanEvade = false;
+	StagerRestrictions.bCanUseSkills = false;
+	StateRestrictions.Add(EPlayerState::STAGERING, StagerRestrictions);
+}
+
+bool APlayer_Kazan::CanPerformAction(EPlayerState State, FString ActionName)
+{
+	if (!StateRestrictions.Contains(State))
+		return false;
+
+	const FActionRestrictions& Restrictions = StateRestrictions[State];
+
+	if (ActionName == "Move")
+		return Restrictions.bCanMove;
+	else if (ActionName == "Rotate")
+		return Restrictions.bCanRotate;
+	else if (ActionName == "Look")
+		return Restrictions.bCanLook;
+	else if (ActionName == "Attack")
+		return Restrictions.bCanAttack;
+	else if (ActionName == "Guard")
+		return Restrictions.bCanGuard;
+	else if (ActionName == "Evade")
+		return Restrictions.bCanEvade;
+	else if (ActionName == "UseSkill")
+		return Restrictions.bCanUseSkills;
+
+	return false;
+}
+
+void APlayer_Kazan::SetPlayerState(EPlayerState NewState)
+{
+	CurrentPlayerState = NewState;
+
+	// 상태 변경에 따른 추가 처리
+	const FActionRestrictions& NewRestrictions = StateRestrictions[NewState];
+
+	// 이동 제한 적용
+	if (!NewRestrictions.bCanMove)
+		GetCharacterMovement()->DisableMovement();
+	else
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+	// 회전 제한 적용
+	GetCharacterMovement()->bOrientRotationToMovement = NewRestrictions.bCanRotate;
 }
 
 
@@ -123,9 +217,13 @@ void APlayer_Kazan::Move(const FVector2D MovementVector)
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
+		// add Movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
+
+		// Rotate Only
+		//FRotator NewRotation = FRotationMatrix::MakeFromX(RightDirection * MovementVector.X + ForwardDirection * MovementVector.Y).Rotator();
+		//SetActorRotation(NewRotation);
 	}
 }
 
@@ -142,26 +240,28 @@ void APlayer_Kazan::Look(const FVector2D LookAxisVector)
 		newPitchAngle = FMath::ClampAngle(newPitchAngle, MinPitchAngle, MaxPitchAngle);
 
 		float pitchInput = newPitchAngle - CurrentPitchAngle;
-		
+
 		AddControllerPitchInput(pitchInput);
 
 		CurrentPitchAngle = newPitchAngle;
 	}
 }
 
-void APlayer_Kazan::On_Attack_Common_Pressed()
+void APlayer_Kazan::Attack_Weak_Pressed()
 {
+	CastSkill(GetSkillByID(10), this);
 }
 
-void APlayer_Kazan::On_Attack_Strong_Pressed()
+void APlayer_Kazan::Attack_Strong_Pressed()
 {
+	CastSkill(GetSkillByID(20), this);
 }
 
 void APlayer_Kazan::Parry_Pressed()
 {
 	// 애니메이션 변수 셋팅
 	KazanAnimInstance->bIsGuard = true;
-	
+
 	// ToDo : @@LCH 고민 바로 적용이 맞는지 Notify로 빼서 적용할지
 	// 플레이어 셋팅
 	IsGuard = true;
@@ -174,7 +274,7 @@ void APlayer_Kazan::Parry_Pressed()
 void APlayer_Kazan::Parry_Released()
 {
 	KazanAnimInstance->bIsGuard = false;
-	
+
 	// 플레이어 셋팅
 	IsGuard = false;
 	// 이동속도 셋팅
@@ -183,8 +283,32 @@ void APlayer_Kazan::Parry_Released()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
-void APlayer_Kazan::On_Evade_Pressed()
+void APlayer_Kazan::Dodge_Pressed()
 {
+	if (CanDodge == false)
+	{
+		return;
+	}
+	CanDodge = false;
+	
+	if(GetCharacterMovement()->Velocity.Length() > 0.1f)
+	{
+		PlayAnimMontage(DodgeAnimMontage);
+	}
+	else
+	{
+		PlayAnimMontage(BackDodgeAnimMontage);
+	}
+	
+	TWeakObjectPtr<APlayer_Kazan> weakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(DodgeTimerHandle,[weakThis]()
+	{
+		APlayer_Kazan* StrongThis = weakThis.Get();
+		if (StrongThis != nullptr)
+		{
+			StrongThis->CanDodge = true;
+		}
+	},DodgeCoolTime,false);
 }
 
 void APlayer_Kazan::On_Run_Pressed()
@@ -197,7 +321,6 @@ void APlayer_Kazan::On_Run_Released()
 
 void APlayer_Kazan::PerfectParryActivated()
 {
-	
 }
 
 void APlayer_Kazan::PerfectParryDeactivated()

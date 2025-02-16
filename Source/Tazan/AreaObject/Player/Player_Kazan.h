@@ -13,6 +13,47 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+// 플레이어의 상태를 정의하는 열거형
+UENUM(BlueprintType)
+enum class EPlayerState : uint8
+{
+	NORMAL,           // 일반 상태
+	SKILL_PREPARE,	  // 스킬 시전 준비중 - 이동 / 회전 불가
+	SKILL_CASTING,    // 스킬 시전 중 - 이동 불가
+	GUARDING,         // 가드 중
+	EVADING,          // 회피 중
+	STAGERING,        // 경직 상태
+	DYING             // 사망 상태
+};
+
+// 액션 제한을 관리하는 구조체
+USTRUCT(BlueprintType)
+struct FActionRestrictions
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanMove = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanRotate = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanLook = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanAttack = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanGuard = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanEvade = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanUseSkills = true;
+};
+
 UCLASS()
 class TAZAN_API APlayer_Kazan : public AAreaObject
 {
@@ -42,7 +83,7 @@ public:
 	/** Called for movement input */
 	void Move(FVector2D MovementVector);
 
-	// Rotation
+	// Camera Rotation
 	/** Called for looking input */
 	void Look(FVector2D LookAxisVector);
 
@@ -51,13 +92,14 @@ public:
 	void Parry_Pressed();
 	void Parry_Released();
 
-private:
 	/** Called for attack input */
-	void On_Attack_Common_Pressed();
-	void On_Attack_Strong_Pressed();
-
+	void Attack_Weak_Pressed();
+	void Attack_Strong_Pressed();
+	
 	/** Called for evade input */
-	void On_Evade_Pressed();
+	void Dodge_Pressed();
+
+private:
 	/** Called for run input */
 	void On_Run_Pressed();
 	void On_Run_Released();
@@ -114,11 +156,29 @@ private:
 
 	UPROPERTY()
 	UKazanAniminstance* KazanAnimInstance;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UAnimMontage* DodgeAnimMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UAnimMontage* BackDodgeAnimMontage;
+
+	// 플레이어 상태 관리
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
+	EPlayerState CurrentPlayerState;
+
+	UPROPERTY(EditDefaultsOnly, Category = "State")
+	TMap<EPlayerState, FActionRestrictions> StateRestrictions;
+
+	void InitializeStateRestrictions();
+	bool CanPerformAction(EPlayerState State, FString ActionName);
+	void SetPlayerState(EPlayerState NewState);
 	
 	bool IsGuard = false;
-	bool CanRotate = true;
-	bool CanMove = true;
-	bool CanSkill = true;
+
+	bool CanDodge = true;
+	float DodgeCoolTime = 1.0f;
+	
+	FTimerHandle DodgeTimerHandle;
 
 	// Data
 	const float MAX_WALK_SPEED = 500.f;

@@ -29,13 +29,13 @@ private:
 	/** Called for looking input */
 	void OnLook(const FInputActionValue& Value);
 	/** Called for attack input */
-	void On_Attack_Common_Pressed(const FInputActionValue& InputActionValue);
+	void On_Attack_Weak_Pressed(const FInputActionValue& InputActionValue);
 	void On_Attack_Strong_Pressed(const FInputActionValue& InputActionValue);
 	/** Called for parry input */
 	void On_Parry_Pressed(const FInputActionValue& InputActionValue);
 	void On_Parry_Released(const FInputActionValue& InputActionValue);
 	/** Called for evade input */
-	void On_Evade_Pressed(const FInputActionValue& InputActionValue);
+	void On_Dodge_Pressed(const FInputActionValue& InputActionValue);
 	/** Called for run input */
 	void On_Run_Pressed(const FInputActionValue& InputActionValue);
 	void On_Run_Released(const FInputActionValue& InputActionValue);

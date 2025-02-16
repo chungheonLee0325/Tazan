@@ -81,7 +81,7 @@ void AKazanPlayerController::SetupInputComponent()
 
 		// Attack
 		EnhancedInputComponent->BindAction(AttackCAction, ETriggerEvent::Started, this,
-										   &AKazanPlayerController::On_Attack_Common_Pressed);
+										   &AKazanPlayerController::On_Attack_Weak_Pressed);
 		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Started, this,
 										   &AKazanPlayerController::On_Attack_Strong_Pressed);
 
@@ -90,7 +90,7 @@ void AKazanPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Completed, this, &AKazanPlayerController::On_Parry_Released);
 
 		// Evade
-		EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Started, this, &AKazanPlayerController::On_Evade_Pressed);
+		EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Started, this, &AKazanPlayerController::On_Dodge_Pressed);
 	}
 	else
 	{
@@ -111,12 +111,14 @@ void AKazanPlayerController::OnLook(const FInputActionValue& Value)
 	Kazan->Look(Value.Get<FVector2D>());
 }
 
-void AKazanPlayerController::On_Attack_Common_Pressed(const FInputActionValue& InputActionValue)
+void AKazanPlayerController::On_Attack_Weak_Pressed(const FInputActionValue& InputActionValue)
 {
+	Kazan->Attack_Weak_Pressed();
 }
 
 void AKazanPlayerController::On_Attack_Strong_Pressed(const FInputActionValue& InputActionValue)
 {
+	Kazan->Attack_Strong_Pressed();
 }
 
 void AKazanPlayerController::On_Parry_Pressed(const FInputActionValue& InputActionValue)
@@ -129,8 +131,9 @@ void AKazanPlayerController::On_Parry_Released(const FInputActionValue& InputAct
 	Kazan->Parry_Released();
 }
 
-void AKazanPlayerController::On_Evade_Pressed(const FInputActionValue& InputActionValue)
+void AKazanPlayerController::On_Dodge_Pressed(const FInputActionValue& InputActionValue)
 {
+	Kazan->Dodge_Pressed();
 }
 
 void AKazanPlayerController::On_Run_Pressed(const FInputActionValue& InputActionValue)
