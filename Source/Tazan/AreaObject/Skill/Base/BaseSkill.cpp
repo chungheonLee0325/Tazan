@@ -50,10 +50,10 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 
 		// 몽타주 재생
 		Caster->PlayAnimMontage(m_SkillData->Montage);
-		
+
 		// 쿨타임 적용
 		m_CurrentCoolTime = m_SkillData->CoolTime;
-		
+
 		// 델리게이트 바인딩
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &UBaseSkill::OnMontageEnded);
@@ -141,6 +141,32 @@ void UBaseSkill::OnMontageBlendOut(UAnimMontage* Montage, bool bInterrupted)
 	}
 }
 
+FAttackData* UBaseSkill::GetAttackDataByIndex(int Index) const
+{
+	if (IsValid(this) == false)
+	{
+		return nullptr;
+	}
+	if (m_SkillData == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("m_SkillData is nullptr!"));
+		return nullptr;
+	}
+
+	if (m_SkillData->AttackData.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackData array is empty!"));
+		return nullptr;
+	}
+
+	if (!m_SkillData->AttackData.IsValidIndex(Index))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid Index: %d (Array Size: %d)"), Index, m_SkillData->AttackData.Num());
+		return nullptr;
+	}
+	return &m_SkillData->AttackData[Index];
+}
+
 float UBaseSkill::GetCooldownProgress() const
 {
 	if (m_SkillData->CoolTime <= 0.0f) return 1.0f;
@@ -161,7 +187,7 @@ bool UBaseSkill::IsInRange(const AAreaObject* Caster, const AAreaObject* Target)
 	else
 	{
 		LOG_PRINT(TEXT("Out of SkillRange, skill casting has failed."));
-		return false;	
+		return false;
 	}
 }
 
@@ -196,6 +222,6 @@ void UBaseSkill::AdjustCoolTime()
 
 void UBaseSkill::SkillLogPrint()
 {
-	LOG_PRINT(TEXT("스킬 상태: %s"),*UEnum::GetValueAsString(m_CurrentPhase));
+	LOG_PRINT(TEXT("스킬 상태: %s"), *UEnum::GetValueAsString(m_CurrentPhase));
 	LOG_PRINT(TEXT("스킬 현재 쿨타임: %f"), m_CurrentCoolTime);
 }

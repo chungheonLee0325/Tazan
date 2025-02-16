@@ -176,6 +176,11 @@ UBaseSkill* AAreaObject::GetCurrentSkill()
 	return m_CurrentSkill;
 }
 
+FAttackData* AAreaObject::GetCurrentSkillAttackData(int Index)
+{
+	return m_CurrentSkill->GetAttackDataByIndex(Index);
+}
+
 void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 {
 	if (nullptr == NewSkill)
@@ -199,6 +204,7 @@ UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 
 bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
 {
+	// ToDo : Cost 소모 확인
 	if (Skill == nullptr) LOG_PRINT(TEXT("Skill is Empty"));
 	if (Target == nullptr) LOG_PRINT(TEXT("Target is Empty"));
 	

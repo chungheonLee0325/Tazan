@@ -208,12 +208,12 @@ struct FSkillData : public FTableRowBase
 
 	// 데미지 관련 데이터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAttackData AttackData;
+	TArray<FAttackData> AttackData;
 
 	// 다음 스킬 ID (플레이어 및 몬스터 콤보 어택)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int NextSkillID = 0;
-	// Todo : AnimMontage & Sound & Cast/Hit FX 관련 항목 추가?
+	// Todo : Sound & Cast/Hit FX 관련 항목 추가? -> Anim Notify로 처리할듯
 };
 
 // SoundDataTable 데이터, GameMode에서 관리

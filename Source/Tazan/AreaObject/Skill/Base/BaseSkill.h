@@ -56,6 +56,8 @@ public:
 	// 현재 진행 페이즈 반환
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	ESkillPhase GetCurrentPhase() const { return m_CurrentPhase; }
+	// Attack Data 반환
+	FAttackData* GetAttackDataByIndex(int Index) const;
 
 	// 쿨타임 진행률 반환 함수
 	UFUNCTION(BlueprintCallable, Category = "Skill")

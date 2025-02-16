@@ -64,6 +64,7 @@ public:
 	// Skill Interface
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual UBaseSkill* GetCurrentSkill();
+	virtual FAttackData* GetCurrentSkillAttackData(int Index);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual bool CanCastSkill(UBaseSkill* Skill, AAreaObject* Target);
 	UFUNCTION(BlueprintCallable, Category = "Combat")

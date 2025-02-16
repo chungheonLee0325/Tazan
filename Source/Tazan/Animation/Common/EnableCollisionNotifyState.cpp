@@ -4,6 +4,7 @@
 #include "EnableCollisionNotifyState.h"
 
 #include "Tazan/AreaObject/Base/AreaObject.h"
+#include "Tazan/Utilities/LogMacro.h"
 
 void UEnableCollisionNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                               float TotalDuration)
@@ -15,6 +16,8 @@ void UEnableCollisionNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 		m_Owner = Cast<AAreaObject>(MeshComp->GetOwner());
 		if (m_Owner != nullptr)
 		{
+			AttackData = m_Owner->GetCurrentSkillAttackData(AttackDataIndex);
+			if (AttackData == nullptr) LOG_PRINT(TEXT("AttackData is Empty"));
 			OwnerSourceMesh = GetTargetMesh(m_Owner);
 		}
 	}
@@ -23,7 +26,7 @@ void UEnableCollisionNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 void UEnableCollisionNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                              float FrameDeltaTime)
 {
-	if (OwnerSourceMesh && m_Owner)
+	if (OwnerSourceMesh && m_Owner && AttackData)
 	{
 		ProcessHitDetection(m_Owner, OwnerSourceMesh);
 	}
@@ -36,7 +39,12 @@ void UEnableCollisionNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UA
 
 USkeletalMeshComponent* UEnableCollisionNotifyState::GetTargetMesh(AAreaObject* TargetAreaObject) const
 {
-	if (SkillData.AttackData.HitBoxData.MeshComponentTag == NAME_None)
+	if (AttackData == nullptr)
+	{
+		LOG_PRINT(TEXT("AttackData is Empty"));
+		return nullptr;
+	}
+	if (AttackData->HitBoxData.MeshComponentTag == NAME_None)
 	{
 		return TargetAreaObject->GetMesh();
 	}
@@ -46,7 +54,7 @@ USkeletalMeshComponent* UEnableCollisionNotifyState::GetTargetMesh(AAreaObject* 
 
 	for (UActorComponent* Component : Components)
 	{
-		if (Component->ComponentHasTag(SkillData.AttackData.HitBoxData.MeshComponentTag))
+		if (Component->ComponentHasTag(AttackData->HitBoxData.MeshComponentTag))
 		{
 			return Cast<USkeletalMeshComponent>(Component);
 		}
@@ -59,19 +67,19 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 	if (!SourceMesh || !OwnerAreaObject)
 		return;
 
-	FVector StartLocation = SourceMesh->GetSocketLocation(SkillData.AttackData.HitBoxData.StartSocketName);
+	FVector StartLocation = SourceMesh->GetSocketLocation(AttackData->HitBoxData.StartSocketName);
 	//FVector EndLocation = SourceMesh->GetSocketLocation(SkillData.AttackData.HitBoxData.EndSocketName);
-	FVector EndLocation = SkillData.AttackData.HitBoxData.EndSocketName != NAME_None
-		                      ? SourceMesh->GetSocketLocation(SkillData.AttackData.HitBoxData.EndSocketName)
+	FVector EndLocation = AttackData->HitBoxData.EndSocketName != NAME_None
+		                      ? SourceMesh->GetSocketLocation(AttackData->HitBoxData.EndSocketName)
 		                      : StartLocation;
-	FRotator SocketRotation = SourceMesh->GetSocketRotation(SkillData.AttackData.HitBoxData.StartSocketName);
+	FRotator SocketRotation = SourceMesh->GetSocketRotation(AttackData->HitBoxData.StartSocketName);
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(OwnerAreaObject);
 
 	TArray<FHitResult> HitResults;
 	bool bHit = false;
 
-	switch (SkillData.AttackData.HitBoxData.DetectionType)
+	switch (AttackData->HitBoxData.DetectionType)
 	{
 	case EHitDetectionType::Line:
 		{
@@ -93,7 +101,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 				EndLocation,
 				FQuat::Identity,
 				ECC_Pawn,
-				FCollisionShape::MakeSphere(SkillData.AttackData.HitBoxData.Radius),
+				FCollisionShape::MakeSphere(AttackData->HitBoxData.Radius),
 				QueryParams
 			);
 			break;
@@ -107,8 +115,8 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 				EndLocation,
 				SocketRotation.Quaternion(),
 				ECC_Pawn,
-				FCollisionShape::MakeCapsule(SkillData.AttackData.HitBoxData.Radius,
-				                             SkillData.AttackData.HitBoxData.HalfHeight),
+				FCollisionShape::MakeCapsule(AttackData->HitBoxData.Radius,
+				                             AttackData->HitBoxData.HalfHeight),
 				QueryParams
 			);
 			break;
@@ -122,7 +130,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 				EndLocation,
 				SocketRotation.Quaternion(),
 				ECC_Pawn,
-				FCollisionShape::MakeBox(SkillData.AttackData.HitBoxData.BoxExtent),
+				FCollisionShape::MakeBox(AttackData->HitBoxData.BoxExtent),
 				QueryParams
 			);
 			break;
@@ -161,7 +169,7 @@ void UEnableCollisionNotifyState::DrawDebugHitDetection(const FVector& Start, co
                                                         const TArray<FHitResult>& HitResults,
                                                         const FRotator& SocketRotation) const
 {
-	auto& HitBoxData = SkillData.AttackData.HitBoxData;
+	auto& HitBoxData = AttackData->HitBoxData;
 	UWorld* World = m_Owner->GetWorld();
 	if (!World) return;
 

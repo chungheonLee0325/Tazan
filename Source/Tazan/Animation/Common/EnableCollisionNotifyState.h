@@ -22,8 +22,12 @@ public:
 	                        float FrameDeltaTime) override;
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkillData)
-	FSkillData SkillData;
+	// 사용되는 AttackData의 Index값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AttackData)
+	int AttackDataIndex;
+
+	// 사용하는 AttackData
+	FAttackData *AttackData;
 
 	// 디버그 드로잉 옵션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
