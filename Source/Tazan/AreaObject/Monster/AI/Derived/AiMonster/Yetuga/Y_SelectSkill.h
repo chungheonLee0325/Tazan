@@ -6,6 +6,7 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
 #include "Y_SelectSkill.generated.h"
 
+class UY_SkillRoulette;
 /**
  * 
  */
@@ -18,4 +19,9 @@ public:
 	virtual void Enter() override;
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
+
+	void SetSkillRoulette(UY_SkillRoulette* skillRoulette);
+
+private:
+	UY_SkillRoulette* SkillRoulette;	
 };

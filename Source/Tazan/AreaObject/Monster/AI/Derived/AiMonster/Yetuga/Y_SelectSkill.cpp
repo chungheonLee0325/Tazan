@@ -3,9 +3,11 @@
 
 #include "Y_SelectSkill.h"
 
-#include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
+#include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
+#include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_SkillRoulette.h"
 
 void UY_SelectSkill::InitState()
 {
@@ -13,12 +15,17 @@ void UY_SelectSkill::InitState()
 
 void UY_SelectSkill::Enter()
 {
-	LOG_PRINT(TEXT("셀렉트스킬::Enter()"));
-	//TODO: SkillBag에서 쿨타임이 아닌 스킬 중 랜덤으로 선택
-	//TODO: SkillBag?은 선택된 스킬 nextSkill 등 변수에 저장해두기
-	//스킬의 사정거리 값을 가져와 Chase상태로 변경 or Attack상태로 변경
-	float skillRange = 300.0f;
-	float dist = m_Owner->GetDistanceTo(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	// LOG_PRINT(TEXT(""));
+	
+	if (SkillRoulette == nullptr) LOG_SCREEN_ERROR(this, "스킬룰렛 없음");
+	
+	m_Owner->UpdateCurrentSkill(SkillRoulette->GetRandomSkill());
+	
+	float skillRange = m_Owner->GetCurrentSkill()->GetSkillRange()-100.0f;
+	AYetuga* yetuaga = Cast<AYetuga>(m_Owner);
+	yetuaga->SkillRange = skillRange; 
+	
+	float dist = m_Owner->GetDistToTarget();
 	if (dist > skillRange)
 	{
 		m_AiFSM->ChangeState(EAiStateType::Chase);
@@ -33,4 +40,9 @@ void UY_SelectSkill::Execute(float DeltaTime)
 
 void UY_SelectSkill::Exit()
 {
+}
+
+void UY_SelectSkill::SetSkillRoulette(UY_SkillRoulette* skillRoulette)
+{
+	SkillRoulette = skillRoulette;
 }

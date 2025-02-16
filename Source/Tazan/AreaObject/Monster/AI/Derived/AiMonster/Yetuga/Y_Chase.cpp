@@ -3,9 +3,9 @@
 
 #include "Y_Chase.h"
 
-#include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
+#include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
 
 void UY_Chase::InitState()
 {
@@ -13,18 +13,17 @@ void UY_Chase::InitState()
 
 void UY_Chase::Enter()
 {
-	LOG_SCREEN("추적");
-	//TODO: SKillBag?에서 nextSkill의 사정거리 가져오기
+	// LOG_PRINT(TEXT(""));
+	SkillRange = Cast<AYetuga>(m_Owner)->SkillRange;
 }
 
 void UY_Chase::Execute(float dt)
 {
-	APawn* p = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	FVector dir = p->GetActorLocation()-m_Owner->GetActorLocation();
+	FVector dir = m_Owner->GetDirToTarget();
 	dir.Normalize();
 	m_Owner->AddMovementInput(dir,1.0f);
 	
-	float dist = m_Owner->GetDistanceTo(p);
+	float dist = m_Owner->GetDistToTarget();
 	if (dist < SkillRange)
 	{
 		m_AiFSM->ChangeState(EAiStateType::Attack);

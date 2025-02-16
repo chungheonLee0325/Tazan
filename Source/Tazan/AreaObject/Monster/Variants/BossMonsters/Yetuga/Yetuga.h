@@ -39,9 +39,7 @@ public:
 	UPROPERTY()
 	UY_SkillRoulette* SkillRoulette;
 
-private:
-	UPROPERTY()
-	APlayer_Kazan* Player;
+	float SkillRange = 300.0f;
 		
 protected:
 	virtual void BeginPlay() override;
@@ -53,10 +51,6 @@ public:
 
 	//TODO: AreaObject로 이전?
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
-	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
-	
-	float DistToPlayer();
-	float GetPlayerDir();
 	
 	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType); 
 	

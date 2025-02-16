@@ -5,7 +5,6 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 
-
 void UY_BaseSkill::OnCastEnd()
 {
 	// Casting Phase일때 한번만 처리
@@ -31,7 +30,6 @@ void UY_BaseSkill::OnCastEnd()
 	ABaseMonster* monster = Cast<ABaseMonster>(m_Caster);
 	if (monster)
 	{
-		LOG_SCREEN("스킬 애니 종료");
 		monster->GetFSM()->ChangeState(EAiStateType::Wait);
 	}
 }

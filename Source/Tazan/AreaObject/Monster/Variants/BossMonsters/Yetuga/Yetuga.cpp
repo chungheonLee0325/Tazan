@@ -4,6 +4,7 @@
 #include "Yetuga.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 #include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_SkillRoulette.h"
@@ -28,7 +29,7 @@ AYetuga::AYetuga()
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
-	Player = Cast<APlayer_Kazan>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
 	SkillRoulette->InitSkill();
 
 	m_CurrentSkill = GetSkillByID(11000);
@@ -57,19 +58,6 @@ UAnimMontage* AYetuga::GetAnimMontage(EWeavingSkillAnim animType)
 		return *MontagePtr;
 	}
 	return nullptr;
-}
-
-float AYetuga::DistToPlayer()
-{
-	return GetDistanceTo(Player);
-}
-
-float AYetuga::GetPlayerDir()
-{
-	// GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorForwardVector();
-	FVector dir = Player->GetActorLocation() - GetActorLocation();
-	dir.Normalize();
-	return FVector::DotProduct(dir,GetActorForwardVector());
 }
 
 void AYetuga::ShortAttack()

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Y_SkillRoulette.generated.h"
 
+class ABaseMonster;
 class UBaseSkill;
 
 USTRUCT(BlueprintType)
@@ -39,14 +40,18 @@ protected:
 
 private:
 	TArray<int> Skill_IDArray;
+	ABaseMonster* Owner;
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	void InitSkill();
-	int GetAllRandom() const;
-	int GetWeavingSkill() const;
-	int GetShortSkill() const;
-	int GetLongSkill() const;
+
+	UBaseSkill* GetRandomSkill() const;
+	
+	int GetIDAllRandom() const;
+	int GetIDWeavingSkill() const;
+	int GetIDShortSkill() const;
+	int GetIDLongSkill() const;
 };
