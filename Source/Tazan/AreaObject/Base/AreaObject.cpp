@@ -199,6 +199,9 @@ UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 
 bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
 {
+	if (Skill == nullptr) LOG_PRINT(TEXT("Skill is Empty"));
+	if (Target == nullptr) LOG_PRINT(TEXT("Target is Empty"));
+	
 	return Skill && Skill->CanCast(this, Target);
 }
 
@@ -216,7 +219,7 @@ void AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
 	}
 	else
 	{
-		LOG_SCREEN("CastSkill실패");
+		LOG_SCREEN_ERROR(this,"CastSkill Failed");
 	}
 }
 

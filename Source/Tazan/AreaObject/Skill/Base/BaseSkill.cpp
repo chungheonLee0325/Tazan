@@ -154,7 +154,15 @@ bool UBaseSkill::IsInRange(const AAreaObject* Caster, const AAreaObject* Target)
 	float DistanceSquared = FVector::DistSquared(Caster->GetActorLocation(), Target->GetActorLocation());
 	float RangeSquared = m_SkillData->CastRange * m_SkillData->CastRange;
 
-	return DistanceSquared <= RangeSquared;
+	if (DistanceSquared <= RangeSquared)
+	{
+		return true;
+	}
+	else
+	{
+		LOG_PRINT(TEXT("Out of SkillRange, skill casting has failed."));
+		return false;	
+	}
 }
 
 void UBaseSkill::AdjustCoolTime()
@@ -184,4 +192,10 @@ void UBaseSkill::AdjustCoolTime()
 			}
 		}
 	}, 0.1f, true);
+}
+
+void UBaseSkill::SkillLogPrint()
+{
+	LOG_PRINT(TEXT("스킬 상태: %s"),*UEnum::GetValueAsString(m_CurrentPhase));
+	LOG_PRINT(TEXT("스킬 현재 쿨타임: %f"), m_CurrentCoolTime);
 }

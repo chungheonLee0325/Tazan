@@ -17,6 +17,13 @@ if (GEngine) GEngine->AddOnScreenDebugMessage(-1, Time, Color, FString::Printf(T
 #define LOG_SCREEN(Format, ...) \
 LOG_SCREEN_MY(2.0f, FColor::Green, Format,  ##__VA_ARGS__)
 
+#define LOG_SCREEN_ERROR(Obj, Format, ...) \
+if (GEngine && Obj) \
+{ \
+FString Msg = FString::Printf(TEXT("[%s] " Format), *Obj->GetName(), ##__VA_ARGS__); \
+GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Red, Msg); \
+}
+
 #define LOG_SCREEN_OBJ(Obj, Format, ...) \
 if (GEngine && Obj) \
 { \
