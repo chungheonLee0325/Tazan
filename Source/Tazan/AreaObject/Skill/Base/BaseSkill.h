@@ -66,6 +66,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	bool IsInRange(const AAreaObject* Caster, const AAreaObject* Target) const;
 
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	void SkillLogPrint();
+
 protected:
 	// 기존 속성들
 	UPROPERTY()
