@@ -53,8 +53,8 @@ public:
 
 	//TODO: AreaObject로 이전?
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
-	
 	APlayer_Kazan* GetPlayer_Kazan() const {return Player;}
+	
 	float DistToPlayer();
 	float GetPlayerDir();
 	
