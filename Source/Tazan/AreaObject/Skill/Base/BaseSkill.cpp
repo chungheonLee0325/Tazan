@@ -7,7 +7,7 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 
-UBaseSkill::UBaseSkill()
+UBaseSkill::UBaseSkill(): m_TargetPos(), m_NextSkill(nullptr), m_SkillData(nullptr)
 {
 	m_CurrentPhase = ESkillPhase::Ready;
 	m_CurrentCoolTime = 0.0f;
@@ -25,8 +25,11 @@ bool UBaseSkill::CanCast(AAreaObject* Caster, const AAreaObject* Target) const
 	if (!Caster || !Target) return false;
 
 	// 스킬 상태 체크
-	if (m_CurrentPhase != ESkillPhase::Ready) return false;
-	if (m_CurrentCoolTime > 0.0f) return false;
+	if (m_CurrentPhase != ESkillPhase::Ready)
+	{
+		return false;
+	}
+	// if (m_CurrentCoolTime > 0.0f) return false;
 
 	// 사거리 체크
 	return IsInRange(Caster, Target);
@@ -76,7 +79,7 @@ void UBaseSkill::OnCastEnd()
 	if (m_CurrentPhase != ESkillPhase::Casting) return;
 	if (!m_Caster || !m_Target) return;
 
-	m_Caster->ClearCurrentSkill();
+	m_Caster->ClearThisCurrentSkill(this);
 	if (nullptr != m_NextSkill && m_Caster->CanCastNextSkill(m_NextSkill, m_Target))
 	{
 		m_NextSkill->OnSkillComplete = OnSkillComplete;
@@ -105,7 +108,7 @@ void UBaseSkill::CancelCast()
 	}
 	if (m_CurrentPhase != ESkillPhase::CoolTime)
 	{
-		m_Caster->ClearCurrentSkill();
+		m_Caster->ClearThisCurrentSkill(this);
 		m_CurrentPhase = ESkillPhase::CoolTime;
 		AdjustCoolTime();
 	}

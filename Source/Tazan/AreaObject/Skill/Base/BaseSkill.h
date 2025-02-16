@@ -56,6 +56,7 @@ public:
 	// 현재 진행 페이즈 반환
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	ESkillPhase GetCurrentPhase() const { return m_CurrentPhase; }
+
 	// Attack Data 반환
 	FAttackData* GetAttackDataByIndex(int Index) const;
 
@@ -72,7 +73,9 @@ public:
 	void SkillLogPrint();
 
 protected:
-	// 기존 속성들
+	UFUNCTION()
+	void AdjustCoolTime();
+
 	UPROPERTY()
 	ESkillPhase m_CurrentPhase;
 
@@ -91,12 +94,8 @@ protected:
 	UPROPERTY()
 	UBaseSkill* m_NextSkill;
 
-	void AdjustCoolTime();
 private:
-
 	FSkillData* m_SkillData;
 
 	float m_CurrentCoolTime;
-
-	int m_SkillID;
 };
