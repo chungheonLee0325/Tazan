@@ -80,6 +80,7 @@ public:
 	// ToDo : 스킬 사용후 이동, 공격 가능 기능 추가 구현
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void ClearCurrentSkill();
+	virtual void ClearThisCurrentSkill(UBaseSkill* Skill);
 
 	// Condition 기능 퍼사드 제공
 	bool AddCondition(EConditionBitsType Condition) const;

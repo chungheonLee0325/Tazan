@@ -234,6 +234,14 @@ void AAreaObject::ClearCurrentSkill()
 	m_CurrentSkill = nullptr;
 }
 
+void AAreaObject::ClearThisCurrentSkill(UBaseSkill* Skill)
+{
+	if (m_CurrentSkill == Skill)
+	{
+		m_CurrentSkill = nullptr;
+	}
+}
+
 bool AAreaObject::AddCondition(EConditionBitsType Condition) const
 {
 	return m_Condition->AddCondition(Condition);
