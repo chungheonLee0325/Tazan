@@ -86,8 +86,8 @@ protected:
 	UPROPERTY()
 	UBaseSkill* m_NextSkill;
 
-private:
 	void AdjustCoolTime();
+private:
 
 	FSkillData* m_SkillData;
 
