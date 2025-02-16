@@ -3,48 +3,58 @@
 
 #include "S_Wait.h"
 #include <Tazan/Utilities/LogMacro.h>
+
+#include "Kismet/GameplayStatics.h"
+#include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 
 void US_Wait::InitState()
 {
-	
 }
 
 void US_Wait::Enter()
 {
-	LOG_SCREEN("기다려");
+	// State에서 Target을 저장하는 Case
+	//if (Target == nullptr)
+	//{
+	//	Target = Cast<APlayer_Kazan>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	//}
+
+	// Monster에서 Target 저장하는 Case -> 다른 State에서도 또다시 안얻어와도 되서 좋음
+	if (m_Owner->GetAggroTarget() == nullptr)
+	{
+		m_Owner->SetAggroTarget(Cast<APlayer_Kazan>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)));
+	}
 	
+	LOG_SCREEN("기다리면서 체크해");
 }
 
 void US_Wait::Execute(float DeltaTime)
 {
-	
-	// 시간이 흐른다 
-	CurrentTime += DeltaTime;
-
-	// 흐른 시간이 딜레이 타임보다 커지면
-	if (CurrentTime > WaitDelayTime)
+	if (m_Owner->GetAggroTarget() == nullptr || m_Owner == nullptr)
 	{
-		// 이동 상태로 전환 한다
-		LOG_SCREEN("이동할래 타겟어딧어 "); 
-		m_AiFSM->ChangeState(EAiStateType::Idle);
-		//그리고 값을 초기화 한다 
-		CurrentTime = 0;
-		
-
+		return;
 	}
-
+	if (IsCheckRadius())
+	{
+		m_AiFSM->ChangeState(EAiStateType::Idle);
+		LOG_SCREEN("범위 안에있다 이동으로가자");
+	}
 }
 
 void US_Wait::Exit()
 {
-	
 }
 
+bool US_Wait::IsCheckRadius()
+{
+	if (Target)
+	{
+		FVector direction = Target->GetActorLocation() - m_Owner->GetActorLocation();
+		float distance = direction.Size();
 
-
-	
-
-
-
+		return distance <= CheckRadius;
+	}
+	return false;
+}

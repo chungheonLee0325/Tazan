@@ -37,7 +37,7 @@ void USword_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	
 }
 
 void USword_FSM::InitStatePool()
@@ -61,6 +61,18 @@ void USword_FSM::InitStatePool()
 	
 	ChangeState(EAiStateType::Wait);
 
+
+	// UFUNCTION()
+	// bool IsPlayerInCheckRadius();
+	//
+	// UFUNCTION()
+	// bool IsPlayerInAttackRadius();
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "S_FSM")
+	// float CheckRadius;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "S_FSM")
+	// float AttackRadius;
 	
 }
 
