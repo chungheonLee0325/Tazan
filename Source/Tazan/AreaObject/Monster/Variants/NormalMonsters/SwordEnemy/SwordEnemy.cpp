@@ -3,6 +3,7 @@
 
 #include "SwordEnemy.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/SwordMonster/Sword_FSM.h"
 
 
@@ -21,6 +22,10 @@ ASwordEnemy::ASwordEnemy()
 		GetMesh()->SetRelativeScale3D(FVector(0.37f));
 	}
 	m_AiFSM = ASwordEnemy::CreateFSM();
+	UCharacterMovementComponent* characterMovement = GetCharacterMovement();
+	float CurrentMaxWalkSpeed = characterMovement->MaxWalkSpeed;
+
+	characterMovement->MaxWalkSpeed = 150.0f;
 }
 
 // Called when the game starts or when spawned

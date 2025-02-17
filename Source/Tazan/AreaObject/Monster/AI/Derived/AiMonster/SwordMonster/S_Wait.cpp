@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
+#include "Tazan/AreaObject/Monster/Variants/NormalMonsters/SwordEnemy/SwordEnemy.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 
 void US_Wait::InitState()
@@ -26,13 +27,17 @@ void US_Wait::Enter()
 	{
 		m_Owner->SetAggroTarget(Cast<APlayer_Kazan>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)));
 	}
-	
+	if (Target == nullptr)
+	{
+		Target = Cast<APlayer_Kazan>(m_Owner->GetAggroTarget());
+	}
+
 	LOG_SCREEN("기다리면서 체크해");
 }
 
 void US_Wait::Execute(float DeltaTime)
 {
-	if (m_Owner->GetAggroTarget() == nullptr || m_Owner == nullptr)
+	if (m_Owner == nullptr)
 	{
 		return;
 	}
@@ -49,9 +54,9 @@ void US_Wait::Exit()
 
 bool US_Wait::IsCheckRadius()
 {
-	if (Target)
+	if (m_Owner)
 	{
-		FVector direction = Target->GetActorLocation() - m_Owner->GetActorLocation();
+		FVector direction = m_Owner->GetActorLocation() - Target->GetActorLocation();
 		float distance = direction.Size();
 
 		return distance <= CheckRadius;
