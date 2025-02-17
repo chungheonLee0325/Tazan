@@ -28,6 +28,8 @@ public:
 	UCondition* m_Condition;
 	bool bCanNextSkill = false;
 
+	FTimerHandle ConditionTimerHandle;
+	EConditionBitsType TempCondition;
 
 protected:
 	// Called when the game starts or when spawned
@@ -83,9 +85,9 @@ public:
 	virtual void ClearThisCurrentSkill(UBaseSkill* Skill);
 
 	// Condition 기능 퍼사드 제공
-	bool AddCondition(EConditionBitsType Condition) const;
-	bool RemoveCondition(EConditionBitsType Condition) const;
-	bool HasCondition(EConditionBitsType Condition) const;
+	bool AddCondition(EConditionBitsType AddConditionType, float Duration = 0.0f);
+	bool RemoveCondition(EConditionBitsType RemoveConditionType) const;
+	bool HasCondition(EConditionBitsType HasConditionType) const;
 	bool ExchangeDead() const;
 
 	// Stagger 처리 핸들

@@ -251,19 +251,38 @@ void AAreaObject::ClearThisCurrentSkill(UBaseSkill* Skill)
 	}
 }
 
-bool AAreaObject::AddCondition(EConditionBitsType Condition) const
+bool AAreaObject::AddCondition(EConditionBitsType AddConditionType, float Duration)
 {
-	return m_Condition->AddCondition(Condition);
+	bool result = m_Condition->AddCondition(AddConditionType);
+	if (result == false)
+		return false;
+	
+	if (false == FMath::IsNearlyZero(Duration))
+	{
+		
+		TWeakObjectPtr<AAreaObject> weakThis = this;
+		TempCondition = AddConditionType;
+
+		GetWorld()->GetTimerManager().SetTimer(ConditionTimerHandle, [weakThis]()
+		{
+			AAreaObject* strongThis = weakThis.Get();
+			if (strongThis != nullptr)
+			{
+				strongThis->RemoveCondition(strongThis->TempCondition);
+			}
+		}, Duration, false);
+	}
+	return result;
 }
 
-bool AAreaObject::RemoveCondition(EConditionBitsType Condition) const
+bool AAreaObject::RemoveCondition(EConditionBitsType RemoveConditionType) const
 {
-	return m_Condition->RemoveCondition(Condition);
+	return m_Condition->RemoveCondition(RemoveConditionType);
 }
 
-bool AAreaObject::HasCondition(EConditionBitsType Condition) const
+bool AAreaObject::HasCondition(EConditionBitsType HasConditionType) const
 {
-	return m_Condition->HasCondition(Condition);
+	return m_Condition->HasCondition(HasConditionType);
 }
 
 bool AAreaObject::ExchangeDead() const
