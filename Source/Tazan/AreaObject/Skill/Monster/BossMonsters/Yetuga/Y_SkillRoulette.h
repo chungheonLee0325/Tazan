@@ -39,7 +39,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	TArray<int> Skill_IDArray;
+	TArray<int> Skill_IDs;
 	ABaseMonster* Owner;
 
 public:
@@ -48,10 +48,15 @@ public:
 
 	void InitSkill();
 
-	UBaseSkill* GetRandomSkill() const;
+	UBaseSkill* GetRandomAllSkill();
+	UBaseSkill* GetRandomMainSkill();
+	UBaseSkill* GetRandomWeavingSkill() const { return GetRandSkillByArray(GetIDWeavingSkill()); }
+	UBaseSkill* GetRandomShortSkill() const { return GetRandSkillByArray(GetIDShortSkill()); }
+	UBaseSkill* GetRandomLongSkill() const { return GetRandSkillByArray(GetIDLongSkill()); }
 	
-	int GetIDAllRandom() const;
-	int GetIDWeavingSkill() const;
-	int GetIDShortSkill() const;
-	int GetIDLongSkill() const;
+private:
+	UBaseSkill* GetRandSkillByArray(TArray<int> arr) const;
+	TArray<int> GetIDWeavingSkill() const;
+	TArray<int> GetIDShortSkill() const;
+	TArray<int> GetIDLongSkill() const;
 };
