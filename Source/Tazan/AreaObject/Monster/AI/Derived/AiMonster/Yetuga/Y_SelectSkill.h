@@ -20,8 +20,10 @@ public:
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
 
-	void SetSkillRoulette(UY_SkillRoulette* skillRoulette);
-
 private:
-	UY_SkillRoulette* SkillRoulette;	
+	UY_SkillRoulette* SkillRoulette;
+
+public:
+	void SetSkillRoulette(UY_SkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
+	bool CheckRange(float dist, float range);
 };

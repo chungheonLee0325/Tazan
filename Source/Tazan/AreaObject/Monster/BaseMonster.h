@@ -76,7 +76,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-
+	
 	UFUNCTION(BlueprintCallable)
 	virtual void OnBodyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
@@ -127,6 +127,8 @@ public:
 	FTimerHandle OnDieHandle;
 	
 	UBaseAiFSM* GetFSM() const {return m_AiFSM;}
+	
+	UBaseSkill* NextSkill;
 
 protected:
 	virtual void OnDie() override;
