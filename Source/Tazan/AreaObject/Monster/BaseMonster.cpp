@@ -73,6 +73,26 @@ bool ABaseMonster::IsRotating() const
 	return true;
 }
 
+float ABaseMonster::GetDistToTarget()
+{
+	if (m_AggroTarget == nullptr)
+	{
+		LOG_PRINT(TEXT("AggroTarget is null."));
+		return 0;
+	}
+	return GetDistanceTo(m_AggroTarget);
+}
+
+FVector ABaseMonster::GetDirToTarget()
+{
+	if (m_AggroTarget == nullptr)
+	{
+		LOG_PRINT(TEXT("AggroTarget is null."));
+		return FVector::ZeroVector;
+	}
+	return m_AggroTarget->GetActorLocation()-GetActorLocation();
+}
+
 void ABaseMonster::OnDie()
 {
 	Super::OnDie();

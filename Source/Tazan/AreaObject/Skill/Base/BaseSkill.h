@@ -65,6 +65,7 @@ public:
 	float GetCooldownProgress() const;
 
 	const FSkillData* GetSkillData() const { return m_SkillData; }
+	float GetSkillRange() const { return m_SkillData->CastRange; }
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	bool IsInRange(const AAreaObject* Caster, const AAreaObject* Target) const;
