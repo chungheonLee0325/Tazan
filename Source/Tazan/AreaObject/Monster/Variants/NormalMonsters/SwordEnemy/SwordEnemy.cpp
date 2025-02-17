@@ -3,6 +3,7 @@
 
 #include "SwordEnemy.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/SwordMonster/Sword_FSM.h"
 
 
@@ -21,6 +22,12 @@ ASwordEnemy::ASwordEnemy()
 		GetMesh()->SetRelativeScale3D(FVector(0.37f));
 	}
 	m_AiFSM = ASwordEnemy::CreateFSM();
+	// 무브먼트에 아웃라이너 언리얼 제공 값들 가져오기 
+	UCharacterMovementComponent* characterMovement = GetCharacterMovement();
+	float CurrentMaxWalkSpeed = characterMovement->MaxWalkSpeed;
+	// 가져온것: 걷기최대속도 , 회전 바라보는방향 자동화 
+	characterMovement->MaxWalkSpeed = 350.0f;
+	characterMovement->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned

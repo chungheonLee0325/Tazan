@@ -23,8 +23,14 @@ public:
 	UPROPERTY(VisibleAnywhere,category = "S_FSM")
 	class APlayer_Kazan* Target;
 
+	UPROPERTY()
+	class ASwordEnemy* SwordEnemy;
+	
+	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
 	float CheckRadius = 1000.0f;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="MonsterStatus")
+	float Speed = 350.f;
 
 	UFUNCTION()
 	bool IsPlayerInCheckRadius();
