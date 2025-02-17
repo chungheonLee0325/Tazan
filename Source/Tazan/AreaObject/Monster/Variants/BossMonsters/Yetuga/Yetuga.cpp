@@ -32,8 +32,10 @@ void AYetuga::BeginPlay()
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
 	SkillRoulette->InitSkill();
 
-	m_CurrentSkill = GetSkillByID(11000);
-	m_AiFSM->ChangeState(EAiStateType::SelectSkill);
+	//시작시 어퍼컷 콤보공격 확정 실행
+	LOG_SCREEN("예투가 시작");
+	NextSkill = GetSkillByID(11000);
+	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
 UBaseAiFSM* AYetuga::CreateFSM()
@@ -60,10 +62,3 @@ UAnimMontage* AYetuga::GetAnimMontage(EWeavingSkillAnim animType)
 	return nullptr;
 }
 
-void AYetuga::ShortAttack()
-{
-}
-
-void AYetuga::LongAtk()
-{
-}

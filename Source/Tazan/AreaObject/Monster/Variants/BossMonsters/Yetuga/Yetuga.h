@@ -53,9 +53,6 @@ public:
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 	
 	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType); 
-	
-	void ShortAttack();
-	void LongAtk();
 
 private:
 	

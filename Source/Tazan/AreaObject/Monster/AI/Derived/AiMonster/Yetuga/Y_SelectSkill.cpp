@@ -15,23 +15,43 @@ void UY_SelectSkill::InitState()
 
 void UY_SelectSkill::Enter()
 {
-	// LOG_PRINT(TEXT(""));
-	
+	LOG_PRINT(TEXT(""));
 	if (SkillRoulette == nullptr) LOG_SCREEN_ERROR(this, "스킬룰렛 없음");
 	
-	m_Owner->UpdateCurrentSkill(SkillRoulette->GetRandomSkill());
-	
-	float skillRange = m_Owner->GetCurrentSkill()->GetSkillRange()-100.0f;
-	AYetuga* yetuaga = Cast<AYetuga>(m_Owner);
-	yetuaga->SkillRange = skillRange; 
-	
 	float dist = m_Owner->GetDistToTarget();
-	if (dist > skillRange)
+
+	if (dist > 600.0f)
 	{
-		m_AiFSM->ChangeState(EAiStateType::Chase);
+		UBaseSkill* sk = SkillRoulette->GetRandomLongSkill();
+		if (sk != nullptr)
+		{
+			if (CheckRange(dist,sk->GetSkillRange()))
+			{
+				m_Owner->CastSkill(sk,m_Owner->GetAggroTarget());
+				m_AiFSM->ChangeState(EAiStateType::Attack);
+				return;
+			}
+		}
+	}
+	
+	UBaseSkill* sk = SkillRoulette->GetRandomShortSkill();
+	if (sk != nullptr)
+	{
+		if (CheckRange(dist,sk->GetSkillRange()))
+		{
+			m_Owner->CastSkill(sk,m_Owner->GetAggroTarget());
+			m_AiFSM->ChangeState(EAiStateType::Attack);
+			return;
+		}
+	}
+
+	if (sk == nullptr)
+	{
+		LOG_SCREEN("셀렉트 스킬 실패!");
 		return;
 	}
-	m_AiFSM->ChangeState(EAiStateType::Attack);
+	m_Owner->NextSkill = sk;
+	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
 void UY_SelectSkill::Execute(float DeltaTime)
@@ -42,7 +62,7 @@ void UY_SelectSkill::Exit()
 {
 }
 
-void UY_SelectSkill::SetSkillRoulette(UY_SkillRoulette* skillRoulette)
+bool UY_SelectSkill::CheckRange(float dist, float range)
 {
-	SkillRoulette = skillRoulette;
+	return dist <= range;
 }

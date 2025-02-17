@@ -42,7 +42,7 @@ void UYetugaFSM::InitStatePool()
 	// Wait 
 	auto StandOff = CreateState<UY_StandOff>(this, m_Owner, EAiStateType::Wait);
 	AddState(EAiStateType::Wait, StandOff);
-	ChangeState(EAiStateType::Attack);
+	StandOff->SetSkillRoulette(yetuga->SkillRoulette);
 	
 	// Idle
 	auto Groggy = CreateState<UY_Groggy>(this, m_Owner, EAiStateType::Idle);

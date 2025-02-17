@@ -4,6 +4,7 @@
 
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
+#include "Algo/RandomShuffle.h"
 
 
 UY_SkillRoulette::UY_SkillRoulette()
@@ -49,7 +50,7 @@ UBaseSkill* UY_SkillRoulette::GetRandomAllSkill()
 
 UBaseSkill* UY_SkillRoulette::GetRandomMainSkill()
 {
-	TArray<int> mainSkill_IDs = {11000,11100,11200,11310,12000,12100};
+	TArray<int> mainSkill_IDs = {11000,11100,13000,12000,12100};
 	while (true)
 	{
 		int randIndex = FMath::RandRange(0,mainSkill_IDs.Num()-1);
@@ -70,15 +71,22 @@ UBaseSkill* UY_SkillRoulette::GetRandSkillByArray(TArray<int> arr) const
 		return nullptr;
 	}
 
-	int max = arr.Num();
-	for (int i = 0; i < max; ++i)
+	Algo::RandomShuffle(arr);
+	
+	for (int id :arr)
 	{
-		int randIndex = FMath::RandRange(0,arr.Num()-1);
+		LOG_PRINT(TEXT("randIndex: %d"), id);
 		
-		UBaseSkill* skill = Owner->GetSkillByID(arr[randIndex]);
+		UBaseSkill* skill = Owner->GetSkillByID(id);
+		if (skill == nullptr)
+		{
+			LOG_PRINT(TEXT("스킬이 NULL"));
+			return nullptr;
+		}
 		
 		if (skill->GetCurrentPhase() == ESkillPhase::Ready)
 		{
+			LOG_PRINT(TEXT("가져온 스킬: %s"),*skill->GetName());
 			return skill;
 		}
 	}
