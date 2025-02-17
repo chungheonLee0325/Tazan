@@ -70,7 +70,8 @@ void AAreaObject::BeginPlay()
 	{
 		if (FSkillData* skillData = gameInstance->GetDataSkill(skill))
 		{
-			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, skillData->SkillClass);
+			FString SkillName = FString::Printf(TEXT("BaseSkill_%d"), skill);
+			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, skillData->SkillClass, *SkillName);
 			NewSkill->InitSkill(skillData);
 			m_SkillInstanceMap.Add(skill, NewSkill);
 		}
@@ -130,8 +131,9 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 
 	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
 	{
-		// point damage event, pass off to helper function
+		// Damage Event 처리 - Poise, ToDo : knockBack
 		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
+		// Poise 처리
 		m_PoiseComponent->PoiseProcess(customDamageEvent->AttackData);
 	}
 
@@ -182,14 +184,10 @@ void AAreaObject::OnRevival()
 
 UBaseSkill* AAreaObject::GetCurrentSkill()
 {
-	if (m_CurrentSkill == nullptr)
+	if (false == IsValid(m_CurrentSkill))
 	{
-		LOG_PRINT(TEXT("현재 스킬 NULL"));
-	}
-	else if (false==IsValid(m_CurrentSkill))
-	{
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
+		m_CurrentSkill = nullptr;
 		return nullptr;
 	}
 	return m_CurrentSkill;
@@ -197,13 +195,20 @@ UBaseSkill* AAreaObject::GetCurrentSkill()
 
 FAttackData* AAreaObject::GetCurrentSkillAttackData(int Index)
 {
+	if (false == IsValid(m_CurrentSkill))
+	{
+		LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
+		m_CurrentSkill = nullptr;
+		return nullptr;
+	}
 	return m_CurrentSkill->GetAttackDataByIndex(Index);
 }
 
 void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 {
-	if (nullptr == NewSkill)
+	if (!IsValid(NewSkill))
 	{
+		LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
 		return;
 	}
 
@@ -212,16 +217,11 @@ void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 
 UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 {
-	UBaseSkill** skillPointer = m_SkillInstanceMap.Find(SkillID);
+	auto skillPointer = m_SkillInstanceMap.Find(SkillID);
 
-	if (skillPointer == nullptr)
+	if (!IsValid(*skillPointer))
 	{
-		return nullptr;
-	}
-	else if (false == IsValid(*skillPointer))
-	{		
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
 		return nullptr;
 	}
 	return *skillPointer;
@@ -234,7 +234,7 @@ bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
 		LOG_PRINT(TEXT("현재 스킬 사용중. m_CurrentSkill 초기화 후 사용"));
 		return false;
 	}
-		
+
 	// ToDo : Cost 소모 확인
 	if (Skill == nullptr) LOG_PRINT(TEXT("Skill is Empty"));
 	if (Target == nullptr) LOG_PRINT(TEXT("Target is Empty"));
@@ -278,10 +278,9 @@ bool AAreaObject::AddCondition(EConditionBitsType AddConditionType, float Durati
 	bool result = m_Condition->AddCondition(AddConditionType);
 	if (result == false)
 		return false;
-	
+
 	if (false == FMath::IsNearlyZero(Duration))
 	{
-		
 		TWeakObjectPtr<AAreaObject> weakThis = this;
 		TempCondition = AddConditionType;
 

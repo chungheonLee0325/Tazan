@@ -43,10 +43,10 @@ protected:
 	TSet<int> m_OwnSkillIDSet;
 	
 	UPROPERTY(EditAnywhere, Category = "Skill")
-	TMap<int, UBaseSkill*> m_SkillInstanceMap;
+	TMap<int, TObjectPtr<UBaseSkill>> m_SkillInstanceMap;
 	
 	UPROPERTY()
-	UBaseSkill* m_CurrentSkill;
+	TObjectPtr<UBaseSkill> m_CurrentSkill;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

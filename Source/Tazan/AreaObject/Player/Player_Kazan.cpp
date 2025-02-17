@@ -259,7 +259,11 @@ void APlayer_Kazan::Look(const FVector2D LookAxisVector)
 
 void APlayer_Kazan::Attack_Weak_Pressed()
 {
-	CastSkill(GetSkillByID(10), this);
+	TObjectPtr<UBaseSkill> skill = GetSkillByID(10);
+	if (true == CanCastSkill(skill, this))
+	{
+		CastSkill(skill, this);
+	}
 }
 
 void APlayer_Kazan::Attack_Strong_Pressed()
