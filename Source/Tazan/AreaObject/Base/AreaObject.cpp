@@ -182,6 +182,16 @@ void AAreaObject::OnRevival()
 
 UBaseSkill* AAreaObject::GetCurrentSkill()
 {
+	if (m_CurrentSkill == nullptr)
+	{
+		LOG_PRINT(TEXT("현재 스킬 NULL"));
+	}
+	else if (false==IsValid(m_CurrentSkill))
+	{
+		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		return nullptr;
+	}
 	return m_CurrentSkill;
 }
 
@@ -208,11 +218,23 @@ UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 	{
 		return nullptr;
 	}
+	else if (false == IsValid(*skillPointer))
+	{		
+		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		return nullptr;
+	}
 	return *skillPointer;
 }
 
 bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
 {
+	if (nullptr != m_CurrentSkill)
+	{
+		LOG_PRINT(TEXT("현재 스킬 사용중. m_CurrentSkill 초기화 후 사용"));
+		return false;
+	}
+		
 	// ToDo : Cost 소모 확인
 	if (Skill == nullptr) LOG_PRINT(TEXT("Skill is Empty"));
 	if (Target == nullptr) LOG_PRINT(TEXT("Target is Empty"));
@@ -251,19 +273,38 @@ void AAreaObject::ClearThisCurrentSkill(UBaseSkill* Skill)
 	}
 }
 
-bool AAreaObject::AddCondition(EConditionBitsType Condition) const
+bool AAreaObject::AddCondition(EConditionBitsType AddConditionType, float Duration)
 {
-	return m_Condition->AddCondition(Condition);
+	bool result = m_Condition->AddCondition(AddConditionType);
+	if (result == false)
+		return false;
+	
+	if (false == FMath::IsNearlyZero(Duration))
+	{
+		
+		TWeakObjectPtr<AAreaObject> weakThis = this;
+		TempCondition = AddConditionType;
+
+		GetWorld()->GetTimerManager().SetTimer(ConditionTimerHandle, [weakThis]()
+		{
+			AAreaObject* strongThis = weakThis.Get();
+			if (strongThis != nullptr)
+			{
+				strongThis->RemoveCondition(strongThis->TempCondition);
+			}
+		}, Duration, false);
+	}
+	return result;
 }
 
-bool AAreaObject::RemoveCondition(EConditionBitsType Condition) const
+bool AAreaObject::RemoveCondition(EConditionBitsType RemoveConditionType) const
 {
-	return m_Condition->RemoveCondition(Condition);
+	return m_Condition->RemoveCondition(RemoveConditionType);
 }
 
-bool AAreaObject::HasCondition(EConditionBitsType Condition) const
+bool AAreaObject::HasCondition(EConditionBitsType HasConditionType) const
 {
-	return m_Condition->HasCondition(Condition);
+	return m_Condition->HasCondition(HasConditionType);
 }
 
 bool AAreaObject::ExchangeDead() const

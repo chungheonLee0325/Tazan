@@ -47,6 +47,13 @@ APlayer_Kazan::APlayer_Kazan()
 	{
 		WeaponComponent->SetSkeletalMesh(tempWeaponSkeletalMesh.Object);
 		WeaponComponent->SetRelativeScale3D(FVector(0.4f));
+		WeaponComponent->ComponentTags.Add(TEXT("WeaponMesh"));
+		static ConstructorHelpers::FObjectFinder<UMaterial> tempWeaponMaterial(
+			TEXT("/Script/Engine.Material'/Game/_Resource/Weapon/CM_I_GSword_Ruins001.CM_I_GSword_Ruins001'"));
+		if (tempWeaponMaterial.Succeeded())
+		{
+			WeaponComponent->SetMaterial(0, tempWeaponMaterial.Object);
+		}
 		//FTransform attachTransform = GetMesh()->GetSocketTransform(TEXT("Weapon_R_BackPack_GSword"));
 		//WeaponComponent->SetRelativeTransform(attachTransform);
 	}
@@ -83,7 +90,9 @@ APlayer_Kazan::APlayer_Kazan()
 	// Create Camera Boom
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The Camera follows at this distance behind the character
+	CameraBoom->SetRelativeLocation({0, 0, 40});
+
+	CameraBoom->TargetArmLength = 300.0f; // The Camera follows at this distance behind the character
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	// Camera Lagging
 	CameraBoom->bEnableCameraLag = true;
@@ -94,6 +103,7 @@ APlayer_Kazan::APlayer_Kazan()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	FollowCamera->FieldOfView = 100;
 }
 
 // Called when the game starts or when spawned
@@ -290,8 +300,8 @@ void APlayer_Kazan::Dodge_Pressed()
 		return;
 	}
 	CanDodge = false;
-	
-	if(GetCharacterMovement()->Velocity.Length() > 0.1f)
+
+	if (GetCharacterMovement()->Velocity.Length() > 0.1f)
 	{
 		PlayAnimMontage(DodgeAnimMontage);
 	}
@@ -299,16 +309,16 @@ void APlayer_Kazan::Dodge_Pressed()
 	{
 		PlayAnimMontage(BackDodgeAnimMontage);
 	}
-	
+
 	TWeakObjectPtr<APlayer_Kazan> weakThis = this;
-	GetWorld()->GetTimerManager().SetTimer(DodgeTimerHandle,[weakThis]()
+	GetWorld()->GetTimerManager().SetTimer(DodgeTimerHandle, [weakThis]()
 	{
 		APlayer_Kazan* StrongThis = weakThis.Get();
 		if (StrongThis != nullptr)
 		{
 			StrongThis->CanDodge = true;
 		}
-	},DodgeCoolTime,false);
+	}, DodgeCoolTime, false);
 }
 
 void APlayer_Kazan::On_Run_Pressed()
