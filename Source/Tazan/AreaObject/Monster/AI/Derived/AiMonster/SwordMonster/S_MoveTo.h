@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
 	float CheckRadius = 1000.0f;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="MonsterStatus")
-	float Speed = 150.f;
+	float Speed = 350.f;
 
 	UFUNCTION()
 	bool IsPlayerInCheckRadius();
