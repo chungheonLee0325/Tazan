@@ -103,7 +103,7 @@ public:
 	void SetHPByRate(float Rate) const;
 	float GetHP() const;
 
-	UPROPERTY(Blueprintable)
+	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
 	int m_AreaObjectID;
 
 	FTimerHandle DeathTimerHandle;

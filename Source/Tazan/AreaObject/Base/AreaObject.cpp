@@ -26,6 +26,9 @@ AAreaObject::AAreaObject()
 
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
+
+	//GetCapsuleComponent()->SetSimulatePhysics(true);
+	GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
 }
 
 
@@ -34,15 +37,15 @@ void AAreaObject::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Condition Component 생성
+	m_Condition = NewObject<UCondition>(this, UCondition::StaticClass());
+
 	// AreaObject ID 는 반드시 셋팅되어야 함!!
 	if (m_AreaObjectID == 0)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Area Object ID is 0!!!"));
 		return;
 	}
-
-	// Condition Component 생성
-	m_Condition = NewObject<UCondition>(this, UCondition::StaticClass());
 
 	// 데이터 초기화
 	UTazanGameInstance* gameInstance = Cast<UTazanGameInstance>(GetGameInstance());
@@ -103,16 +106,10 @@ void AAreaObject::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void AAreaObject::CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Target, FHitResult& HitInfo)
 {
 	float Damage = FMath::RandRange(AttackData.HealthDamageAmountMin, AttackData.HealthDamageAmountMax);
-	if (Target == nullptr || (Damage != 0.f))
+	if (Target == nullptr)
 	{
 		return;
 	}
-
-	// UGameplayStatics::ApplyDamage(Target,
-	//                              Damage,
-	//                              GetController(),
-	//                              this,
-	//                              UDamageType::StaticClass());
 
 	FCustomDamageEvent DamageEvent;
 	DamageEvent.AttackData = AttackData;
@@ -125,6 +122,7 @@ void AAreaObject::CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Ta
 float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
                               AActor* DamageCauser)
 {
+	//LOG_SCREEN("TakeDamage");
 	if (IsDie() || HasCondition(EConditionBitsType::Invincible))
 		return 0.0f;
 
@@ -133,10 +131,10 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
 	{
 		// point damage event, pass off to helper function
-		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*) &DamageEvent;
+		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
 		m_PoiseComponent->PoiseProcess(customDamageEvent->AttackData);
 	}
-		
+
 	if (FMath::IsNearlyZero(IncreaseHP(-ActualDamage)))
 	{
 		if (true == ExchangeDead())
@@ -273,7 +271,7 @@ bool AAreaObject::ExchangeDead() const
 	return m_Condition->ExchangeDead();
 }
 
-void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration) 
+void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
 {
 	// 애니메이션 재생
 	PlayStaggerAnimation(Type);
@@ -283,7 +281,7 @@ void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
 	// ToDo : 스킬 사용 불가
 }
 
-void AAreaObject::HandleStaggerEnd() 
+void AAreaObject::HandleStaggerEnd()
 {
 	// 이동 불가 해제
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);

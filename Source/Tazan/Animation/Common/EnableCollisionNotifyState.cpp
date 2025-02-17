@@ -68,7 +68,6 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 		return;
 
 	FVector StartLocation = SourceMesh->GetSocketLocation(AttackData->HitBoxData.StartSocketName);
-	//FVector EndLocation = SourceMesh->GetSocketLocation(SkillData.AttackData.HitBoxData.EndSocketName);
 	FVector EndLocation = AttackData->HitBoxData.EndSocketName != NAME_None
 		                      ? SourceMesh->GetSocketLocation(AttackData->HitBoxData.EndSocketName)
 		                      : StartLocation;
@@ -83,24 +82,23 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 	{
 	case EHitDetectionType::Line:
 		{
-			bHit = GetWorld()->LineTraceMultiByChannel(
+			bHit = m_Owner->GetWorld()->LineTraceMultiByChannel(
 				HitResults,
 				StartLocation,
 				EndLocation,
-				ECC_GameTraceChannel1,
+				ECC_GameTraceChannel2,
 				QueryParams
 			);
 			break;
 		}
-
 	case EHitDetectionType::Sphere:
 		{
-			bHit = GetWorld()->SweepMultiByChannel(
+			bHit = m_Owner->GetWorld()->SweepMultiByChannel(
 				HitResults,
 				StartLocation,
 				EndLocation,
 				FQuat::Identity,
-				ECC_GameTraceChannel1,
+				ECC_GameTraceChannel2,
 				FCollisionShape::MakeSphere(AttackData->HitBoxData.Radius),
 				QueryParams
 			);
@@ -109,12 +107,13 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 
 	case EHitDetectionType::Capsule:
 		{
-			bHit = GetWorld()->SweepMultiByChannel(
+			FVector location = (StartLocation + EndLocation) / 2.f;
+			bHit = m_Owner->GetWorld()->SweepMultiByChannel(
 				HitResults,
-				StartLocation,
-				EndLocation,
+				location,
+				location,
 				SocketRotation.Quaternion(),
-				ECC_GameTraceChannel1,
+				ECC_GameTraceChannel2,
 				FCollisionShape::MakeCapsule(AttackData->HitBoxData.Radius,
 				                             AttackData->HitBoxData.HalfHeight),
 				QueryParams
@@ -124,12 +123,13 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 
 	case EHitDetectionType::Box:
 		{
-			bHit = GetWorld()->SweepMultiByChannel(
+			FVector location = (StartLocation + EndLocation) / 2.f;
+			bHit = m_Owner->GetWorld()->SweepMultiByChannel(
 				HitResults,
-				StartLocation,
-				EndLocation,
+				location,
+				location,
 				SocketRotation.Quaternion(),
-				ECC_GameTraceChannel1,
+				ECC_GameTraceChannel2,
 				FCollisionShape::MakeBox(AttackData->HitBoxData.BoxExtent),
 				QueryParams
 			);
@@ -147,6 +147,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 	{
 		return;
 	}
+
 	for (FHitResult& Hit : HitResults)
 	{
 		AActor* hitActor = Hit.GetActor();
@@ -160,9 +161,7 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 		AAreaObject* hitAreaObject = Cast<AAreaObject>(Hit.GetActor());
 		if (hitAreaObject != nullptr)
 		{
-			// ToDo : Calc Point Damage
-			m_Owner->CalcDamage(*AttackData,m_Owner,hitActor,Hit);
-			
+			m_Owner->CalcDamage(*AttackData, m_Owner, hitActor, Hit);
 		}
 	}
 }
