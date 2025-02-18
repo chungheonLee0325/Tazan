@@ -40,8 +40,7 @@ void USword_FSM::BeginPlay()
 	{
 		Target = Cast<APlayer_Kazan>(m_Owner->GetAggroTarget());
 	}
-
-	Anim = Cast<USwordAnim>(m_Owner->GetMesh()->GetAnimInstance());
+	
 	
 }
 

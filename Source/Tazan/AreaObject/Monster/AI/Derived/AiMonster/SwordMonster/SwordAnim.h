@@ -17,12 +17,5 @@ public:
 	UPROPERTY()
 	class ASwordEnemy* SwordEnemy;
 
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = S_FSM)
-	// ESwordState SwordState = ESwordState::Idle;
 	
-	UPROPERTY()
-	class USwordAnim* SwordAnim;
-
-
-	void NativeUpdateAnimation(float DeltaSeconds);
 };
