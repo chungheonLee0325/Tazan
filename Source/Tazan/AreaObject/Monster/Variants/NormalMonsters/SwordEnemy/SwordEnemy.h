@@ -43,7 +43,11 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	class USkeletalMeshComponent* SwordComp;
-	
+
+	UPROPERTY(VisibleAnywhere)
+	class UCapsuleComponent* CapsuleComp;
+
+
 }; 
 
 
