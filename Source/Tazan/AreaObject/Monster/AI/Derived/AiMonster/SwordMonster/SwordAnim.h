@@ -22,6 +22,7 @@ public:
 	
 	UPROPERTY()
 	class USwordAnim* SwordAnim;
-	
-	
+
+
+	void NativeUpdateAnimation(float DeltaSeconds);
 };
