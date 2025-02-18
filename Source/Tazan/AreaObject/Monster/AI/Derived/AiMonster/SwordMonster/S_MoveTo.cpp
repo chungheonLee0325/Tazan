@@ -19,6 +19,7 @@ void US_MoveTo::InitState()
 
 void US_MoveTo::Enter()
 {
+	LOG_PRINT(TEXT("무브투"));
 	if (m_Owner->GetAggroTarget() == nullptr)
 	{
 		m_Owner->SetAggroTarget(Cast<APlayer_Kazan>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)));
@@ -44,11 +45,12 @@ void US_MoveTo::Execute(float DeltaTime)
 	{
 		m_AiFSM->ChangeState(EAiStateType::Wait);
 		LOG_SCREEN("없다 체크하러가자 ");
+		LOG_PRINT(TEXT("웨이트로 상태 변경"));
 	}
 	else if (IsPlayerInAttackRadius())
 	{
-		m_AiFSM->ChangeState(EAiStateType::Wait);
-		LOG_SCREEN("공격범위안에있다 가자 공격하러");
+		m_AiFSM->ChangeState(EAiStateType::Attack);
+		LOG_PRINT(TEXT("공격으로 상태 변경"));
 	}
 	else
 	{

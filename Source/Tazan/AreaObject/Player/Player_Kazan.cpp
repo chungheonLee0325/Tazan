@@ -25,6 +25,10 @@ APlayer_Kazan::APlayer_Kazan()
 	// Set AreaObject ID
 	m_AreaObjectID = 1;
 
+	// Set SFX ID
+	GuardSFXID = 10;
+	PerfectGuardSFXID = 11;
+
 	// Set Size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 

@@ -33,6 +33,7 @@ void US_Wait::Enter()
 	}
 
 	LOG_SCREEN("기다리면서 체크해");
+	LOG_PRINT(TEXT("기다리면서 체크"));
 }
 
 void US_Wait::Execute(float DeltaTime)
@@ -45,12 +46,15 @@ void US_Wait::Execute(float DeltaTime)
 	{
 		m_AiFSM->ChangeState(EAiStateType::Idle);
 		LOG_SCREEN("범위 안에있다 이동으로가자");
+		LOG_PRINT(TEXT("이동으로"));
 	}
 }
 
 void US_Wait::Exit()
 {
+	
 }
+
 
 bool US_Wait::IsCheckRadius()
 {
