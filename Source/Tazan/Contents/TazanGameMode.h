@@ -25,10 +25,10 @@ public:
 	//플레이어의 폰을 스폰 시도.
 	virtual void RestartPlayer(AController* NewPlayer) override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayGlobalSound(int SoundID);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayPositionalSound(int SoundID, FVector Position);
 
 	// BGM 재생 함수
