@@ -17,6 +17,7 @@ enum class ESkillPhase : uint8
 {
 	Ready, // 스킬 사용 가능
 	Casting, // 시전 중
+	PostCasting, // 시전 후딜레이
 	CoolTime // 쿨타임
 };
 
@@ -99,4 +100,7 @@ private:
 	FSkillData* m_SkillData;
 
 	float m_CurrentCoolTime;
+
+	FOnMontageEnded EndDelegate;
+	FOnMontageBlendingOutStarted CompleteDelegate;
 };

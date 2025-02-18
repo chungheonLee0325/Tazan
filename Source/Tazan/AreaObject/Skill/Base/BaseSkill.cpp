@@ -29,7 +29,15 @@ bool UBaseSkill::CanCast(AAreaObject* Caster, const AAreaObject* Target) const
 	{
 		return false;
 	}
-	// if (m_CurrentCoolTime > 0.0f) return false;
+
+	// 스태미나 체크
+	if (m_SkillData->Cost > 0)
+	{
+		if (!Caster->CanUseStamina(m_SkillData->Cost))
+		{
+			return false;
+		}
+	}
 
 	// 사거리 체크
 	return IsInRange(Caster, Target);
@@ -42,6 +50,12 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 	m_Caster = Caster;
 	m_Target = Target;
 
+	// 스태미나 소모
+	if (m_SkillData->Cost > 0)
+	{
+		m_Caster->DecreaseStamina(m_SkillData->Cost);
+	}
+
 	m_CurrentPhase = ESkillPhase::Casting;
 
 	// 애니메이션 몽타주 재생
@@ -53,17 +67,16 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 
 		// 몽타주 재생
 		Caster->PlayAnimMontage(m_SkillData->Montage);
+		m_CurrentPhase = ESkillPhase::PostCasting;
 
 		// 쿨타임 적용
 		m_CurrentCoolTime = m_SkillData->CoolTime;
 
 		// 델리게이트 바인딩
-		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &UBaseSkill::OnMontageEnded);
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, m_SkillData->Montage);
 		//
 		//// 블렌드 아웃
-		FOnMontageBlendingOutStarted CompleteDelegate;
 		CompleteDelegate.BindUObject(this, &UBaseSkill::OnMontageBlendOut);
 		AnimInstance->Montage_SetBlendingOutDelegate(CompleteDelegate, m_SkillData->Montage);
 	}
@@ -76,9 +89,25 @@ void UBaseSkill::OnCastFire()
 void UBaseSkill::OnCastEnd()
 {
 	// Casting Phase일때 한번만 처리
-	if (m_CurrentPhase != ESkillPhase::Casting) return;
+	if (m_CurrentPhase != ESkillPhase::PostCasting) return;
 	if (!m_Caster || !m_Target) return;
 
+	m_CurrentPhase = ESkillPhase::CoolTime;
+	// 애니메이션 인스턴스 얻기
+	if (UAnimInstance* AnimInstance = m_Caster->GetMesh()->GetAnimInstance())
+	{
+		// 델리게이트 정리
+		EndDelegate.Unbind();
+		CompleteDelegate.Unbind();
+		
+		// 현재 재생중인 몽타주 정지
+		AnimInstance->Montage_Stop(0.1f, m_SkillData->Montage);
+	}
+
+	if (OnSkillComplete.IsBound())
+	{
+		OnSkillComplete.Unbind();
+	}
 	m_Caster->ClearThisCurrentSkill(this);
 	if (nullptr != m_NextSkill && m_Caster->CanCastNextSkill(m_NextSkill, m_Target))
 	{
@@ -93,20 +122,29 @@ void UBaseSkill::OnCastEnd()
 			OnSkillComplete.Unbind();
 		}
 	}
-	m_CurrentPhase = ESkillPhase::CoolTime;
 	AdjustCoolTime();
 }
 
 void UBaseSkill::CancelCast()
 {
 	// Casting Phase일때 한번만 처리
-	if (m_CurrentPhase != ESkillPhase::Casting) return;
+	if (m_CurrentPhase != ESkillPhase::PostCasting) return;
 	if (!m_Caster) return;
+	if (UAnimInstance* AnimInstance = m_Caster->GetMesh()->GetAnimInstance())
+	{
+		// 델리게이트 정리
+		EndDelegate.Unbind();
+		CompleteDelegate.Unbind();
+        
+		// 현재 재생중인 몽타주 정지
+		AnimInstance->Montage_Stop(0.1f, m_SkillData->Montage);
+	}
+	
 	if (OnSkillComplete.IsBound() == true)
 	{
 		OnSkillComplete.Unbind();
 	}
-	if (m_CurrentPhase != ESkillPhase::CoolTime)
+	//if (m_CurrentPhase != ESkillPhase::CoolTime)
 	{
 		m_Caster->ClearThisCurrentSkill(this);
 		m_CurrentPhase = ESkillPhase::CoolTime;
@@ -146,10 +184,6 @@ void UBaseSkill::OnMontageBlendOut(UAnimMontage* Montage, bool bInterrupted)
 
 FAttackData* UBaseSkill::GetAttackDataByIndex(int Index) const
 {
-	if (IsValid(this) == false)
-	{
-		return nullptr;
-	}
 	if (m_SkillData == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("m_SkillData is nullptr!"));
