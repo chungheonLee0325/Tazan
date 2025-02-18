@@ -31,10 +31,18 @@ ASwordEnemy::ASwordEnemy()
 	characterMovement->MaxWalkSpeed = 350.0f;
 	characterMovement->bOrientRotationToMovement = true;
 
-	ConstructorHelpers::FClassFinder<UAnimInstance> TempAnim(TEXT("'/Game/_BluePrints/AreaObject/Monster/SwordMonsters/BluePrints/ABP_SwordMonster.ABP_SwordMonster'"));
+	ConstructorHelpers::FClassFinder<UAnimInstance> TempAnim(TEXT("'/Game/_BluePrints/AreaObject/Monster/SwordMonsters/BluePrints/ABP_SwordMonster.ABP_SwordMonster_C'"));
 	if (TempAnim.Succeeded())
 	{
 		GetMesh()->SetAnimInstanceClass(TempAnim.Class);
+	}
+
+	SwordComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SwordComp"));
+	SwordComp->SetupAttachment(GetMesh());
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>TempSword(TEXT("'/Game/_Resource/Sword/SKM_Sword.SKM_Sword'"));
+	if (TempSword.Succeeded())
+	{
+		SwordComp->SetSkeletalMesh(TempSword.Object);
 	}
 }
 

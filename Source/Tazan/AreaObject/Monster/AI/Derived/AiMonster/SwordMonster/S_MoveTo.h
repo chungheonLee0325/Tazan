@@ -37,7 +37,7 @@ public:
 
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
-	float AttackRadius = 200.0f;
+	float AttackRadius = 99.0f;
 
 	UFUNCTION()
 	bool IsPlayerInAttackRadius();

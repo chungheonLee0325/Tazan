@@ -19,5 +19,8 @@ public:
 	virtual void Enter() override;
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
+
+	UFUNCTION()
+	void OnSkillComplete();
 };
 
