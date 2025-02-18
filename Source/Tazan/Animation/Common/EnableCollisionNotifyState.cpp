@@ -78,6 +78,13 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 	TArray<FHitResult> HitResults;
 	bool bHit = false;
 
+	// Test용 디버그 데이터 로직
+	if (bDebugData == true)
+	{
+		LOG_SCREEN("디버그용 데이터로 계산!! AnimNotifyState 설정 변경하기!")
+		AttackData = &DebugAttackData;
+	}
+
 	switch (AttackData->HitBoxData.DetectionType)
 	{
 	case EHitDetectionType::Line:
