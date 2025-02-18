@@ -72,4 +72,14 @@ private:
 	// Owner
 	UPROPERTY(VisibleAnywhere)
 	APlayer_Kazan* Kazan;
+
+	// UI 관련
+	UPROPERTY()
+	class UPlayerStatusWidget* StatusWidget;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UPlayerStatusWidget> StatusWidgetClass;
+	
+	// UI 초기화 및 바인딩
+	void InitializeHUD();
 };

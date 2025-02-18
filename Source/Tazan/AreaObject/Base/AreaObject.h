@@ -20,16 +20,18 @@ class TAZAN_API AAreaObject : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AAreaObject();
+
 	UPROPERTY(BlueprintReadWrite)
 	class UHealth* m_Health;
 	UPROPERTY(BlueprintReadWrite)
-	UPoiseComponent* m_PoiseComponent;
-	UPROPERTY(BlueprintReadWrite)
 	UCondition* m_Condition;
-	bool bCanNextSkill = false;
+	UPROPERTY(BlueprintReadWrite)
+	class UStamina* m_Stamina;
+	UPROPERTY(BlueprintReadWrite)
+	UPoiseComponent* m_PoiseComponent;
 
-	FTimerHandle ConditionTimerHandle;
-	EConditionBitsType TempCondition;
+	UPROPERTY(EditDefaultsOnly, Category = "AreaObject Data Setting")
+	int m_AreaObjectID;
 
 protected:
 	// Called when the game starts or when spawned
@@ -41,19 +43,37 @@ protected:
 	// Skill System
 	UPROPERTY(EditAnywhere, Category = "Skill")
 	TSet<int> m_OwnSkillIDSet;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Skill")
-	TMap<int, UBaseSkill*> m_SkillInstanceMap;
-	
+	TMap<int, TObjectPtr<UBaseSkill>> m_SkillInstanceMap;
+
 	UPROPERTY()
-	UBaseSkill* m_CurrentSkill;
+	TObjectPtr<UBaseSkill> m_CurrentSkill;
+
+	// Guard/Dodge constants
+	const float GUARD_STAMINA_COST = 20.0f;
+	const float PERFECT_GUARD_STAMINA_COST = 10.0f;
+	const float PERFECT_GUARD_STAMINA_DAMAGE = 30.0f;
+	const float PERFECT_DODGE_BUFF_DURATION = 5.0f;
+
+	// Perfect dodge damage multiplier
+	const float PERFECT_DODGE_DAMAGE_MULTIPLIER = 1.5f;
+	bool bPerfectDodgeBuffActive = false;
+
+	// VFX references
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|VFX")
+	UParticleSystem* PerfectGuardEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|VFX")
+	UParticleSystem* PerfectDodgeEffect;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
 	virtual void CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Target, FHitResult& HitInfo);
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
@@ -77,12 +97,22 @@ public:
 	virtual void UpdateCurrentSkill(UBaseSkill* NewSkill);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual UBaseSkill* GetSkillByID(int SkillID);
-	
 
 	// ToDo : 스킬 사용후 이동, 공격 가능 기능 추가 구현
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void ClearCurrentSkill();
 	virtual void ClearThisCurrentSkill(UBaseSkill* Skill);
+
+	// Health 기능 퍼사드 제공
+	float IncreaseHP(float Delta) const;
+	void SetHPByRate(float Rate) const;
+	float GetHP() const;
+
+	// Stamina 기능 퍼사드 제공
+	float IncreaseStamina(float Delta) const;
+	float DecreaseStamina(float Delta) const;
+	float GetStamina() const;
+	bool CanUseStamina(float Cost) const;
 
 	// Condition 기능 퍼사드 제공
 	bool AddCondition(EConditionBitsType AddConditionType, float Duration = 0.0f);
@@ -95,20 +125,17 @@ public:
 	void HandleStaggerBegin(EStaggerType Type, float Duration);
 	UFUNCTION()
 	void HandleStaggerEnd();
-
 	// ToDo : 종료 Bind 인자 추가?
 	void PlayStaggerAnimation(EStaggerType Type) const;
 	float GetStaggerAnimationDuration(EStaggerType Type) const;
 
-	// Health 기능 퍼사드 제공
-	float IncreaseHP(float Delta) const;
-	void SetHPByRate(float Rate) const;
-	float GetHP() const;
+	// 퍼펙트 가드 처리 핸들
+	virtual void HandlePerfectGuard(AActor* DamageCauser);
+	// 퍼펙트 회피 처리 핸들
+	virtual void HandlePerfectDodge();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
-	int m_AreaObjectID;
-
-	FTimerHandle DeathTimerHandle;
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	bool bCanNextSkill = false;
 
 	// Death Setting
 	// 죽음 후 destroy 지연 시간
@@ -118,6 +145,25 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
 	UParticleSystem* DeathEffect;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
+	FTimerHandle DeathTimerHandle;
+
+	// HitStop 관련
+	void ApplyHitStop(float Duration);
+	void ResetTimeScale();
+	FTimerHandle HitStopTimerHandle;
+	
+	// 넉백 관련
+	void ApplyKnockBack(const FVector& KnockbackForce);
+	bool bIsBeingKnockedBack = false;
+
+	// 가드 상태 변경 시 호출
+	void SetGuardState(bool bIsGuarding);
+
 private:
 	FAreaObjectData* dt_AreaObject;
+
+	// 버프 / 디버프 Condition 정보
+
+	EConditionBitsType TempCondition;
 };

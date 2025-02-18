@@ -89,8 +89,8 @@ public:
 
 	// Guard / Parry
 	/** Called for parry input */
-	void Parry_Pressed();
-	void Parry_Released();
+	void Guard_Pressed();
+	void Guard_Released();
 
 	/** Called for attack input */
 	void Attack_Weak_Pressed();
@@ -103,33 +103,7 @@ private:
 	/** Called for run input */
 	void On_Run_Pressed();
 	void On_Run_Released();
-
-	// Animation Notify Handlers
-	UFUNCTION(BlueprintCallable)
-	void PerfectParryActivated();
-
-	UFUNCTION(BlueprintCallable)
-	void PerfectParryDeactivated();
-
-	UFUNCTION(BlueprintCallable)
-	void OnPerfectParryActivated();
-
-	UFUNCTION(BlueprintCallable)
-	void OnPerfectParryDeactivated();
-
-	UFUNCTION(BlueprintCallable)
-	void OnAttackHitStart();
-
-	UFUNCTION(BlueprintCallable)
-	void OnAttackHitEnd();
-
-	UFUNCTION(BlueprintCallable)
-	void DodgeInvincibilityStart();
-
-	UFUNCTION(BlueprintCallable)
-	void DodgeInvincibilityEnd();
-
-private:
+	
 	// Weapon Setting
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* WeaponComponent;
@@ -173,10 +147,10 @@ private:
 	bool CanPerformAction(EPlayerState State, FString ActionName);
 	void SetPlayerState(EPlayerState NewState);
 	
-	bool IsGuard = false;
-
 	bool CanDodge = true;
 	float DodgeCoolTime = 1.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "STATUS")
+	float DODGE_COST = 30.f;
 	
 	FTimerHandle DodgeTimerHandle;
 

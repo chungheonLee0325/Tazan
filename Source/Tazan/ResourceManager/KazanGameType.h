@@ -13,11 +13,15 @@
 class UBaseSkill;
 // ConditionBits - 비트마스크를 활용한 죽음, 무적 
 UENUM(Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EConditionBitsType : uint8
+enum class EConditionBitsType : uint32
 {
 	None = 0, // 0b0000
 	Dead = 1 << 0, // 0b0001
 	Invincible = 1 << 1, // 0b0010
+	Guard = 1 << 2, // 0b0100
+	PerfectGuardWindow = 1 << 3, // 0b1000
+	DodgeWindow = 1 << 4, // 0b 1 0000
+	PerfectDodgeWindow = 1 << 5, // 0b 10 0000
 };
 
 ENUM_CLASS_FLAGS(EConditionBitsType);
@@ -103,12 +107,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	UAnimMontage* Die_AnimMontage = nullptr;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
-	TMap<EStaggerType,UAnimMontage*> Stagger_AnimMontages;
-	
+	TMap<EStaggerType, UAnimMontage*> Stagger_AnimMontages;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	TSet<int> SkillList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	float StaminaMax = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	float StaminaRecoveryRate = 20.0f;  // 초당 회복량
 };
 
 // HitBox 동적으로 생성하기 위한 구조체 정보, FAttackData 멤버 변수
@@ -167,13 +177,26 @@ struct FAttackData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EStaggerType StaggerType = EStaggerType::None;
 
-	// 넉백 거리
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float KnockBackForce = 50.0f;
-
 	// 공격 히트 박스 정보 구조체
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FHitBoxData HitBoxData;
+
+	// HitStop 관련 데이터
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bEnableHitStop = false;  // HitStop 적용 여부
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bEnableHitStop"))
+	float HitStopDuration = 0.1f;  // HitStop 지속 시간
+	
+	// 넉백 관련 데이터
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float KnockBackForce = 0.0f;	// 넉백 거리
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUseCustomKnockBackDirection = false;  // 커스텀 넉백 방향 사용 여부
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUseCustomKnockbackDirection"))
+	FVector KnockBackDirection = FVector::ForwardVector;  // 커스텀 넉백 방향
 };
 
 // m_SkillData 테이블 정보, 데미지 정보등 관리
@@ -186,7 +209,7 @@ struct FSkillData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UBaseSkill> SkillClass = nullptr;
-	
+
 	// 소모 자원(현재는 스태미너 고정 추후 체력등 확장시 enum 추가될듯)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Cost = 0;
@@ -198,7 +221,7 @@ struct FSkillData : public FTableRowBase
 	// 스킬 쿨타임
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CoolTime = 0.0f;
-	
+
 	// 사용 스킬의 애님 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* Montage = nullptr;
@@ -225,11 +248,11 @@ struct FCustomDamageEvent : public FPointDamageEvent
 
 	UPROPERTY()
 	FAttackData AttackData;
-    
+
 	// FDamageEvent 인터페이스 구현
 	virtual bool IsOfType(int32 InID) const override;
 	virtual int32 GetTypeID() const override;
-    
+
 	static const int32 ClassID = 0; // 유니크한 ID 할당
 };
 
