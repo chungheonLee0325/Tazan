@@ -4,10 +4,13 @@
 #include "Sword_FSM.h"
 
 
+#include "SwordAnim.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Monster/Variants/NormalMonsters/SwordEnemy/SwordEnemy.h"
 #include "Tazan/AreaObject/Monster/Ai/Derived/AiMonster/SwordMonster/S_Attack.h"
 #include "Tazan/AreaObject/Monster/Ai/Derived/AiMonster/SwordMonster/S_Wait.h"
 #include "Tazan/AreaObject/Monster/Ai/Derived/AiMonster/SwordMonster/S_MoveTo.h"
+#include "Tazan/AreaObject/Player/Player_Kazan.h"
 
 
 // Sets default values for this component's properties
@@ -19,6 +22,8 @@ USword_FSM::USword_FSM()
 
 
 	
+	
+	
 }
 
 
@@ -27,7 +32,16 @@ void USword_FSM::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	if (m_Owner->GetAggroTarget() == nullptr)
+	{
+		m_Owner->SetAggroTarget(Cast<APlayer_Kazan>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)));
+	}
+	if (Target == nullptr)
+	{
+		Target = Cast<APlayer_Kazan>(m_Owner->GetAggroTarget());
+	}
+
+	Anim = Cast<USwordAnim>(m_Owner->GetMesh()->GetAnimInstance());
 	
 }
 
@@ -49,7 +63,6 @@ void USword_FSM::InitStatePool()
 	//Move
 	auto Moveto = CreateState<US_MoveTo>(this, m_Owner, EAiStateType::Idle);
 	AddState(EAiStateType::Idle, Moveto);
-	
 
 	//wait
 	auto Wait = CreateState<US_Wait>(this, m_Owner, EAiStateType::Wait);

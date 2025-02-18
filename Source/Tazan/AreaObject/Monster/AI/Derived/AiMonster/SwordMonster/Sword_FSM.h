@@ -6,7 +6,6 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Sword_FSM.generated.h"
 
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TAZAN_API USword_FSM : public UBaseAiFSM
 {
@@ -27,5 +26,16 @@ public:
 
 
 	virtual void InitStatePool() override;
+
+	UPROPERTY()
+	class USwordAnim* Anim;
+
+	UPROPERTY()
+	class ASwordEnemy* SwordEnemy;
+
+	UPROPERTY()
+	class APlayer_Kazan* Target;
+	
+	
 	
 };
