@@ -15,4 +15,7 @@ class TAZAN_API UY_BaseSkill : public UBaseSkill
 	GENERATED_BODY()
 
 public:
+	virtual void Begin();
+	virtual void Tick(float dt);
+	virtual void End();
 };
