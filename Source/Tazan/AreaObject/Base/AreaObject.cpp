@@ -337,6 +337,8 @@ void AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
 	}
 	else
 	{
+		FString fail = UEnum::GetValueAsString(Skill->SkillFailCase);
+		LOG_PRINT(TEXT("CastSkill Failed: %s"), *fail);
 		LOG_SCREEN_ERROR(this, "CastSkill Failed");
 	}
 }
