@@ -19,4 +19,7 @@ public:
 	virtual void Enter() override;
 	virtual void Execute(float dt) override;
 	virtual void Exit() override;
+
+	UFUNCTION()
+	void OnSkillCompleted();
 };
