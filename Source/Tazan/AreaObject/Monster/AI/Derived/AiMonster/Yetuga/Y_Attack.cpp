@@ -13,6 +13,7 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
+	m_Owner->GetCurrentSkill()->OnSkillComplete.BindUObject(m_AiFSM,&UBaseAiFSM::ChangeState,EAiStateType::Wait);
 }
 
 void UY_Attack::Execute(float dt)
