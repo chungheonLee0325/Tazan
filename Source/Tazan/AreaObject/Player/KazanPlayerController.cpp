@@ -6,6 +6,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Player_Kazan.h"
+#include "Tazan/AreaObject/Attribute/Stamina.h"
+#include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 AKazanPlayerController::AKazanPlayerController()
 {
@@ -54,6 +56,13 @@ AKazanPlayerController::AKazanPlayerController()
 	}
 	
 	Kazan = nullptr;
+	
+	// UI 클래스 설정
+	static ConstructorHelpers::FClassFinder<UPlayerStatusWidget> WidgetClassFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_PlayerStatusWidget.WB_PlayerStatusWidget_C'"));
+	if (WidgetClassFinder.Succeeded())
+	{
+		StatusWidgetClass = WidgetClassFinder.Class;
+	}
 }
 
 void AKazanPlayerController::BeginPlay()
@@ -65,6 +74,37 @@ void AKazanPlayerController::BeginPlay()
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 	Kazan = Cast<APlayer_Kazan>(GetPawn());
+	
+	// UI 초기화
+	InitializeHUD();
+}
+
+void AKazanPlayerController::InitializeHUD()
+{
+	if (!StatusWidgetClass || !Kazan) return;
+	
+	// UI 위젯 생성
+	StatusWidget = CreateWidget<UPlayerStatusWidget>(this, StatusWidgetClass);
+	if (StatusWidget)
+	{
+		StatusWidget->AddToViewport();
+		
+		// HP 변경 이벤트 바인딩
+		if (Kazan->m_Health)
+		{
+			Kazan->m_Health->OnHealthChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateHealth);
+			// 초기값 설정
+			StatusWidget->UpdateHealth(Kazan->GetHP(), 0.0f, Kazan->m_Health->GetMaxHP());
+		}
+		
+		// Stamina 변경 이벤트 바인딩
+		if (Kazan->m_Stamina)
+		{
+			Kazan->m_Stamina->OnStaminaChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateStamina);
+			// 초기값 설정
+			StatusWidget->UpdateStamina(Kazan->GetStamina(), 0.0f, Kazan->m_Stamina->GetMaxStamina());
+		}
+	}
 }
 
 void AKazanPlayerController::SetupInputComponent()
@@ -123,12 +163,12 @@ void AKazanPlayerController::On_Attack_Strong_Pressed(const FInputActionValue& I
 
 void AKazanPlayerController::On_Parry_Pressed(const FInputActionValue& InputActionValue)
 {
-	Kazan->Parry_Pressed();
+	Kazan->Guard_Pressed();
 }
 
 void AKazanPlayerController::On_Parry_Released(const FInputActionValue& InputActionValue)
 {
-	Kazan->Parry_Released();
+	Kazan->Guard_Released();
 }
 
 void AKazanPlayerController::On_Dodge_Pressed(const FInputActionValue& InputActionValue)

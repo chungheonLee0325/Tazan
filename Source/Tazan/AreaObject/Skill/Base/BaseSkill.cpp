@@ -29,7 +29,15 @@ bool UBaseSkill::CanCast(AAreaObject* Caster, const AAreaObject* Target) const
 	{
 		return false;
 	}
-	// if (m_CurrentCoolTime > 0.0f) return false;
+
+	// 스태미나 체크
+	if (m_SkillData->Cost > 0)
+	{
+		if (!Caster->CanUseStamina(m_SkillData->Cost))
+		{
+			return false;
+		}
+	}
 
 	// 사거리 체크
 	return IsInRange(Caster, Target);
@@ -41,6 +49,12 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 
 	m_Caster = Caster;
 	m_Target = Target;
+
+	// 스태미나 소모
+	if (m_SkillData->Cost > 0)
+	{
+		m_Caster->DecreaseStamina(m_SkillData->Cost);
+	}
 
 	m_CurrentPhase = ESkillPhase::Casting;
 

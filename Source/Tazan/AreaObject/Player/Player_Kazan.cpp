@@ -271,26 +271,34 @@ void APlayer_Kazan::Attack_Strong_Pressed()
 	CastSkill(GetSkillByID(20), this);
 }
 
-void APlayer_Kazan::Parry_Pressed()
+void APlayer_Kazan::Guard_Pressed()
 {
 	// 애니메이션 변수 셋팅
 	KazanAnimInstance->bIsGuard = true;
 
 	// ToDo : @@LCH 고민 바로 적용이 맞는지 Notify로 빼서 적용할지
 	// 플레이어 셋팅
-	IsGuard = true;
+	// 가드 상태 추가
+	SetGuardState(true);
+	// 가드 상태이상 추가
+	AddCondition(EConditionBitsType::Guard);
+	// 퍼펙트 가드 상태이상 추가
+	AddCondition(EConditionBitsType::PerfectGuardWindow, 0.1f);
+
 	// 이동속도 셋팅
 	GetCharacterMovement()->MaxWalkSpeed = MAX_GUARD_WALK_SPEED;
 	// Rotation Setting
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
-void APlayer_Kazan::Parry_Released()
+void APlayer_Kazan::Guard_Released()
 {
 	KazanAnimInstance->bIsGuard = false;
 
 	// 플레이어 셋팅
-	IsGuard = false;
+	SetGuardState(false);
+	// 가드 상태이상 제거
+	RemoveCondition(EConditionBitsType::Guard);
 	// 이동속도 셋팅
 	GetCharacterMovement()->MaxWalkSpeed = MAX_WALK_SPEED;
 	// Rotation Setting
@@ -303,7 +311,12 @@ void APlayer_Kazan::Dodge_Pressed()
 	{
 		return;
 	}
+	if (!CanUseStamina(DODGE_COST))
+	{
+		return;
+	}
 	CanDodge = false;
+	DecreaseStamina(DODGE_COST);
 
 	if (GetCharacterMovement()->Velocity.Length() > 0.1f)
 	{
@@ -330,37 +343,5 @@ void APlayer_Kazan::On_Run_Pressed()
 }
 
 void APlayer_Kazan::On_Run_Released()
-{
-}
-
-void APlayer_Kazan::PerfectParryActivated()
-{
-}
-
-void APlayer_Kazan::PerfectParryDeactivated()
-{
-}
-
-void APlayer_Kazan::OnPerfectParryActivated()
-{
-}
-
-void APlayer_Kazan::OnPerfectParryDeactivated()
-{
-}
-
-void APlayer_Kazan::OnAttackHitStart()
-{
-}
-
-void APlayer_Kazan::OnAttackHitEnd()
-{
-}
-
-void APlayer_Kazan::DodgeInvincibilityStart()
-{
-}
-
-void APlayer_Kazan::DodgeInvincibilityEnd()
 {
 }
