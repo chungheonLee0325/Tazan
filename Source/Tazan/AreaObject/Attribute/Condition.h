@@ -21,7 +21,7 @@ public:
 	bool IsDead() const { return HasCondition(EConditionBitsType::Dead); }
 
 	UFUNCTION(BlueprintCallable, Category = "Condition")
-	bool AddCondition(EConditionBitsType Condition);
+	bool AddCondition(EConditionBitsType Condition, float Duration = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Condition")
 	bool RemoveCondition(EConditionBitsType Condition);
@@ -37,5 +37,14 @@ public:
 
 private:
 	UPROPERTY()
-	uint8 ConditionFlags;
+	uint32 ConditionFlags;
+
+	// Condition별 타이머 핸들 관리
+	UPROPERTY()
+	TMap<EConditionBitsType, FTimerHandle> ConditionTimers;
+	
+
+	bool _addCondition(EConditionBitsType Condition);
+	bool _removeCondition(EConditionBitsType Condition);
+	void RemoveConditionInternal(EConditionBitsType Condition);
 };

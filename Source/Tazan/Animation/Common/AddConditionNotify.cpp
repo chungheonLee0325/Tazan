@@ -10,7 +10,7 @@ void UAddConditionNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	if (MeshComp && MeshComp->GetOwner())
 	{
 		AAreaObject* owner = Cast<AAreaObject>(MeshComp->GetOwner());
-		if (owner != nullptr && owner->GetCurrentSkill() != nullptr)
+		if (owner != nullptr)
 		{
 			owner->AddCondition(Condition, DurationTime);
 		}

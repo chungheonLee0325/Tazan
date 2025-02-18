@@ -14,6 +14,7 @@
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
+#include "Tazan/AreaObject/Attribute/Stamina.h"
 
 // Sets default values
 AAreaObject::AAreaObject()
@@ -26,6 +27,9 @@ AAreaObject::AAreaObject()
 
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
+
+	// Stamina Component 생성
+	m_Stamina = CreateDefaultSubobject<UStamina>(TEXT("Stamina"));
 
 	//GetCapsuleComponent()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
@@ -54,23 +58,27 @@ void AAreaObject::BeginPlay()
 	// Health 초기화 By Data
 	float hpMax = 1.0f;
 	int basePoise = 0;
+	float maxStamina = 100.0f; // Assuming a default value, actual implementation needed
 
 	if (dt_AreaObject != nullptr)
 	{
 		hpMax = dt_AreaObject->HPMax;
 		basePoise = dt_AreaObject->BasePoise;
 		m_OwnSkillIDSet = dt_AreaObject->SkillList;
+		maxStamina = dt_AreaObject->StaminaMax;
 	}
 
 	m_Health->InitHealth(hpMax);
 	m_PoiseComponent->InitPoise(basePoise);
+	m_Stamina->InitStamina(maxStamina);
 
 	// 스킬 인스턴스 생성
 	for (auto& skill : m_OwnSkillIDSet)
 	{
 		if (FSkillData* skillData = gameInstance->GetDataSkill(skill))
 		{
-			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, skillData->SkillClass);
+			FString SkillName = FString::Printf(TEXT("BaseSkill_%d"), skill);
+			UBaseSkill* NewSkill = NewObject<UBaseSkill>(this, skillData->SkillClass, *SkillName);
 			NewSkill->InitSkill(skillData);
 			m_SkillInstanceMap.Add(skill, NewSkill);
 		}
@@ -106,6 +114,13 @@ void AAreaObject::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void AAreaObject::CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Target, FHitResult& HitInfo)
 {
 	float Damage = FMath::RandRange(AttackData.HealthDamageAmountMin, AttackData.HealthDamageAmountMax);
+
+	// Apply perfect dodge damage buff if active
+	if (bPerfectDodgeBuffActive)
+	{
+		Damage *= PERFECT_DODGE_DAMAGE_MULTIPLIER;
+	}
+
 	if (Target == nullptr)
 	{
 		return;
@@ -122,19 +137,82 @@ void AAreaObject::CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Ta
 float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
                               AActor* DamageCauser)
 {
-	//LOG_SCREEN("TakeDamage");
+	// ToDo : Can Attack Logic 추가? -> 설인 만들면 추가해야할듯
+
 	if (IsDie() || HasCondition(EConditionBitsType::Invincible))
 		return 0.0f;
 
-	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	float ActualDamage = Damage;
+
+	// Check for dodge conditions
+	if (HasCondition(EConditionBitsType::DodgeWindow) ||
+		HasCondition(EConditionBitsType::PerfectDodgeWindow))
+	{
+		// Complete dodge - no damage
+		ActualDamage = 0.0f;
+
+		// Handle perfect dodge
+		if (HasCondition(EConditionBitsType::PerfectDodgeWindow))
+		{
+			HandlePerfectDodge();
+		}
+		return ActualDamage;
+	}
+
+	// Check for guard conditions
+	if (HasCondition(EConditionBitsType::Guard) ||
+		HasCondition(EConditionBitsType::PerfectGuardWindow))
+	{
+		ActualDamage = 0.0f;
+
+		if (HasCondition(EConditionBitsType::PerfectGuardWindow))
+		{
+			HandlePerfectGuard(DamageCauser);
+		}
+		else
+		{
+			// Regular guard stamina cost
+			m_Stamina->DecreaseStamina(GUARD_STAMINA_COST);
+		}
+		return ActualDamage;
+	}
 
 	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
 	{
-		// point damage event, pass off to helper function
 		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
-		m_PoiseComponent->PoiseProcess(customDamageEvent->AttackData);
+		const FAttackData& attackData = customDamageEvent->AttackData;
+		
+		// HitStop 처리
+		if (attackData.bEnableHitStop)
+		{
+			// 월드의 시간 스케일을 조절하거나
+			// 캐릭터의 애니메이션만 일시 정지
+			ApplyHitStop(attackData.HitStopDuration);
+		}
+		
+		// 넉백 처리
+		if (attackData.KnockBackForce > 0.0f)
+		{
+			FVector knockBackDir;
+			if (attackData.bUseCustomKnockBackDirection)
+			{
+				knockBackDir = attackData.KnockBackDirection;
+			}
+			else
+			{
+				// 기본적으로 타격 방향으로 넉백
+				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+			}
+			
+			ApplyKnockBack(knockBackDir * attackData.KnockBackForce);
+		}
+		
+		m_PoiseComponent->PoiseProcess(attackData);
 	}
 
+	ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
+
+	// apply hp damage
 	if (FMath::IsNearlyZero(IncreaseHP(-ActualDamage)))
 	{
 		if (true == ExchangeDead())
@@ -182,14 +260,13 @@ void AAreaObject::OnRevival()
 
 UBaseSkill* AAreaObject::GetCurrentSkill()
 {
-	if (m_CurrentSkill == nullptr)
+	if (false == IsValid(m_CurrentSkill))
 	{
-		LOG_PRINT(TEXT("현재 스킬 NULL"));
-	}
-	else if (false==IsValid(m_CurrentSkill))
-	{
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		if (m_CurrentSkill != nullptr)
+		{
+			LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
+		}
+		m_CurrentSkill = nullptr;
 		return nullptr;
 	}
 	return m_CurrentSkill;
@@ -197,13 +274,20 @@ UBaseSkill* AAreaObject::GetCurrentSkill()
 
 FAttackData* AAreaObject::GetCurrentSkillAttackData(int Index)
 {
+	if (false == IsValid(m_CurrentSkill))
+	{
+		LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
+		m_CurrentSkill = nullptr;
+		return nullptr;
+	}
 	return m_CurrentSkill->GetAttackDataByIndex(Index);
 }
 
 void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 {
-	if (nullptr == NewSkill)
+	if (!IsValid(NewSkill))
 	{
+		LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
 		return;
 	}
 
@@ -212,16 +296,11 @@ void AAreaObject::UpdateCurrentSkill(UBaseSkill* NewSkill)
 
 UBaseSkill* AAreaObject::GetSkillByID(int SkillID)
 {
-	UBaseSkill** skillPointer = m_SkillInstanceMap.Find(SkillID);
+	auto skillPointer = m_SkillInstanceMap.Find(SkillID);
 
-	if (skillPointer == nullptr)
+	if (!IsValid(*skillPointer))
 	{
-		return nullptr;
-	}
-	else if (false == IsValid(*skillPointer))
-	{		
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
-		LOG_PRINT(TEXT("스킬 문제발생!!!!"));
+		LOG_PRINT(TEXT("스킬 댕글링 포인터 문제발생!!!!"));
 		return nullptr;
 	}
 	return *skillPointer;
@@ -234,8 +313,7 @@ bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
 		LOG_PRINT(TEXT("현재 스킬 사용중. m_CurrentSkill 초기화 후 사용"));
 		return false;
 	}
-		
-	// ToDo : Cost 소모 확인
+	
 	if (Skill == nullptr) LOG_PRINT(TEXT("Skill is Empty"));
 	if (Target == nullptr) LOG_PRINT(TEXT("Target is Empty"));
 
@@ -275,26 +353,7 @@ void AAreaObject::ClearThisCurrentSkill(UBaseSkill* Skill)
 
 bool AAreaObject::AddCondition(EConditionBitsType AddConditionType, float Duration)
 {
-	bool result = m_Condition->AddCondition(AddConditionType);
-	if (result == false)
-		return false;
-	
-	if (false == FMath::IsNearlyZero(Duration))
-	{
-		
-		TWeakObjectPtr<AAreaObject> weakThis = this;
-		TempCondition = AddConditionType;
-
-		GetWorld()->GetTimerManager().SetTimer(ConditionTimerHandle, [weakThis]()
-		{
-			AAreaObject* strongThis = weakThis.Get();
-			if (strongThis != nullptr)
-			{
-				strongThis->RemoveCondition(strongThis->TempCondition);
-			}
-		}, Duration, false);
-	}
-	return result;
+	return m_Condition->AddCondition(AddConditionType, Duration);
 }
 
 bool AAreaObject::RemoveCondition(EConditionBitsType RemoveConditionType) const
@@ -375,4 +434,131 @@ void AAreaObject::SetHPByRate(float Rate) const
 float AAreaObject::GetHP() const
 {
 	return m_Health->GetHP();
+}
+
+float AAreaObject::IncreaseStamina(float Delta) const
+{
+	return m_Stamina->IncreaseStamina(Delta);
+}
+
+float AAreaObject::DecreaseStamina(float Delta) const
+{
+	return m_Stamina->DecreaseStamina(Delta);
+}
+
+float AAreaObject::GetStamina() const
+{
+	return m_Stamina->GetStamina();
+}
+
+bool AAreaObject::CanUseStamina(float Cost) const
+{
+	return m_Stamina->CanUseStamina(Cost);
+}
+
+void AAreaObject::HandlePerfectGuard(AActor* DamageCauser)
+{
+	// Perfect guard stamina cost
+	m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_COST);
+
+	// Apply stamina damage to attacker
+	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
+	{
+		attacker->m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_DAMAGE);
+	}
+	// Spawn perfect guard VFX
+	if (PerfectGuardEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			PerfectGuardEffect,
+			GetActorLocation()
+		);
+	}
+
+	// TODO: Could trigger perfect guard animation through montage or notify
+}
+
+void AAreaObject::HandlePerfectDodge()
+{
+	// Activate damage buff
+	bPerfectDodgeBuffActive = true;
+
+	// Spawn perfect dodge VFX
+	if (PerfectDodgeEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			PerfectDodgeEffect,
+			GetActorLocation()
+		);
+	}
+
+	// Set timer to remove buff
+	FTimerHandle BuffTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		BuffTimerHandle,
+		[this]()
+		{
+			bPerfectDodgeBuffActive = false;
+		},
+		PERFECT_DODGE_BUFF_DURATION, // Buff duration - could be made configurable
+		false
+	);
+}
+
+void AAreaObject::ApplyHitStop(float Duration)
+{
+	// 월드 전체 시간 조절
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
+	
+	// 타이머로 원래 속도로 복구
+	GetWorld()->GetTimerManager().SetTimer(
+		HitStopTimerHandle,
+		this,
+		&AAreaObject::ResetTimeScale,
+		Duration * 0.01f,  // 실제 시간으로 변환
+		false
+	);
+}
+
+void AAreaObject::ResetTimeScale()
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+}
+
+void AAreaObject::ApplyKnockBack(const FVector& KnockbackForce)
+{
+	// 이미 넉백 중이면 무시
+	if (bIsBeingKnockedBack)
+		return;
+		
+	bIsBeingKnockedBack = true;
+	
+	// 캐릭터 무브먼트 컴포넌트를 통한 넉백
+	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
+	if (MovementComp)
+	{
+		MovementComp->AddImpulse(KnockbackForce, true);
+		
+		// 넉백 종료 처리
+		FTimerHandle KnockBackTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(
+			KnockBackTimerHandle,
+			[this]()
+			{
+				bIsBeingKnockedBack = false;
+			},
+			0.5f,  // 넉백 상태 지속 시간
+			false
+		);
+	}
+}
+
+void AAreaObject::SetGuardState(bool bIsGuarding)
+{
+	if (m_Stamina)
+	{
+		m_Stamina->SetGuardState(bIsGuarding);
+	}
 }

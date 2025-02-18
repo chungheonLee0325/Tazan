@@ -3,32 +3,95 @@
 
 #include "Condition.h"
 
-bool UCondition::AddCondition(EConditionBitsType Condition)
+#include "Tazan/Utilities/LogMacro.h"
+
+bool UCondition::AddCondition(EConditionBitsType Condition, float Duration)
 {
-	if (HasCondition(Condition))
-		return false;
+	// Condition 적용
+	bool bApplied = _addCondition(Condition);
+
+	// Debug
+	if (bApplied) 	LOG_SCREEN("%d : Condition 적용",Condition);
 	
-	ConditionFlags |= static_cast<uint8>(Condition);
-	return true;
+	// Duration이 유효한 경우 타이머 설정
+	if (Duration > 0.0f)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			// 기존 타이머가 있다면 제거
+			if (FTimerHandle* ExistingTimer = ConditionTimers.Find(Condition))
+			{
+				World->GetTimerManager().ClearTimer(*ExistingTimer);
+			}
+
+			FTimerHandle& TimerHandle = ConditionTimers.FindOrAdd(Condition);
+
+			FTimerDelegate TimerDelegate;
+			TimerDelegate.BindUObject(this, &UCondition::RemoveConditionInternal, Condition);
+
+			World->GetTimerManager().SetTimer(
+				TimerHandle,
+				TimerDelegate,
+				Duration,
+				false
+			);
+		}
+	}
+
+	return bApplied;
+}
+
+void UCondition::RemoveConditionInternal(EConditionBitsType Condition)
+{
+	// 타이머 제거
+	ConditionTimers.Remove(Condition);
+
+	// Condition 제거
+	RemoveCondition(Condition);
 }
 
 bool UCondition::RemoveCondition(EConditionBitsType Condition)
 {
+	// 기존 타이머가 있다면 제거
+	if (FTimerHandle* ExistingTimer = ConditionTimers.Find(Condition))
+	{
+		if (UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(*ExistingTimer);
+		}
+		ConditionTimers.Remove(Condition);
+	}
+	bool bApplied = _removeCondition(Condition);
+	// Debug
+	if (bApplied) 	LOG_SCREEN("%d : Condition 해제",Condition);
+	return bApplied;
+}
+
+bool UCondition::_addCondition(EConditionBitsType Condition)
+{
+	if (HasCondition(Condition))
+		return false;
+	
+	ConditionFlags |= static_cast<uint32>(Condition);
+	return true;
+}
+
+bool UCondition::_removeCondition(EConditionBitsType Condition)
+{
 	if (!HasCondition(Condition))
 		return false;
 	
-	ConditionFlags &= ~static_cast<uint8>(Condition);
+	ConditionFlags &= ~static_cast<uint32>(Condition);
 	return true;
 }
 
 bool UCondition::HasCondition(EConditionBitsType Condition) const
 {
 	//상태 활성화 확인
-	return (((ConditionFlags) & (static_cast<uint8>(Condition))) != 0);
+	return (((ConditionFlags) & (static_cast<uint32>(Condition))) != 0);
 }
 
 //dead로 전환
-//??????????die랑 뭐가 다른지
 bool UCondition::ExchangeDead()
 {
 	if (HasCondition(EConditionBitsType::Dead))
