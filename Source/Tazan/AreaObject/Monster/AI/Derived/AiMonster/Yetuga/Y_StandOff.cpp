@@ -39,7 +39,7 @@ void UY_StandOff::Enter()
 				LOG_SCREEN("BackAttack Cooldown...");
 				return;
 			}
-			m_Owner->CastSkill(m_Owner->GetSkillByID(10400),m_Owner->GetAggroTarget());
+			m_Owner->NextSkill = m_Owner->GetSkillByID(10400);
 			m_AiFSM->ChangeState(EAiStateType::Attack);
 			return;
 		}
@@ -53,7 +53,7 @@ void UY_StandOff::Enter()
 			if (sk)
 			{
 				LOG_SCREEN("견제기 실행");
-				m_Owner->CastSkill(SkillRoulette->GetRandomWeavingSkill(),m_Owner->GetAggroTarget());
+				m_Owner->NextSkill = sk;
 				m_AiFSM->ChangeState(EAiStateType::Attack);
 			}
 		}

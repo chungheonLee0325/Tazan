@@ -27,7 +27,7 @@ void UY_SelectSkill::Enter()
 		{
 			if (CheckRange(dist,sk->GetSkillRange()))
 			{
-				m_Owner->CastSkill(sk,m_Owner->GetAggroTarget());
+				m_Owner->NextSkill =sk;
 				m_AiFSM->ChangeState(EAiStateType::Attack);
 				return;
 			}
@@ -39,18 +39,18 @@ void UY_SelectSkill::Enter()
 	{
 		if (CheckRange(dist,sk->GetSkillRange()))
 		{
-			m_Owner->CastSkill(sk,m_Owner->GetAggroTarget());
+			m_Owner->NextSkill =sk;
 			m_AiFSM->ChangeState(EAiStateType::Attack);
 			return;
 		}
 	}
-
-	if (sk == nullptr)
+	else
 	{
-		m_Owner->CastSkill(m_Owner->GetSkillByID(14000),m_Owner->GetAggroTarget());
+		m_Owner->NextSkill = (m_Owner->GetSkillByID(14000));
 		m_AiFSM->ChangeState(EAiStateType::Attack);
 		return;
 	}
+	
 	m_Owner->NextSkill = sk;
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }

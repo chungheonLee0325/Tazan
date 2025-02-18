@@ -33,7 +33,6 @@ void AYetuga::BeginPlay()
 	SkillRoulette->InitSkill();
 
 	//시작시 어퍼컷 콤보공격 확정 실행
-	LOG_SCREEN("예투가 시작");
 	NextSkill = GetSkillByID(11000);
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
