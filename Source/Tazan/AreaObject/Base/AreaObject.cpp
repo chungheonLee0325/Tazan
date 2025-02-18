@@ -15,6 +15,7 @@
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "Tazan/AreaObject/Attribute/Stamina.h"
+#include "Tazan/Contents/TazanGameMode.h"
 
 // Sets default values
 AAreaObject::AAreaObject()
@@ -92,6 +93,9 @@ void AAreaObject::BeginPlay()
 	// 스태거 적용 바인드
 	m_PoiseComponent->OnStaggerBegin.AddDynamic(this, &AAreaObject::HandleStaggerBegin);
 	m_PoiseComponent->OnStaggerEnd.AddDynamic(this, &AAreaObject::HandleStaggerEnd);
+
+	// GameMode Setting
+	m_GameMode = Cast<ATazanGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 void AAreaObject::PostInitializeComponents()
@@ -171,8 +175,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 		}
 		else
 		{
-			// Regular guard stamina cost
-			m_Stamina->DecreaseStamina(GUARD_STAMINA_COST);
+			HandleGuard(DamageCauser);
 		}
 		return ActualDamage;
 	}
@@ -181,7 +184,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	{
 		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
 		const FAttackData& attackData = customDamageEvent->AttackData;
-		
+
 		// HitStop 처리
 		if (attackData.bEnableHitStop)
 		{
@@ -189,7 +192,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 			// 캐릭터의 애니메이션만 일시 정지
 			ApplyHitStop(attackData.HitStopDuration);
 		}
-		
+
 		// 넉백 처리
 		if (attackData.KnockBackForce > 0.0f)
 		{
@@ -203,10 +206,10 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 				// 기본적으로 타격 방향으로 넉백
 				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
 			}
-			
+
 			ApplyKnockBack(knockBackDir * attackData.KnockBackForce);
 		}
-		
+
 		m_PoiseComponent->PoiseProcess(attackData);
 	}
 
@@ -313,7 +316,7 @@ bool AAreaObject::CanCastSkill(UBaseSkill* Skill, AAreaObject* Target)
 		LOG_PRINT(TEXT("현재 스킬 사용중. m_CurrentSkill 초기화 후 사용"));
 		return false;
 	}
-	
+
 	if (Skill == nullptr) LOG_PRINT(TEXT("Skill is Empty"));
 	if (Target == nullptr) LOG_PRINT(TEXT("Target is Empty"));
 
@@ -456,6 +459,26 @@ bool AAreaObject::CanUseStamina(float Cost) const
 	return m_Stamina->CanUseStamina(Cost);
 }
 
+void AAreaObject::HandleGuard(AActor* DamageCauser)
+{
+	// Regular guard stamina cost
+	m_Stamina->DecreaseStamina(GUARD_STAMINA_COST);
+
+	// Spawn guard VFX
+	if (GuardEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			GuardEffect,
+			GetActorLocation()
+		);
+	}
+	if (GuardSFXID != 0)
+	{
+		PlayGlobalSound(GuardSFXID);
+	}
+}
+
 void AAreaObject::HandlePerfectGuard(AActor* DamageCauser)
 {
 	// Perfect guard stamina cost
@@ -475,6 +498,12 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser)
 			GetActorLocation()
 		);
 	}
+	if (PerfectGuardSFXID != 0)
+	{
+		PlayGlobalSound(PerfectGuardSFXID);
+	}
+
+	ApplyHitStop(PERFECT_GUARD_HIT_STOP_DURATION);
 
 	// TODO: Could trigger perfect guard animation through montage or notify
 }
@@ -493,6 +522,10 @@ void AAreaObject::HandlePerfectDodge()
 			GetActorLocation()
 		);
 	}
+	if (PerfectDodgeSFXID != 0)
+	{
+		PlayGlobalSound(PerfectDodgeSFXID);
+	}
 
 	// Set timer to remove buff
 	FTimerHandle BuffTimerHandle;
@@ -505,19 +538,21 @@ void AAreaObject::HandlePerfectDodge()
 		PERFECT_DODGE_BUFF_DURATION, // Buff duration - could be made configurable
 		false
 	);
+
+	ApplyHitStop(PERFECT_DODGE_HIT_STOP_DURATION);
 }
 
 void AAreaObject::ApplyHitStop(float Duration)
 {
 	// 월드 전체 시간 조절
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
-	
+
 	// 타이머로 원래 속도로 복구
 	GetWorld()->GetTimerManager().SetTimer(
 		HitStopTimerHandle,
 		this,
 		&AAreaObject::ResetTimeScale,
-		Duration * 0.01f,  // 실제 시간으로 변환
+		Duration * 0.01f, // 실제 시간으로 변환
 		false
 	);
 }
@@ -532,15 +567,15 @@ void AAreaObject::ApplyKnockBack(const FVector& KnockbackForce)
 	// 이미 넉백 중이면 무시
 	if (bIsBeingKnockedBack)
 		return;
-		
+
 	bIsBeingKnockedBack = true;
-	
+
 	// 캐릭터 무브먼트 컴포넌트를 통한 넉백
 	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
 	if (MovementComp)
 	{
 		MovementComp->AddImpulse(KnockbackForce, true);
-		
+
 		// 넉백 종료 처리
 		FTimerHandle KnockBackTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(
@@ -549,7 +584,7 @@ void AAreaObject::ApplyKnockBack(const FVector& KnockbackForce)
 			{
 				bIsBeingKnockedBack = false;
 			},
-			0.5f,  // 넉백 상태 지속 시간
+			0.5f, // 넉백 상태 지속 시간
 			false
 		);
 	}
@@ -561,4 +596,40 @@ void AAreaObject::SetGuardState(bool bIsGuarding)
 	{
 		m_Stamina->SetGuardState(bIsGuarding);
 	}
+}
+
+void AAreaObject::PlayGlobalSound(int SoundID)
+{
+	if (m_GameMode == nullptr)
+	{
+		LOG_PRINT(TEXT("GameMode nullptr"));
+	}
+	m_GameMode->PlayGlobalSound(SoundID);
+}
+
+void AAreaObject::PlayPositionalSound(int SoundID, FVector Position)
+{
+	if (m_GameMode == nullptr)
+	{
+		LOG_PRINT(TEXT("GameMode nullptr"));
+	}
+	m_GameMode->PlayPositionalSound(SoundID, Position);
+}
+
+void AAreaObject::PlayBGM(int SoundID, bool bLoop)
+{
+	if (m_GameMode == nullptr)
+	{
+		LOG_PRINT(TEXT("GameMode nullptr"));
+	}
+	m_GameMode->PlayBGM(SoundID, bLoop);
+}
+
+void AAreaObject::StopBGM()
+{
+	if (m_GameMode == nullptr)
+	{
+		LOG_PRINT(TEXT("GameMode nullptr"));
+	}
+	m_GameMode->StopBGM();
 }

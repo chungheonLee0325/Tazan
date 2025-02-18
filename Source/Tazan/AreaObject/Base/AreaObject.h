@@ -10,6 +10,7 @@
 #include "Tazan/ResourceManager/KazanGameType.h"
 #include "AreaObject.generated.h"
 
+class ATazanGameMode;
 class UCondition;
 
 UCLASS()
@@ -55,6 +56,8 @@ protected:
 	const float PERFECT_GUARD_STAMINA_COST = 10.0f;
 	const float PERFECT_GUARD_STAMINA_DAMAGE = 30.0f;
 	const float PERFECT_DODGE_BUFF_DURATION = 5.0f;
+	const float PERFECT_DODGE_HIT_STOP_DURATION = 0.2f;
+	const float PERFECT_GUARD_HIT_STOP_DURATION = 0.2f;
 
 	// Perfect dodge damage multiplier
 	const float PERFECT_DODGE_DAMAGE_MULTIPLIER = 1.5f;
@@ -63,10 +66,19 @@ protected:
 	// VFX references
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|VFX")
 	UParticleSystem* PerfectGuardEffect;
-
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|VFX")
+	UParticleSystem* GuardEffect;
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|VFX")
 	UParticleSystem* PerfectDodgeEffect;
 
+	// SFX references
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|SFX")
+	int PerfectGuardSFXID;
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|SFX")
+	int GuardSFXID;
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|SFX")
+	int PerfectDodgeSFXID;
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -131,6 +143,8 @@ public:
 
 	// 퍼펙트 가드 처리 핸들
 	virtual void HandlePerfectGuard(AActor* DamageCauser);
+	// 가드 처리 핸들
+	virtual void HandleGuard(AActor* DamageCauser);
 	// 퍼펙트 회피 처리 핸들
 	virtual void HandlePerfectDodge();
 
@@ -160,10 +174,19 @@ public:
 	// 가드 상태 변경 시 호출
 	void SetGuardState(bool bIsGuarding);
 
+	// Interface Sounds
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayGlobalSound(int SoundID);
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayPositionalSound(int SoundID, FVector Position);
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayBGM(int SoundID, bool bLoop = true);
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void StopBGM();
+
 private:
 	FAreaObjectData* dt_AreaObject;
 
-	// 버프 / 디버프 Condition 정보
-
-	EConditionBitsType TempCondition;
+	UPROPERTY()
+	ATazanGameMode* m_GameMode = nullptr;
 };
