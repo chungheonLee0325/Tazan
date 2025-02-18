@@ -103,11 +103,7 @@ void UBaseSkill::OnCastEnd()
 		// 현재 재생중인 몽타주 정지
 		AnimInstance->Montage_Stop(0.1f, m_SkillData->Montage);
 	}
-
-	if (OnSkillComplete.IsBound())
-	{
-		OnSkillComplete.Unbind();
-	}
+	
 	m_Caster->ClearThisCurrentSkill(this);
 	if (nullptr != m_NextSkill && m_Caster->CanCastNextSkill(m_NextSkill, m_Target))
 	{

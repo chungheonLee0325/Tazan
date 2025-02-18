@@ -28,6 +28,12 @@ ASwordEnemy::ASwordEnemy()
 	// 가져온것: 걷기최대속도 , 회전 바라보는방향 자동화 
 	characterMovement->MaxWalkSpeed = 350.0f;
 	characterMovement->bOrientRotationToMovement = true;
+
+	ConstructorHelpers::FClassFinder<UAnimInstance> TempAnim(TEXT("'/Game/_BluePrints/AreaObject/Monster/SwordMonsters/BluePrints/ABP_SwordMonster.ABP_SwordMonster'"));
+	if (TempAnim.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(TempAnim.Class);
+	}
 }
 
 // Called when the game starts or when spawned
