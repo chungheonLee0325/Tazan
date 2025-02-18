@@ -6,16 +6,16 @@
 #include "Animation/AnimInstance.h"
 #include "SwordAnim.generated.h"
 
-/**
- * 
- */
+
+
 UCLASS()
 class TAZAN_API USwordAnim : public UAnimInstance
 {
 	GENERATED_BODY()
 
-	virtual  void NativeUpdateAnimation(float DeltaSeconds) override;
+public:
 	UPROPERTY()
 	class ASwordEnemy* SwordEnemy;
 
+	
 };

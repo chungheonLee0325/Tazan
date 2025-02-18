@@ -6,6 +6,19 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "SwordEnemy.generated.h"
 
+//Pierce , Smash
+
+
+
+//
+// UENUM(BlueprintType)
+// enum class EWeavingSkillAnim : uint8
+// {
+// 	NormalAtk		UMETA(DisplayName = "NormalAtk"),
+// 	StrongAtk		UMETA(DisplayName = "StrongAtk"),
+// 	ComboAtk		UMETA(DisplayName = "ComboAtk"),
+// };
+
 UCLASS()
 class TAZAN_API ASwordEnemy : public ABaseMonster
 {
