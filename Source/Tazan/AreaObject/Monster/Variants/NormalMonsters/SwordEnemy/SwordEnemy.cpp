@@ -13,6 +13,8 @@ ASwordEnemy::ASwordEnemy()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	m_AreaObjectID = 10;
+
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(
 		TEXT("/Script/Engine.SkeletalMesh'/Game/_Resource/SkeletonSword/C_M_SkeletonSword.C_M_SkeletonSword'"));
 	if (TempMesh.Succeeded())
