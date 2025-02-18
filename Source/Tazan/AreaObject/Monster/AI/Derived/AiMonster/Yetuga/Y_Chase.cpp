@@ -28,7 +28,7 @@ void UY_Chase::Execute(float dt)
 	float dist = m_Owner->GetDistToTarget();
 	if (dist < SkillRange)
 	{
-		m_Owner->CastSkill(m_Owner->NextSkill,m_Owner->GetAggroTarget());
+		//m_Owner->CastSkill(m_Owner->NextSkill,m_Owner->GetAggroTarget());
 		m_AiFSM->ChangeState(EAiStateType::Attack);
 	}
 }

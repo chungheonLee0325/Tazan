@@ -13,15 +13,27 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
-	m_NextState = EAiStateType::Wait;
+	if (m_Owner->CanCastSkill(m_Owner->NextSkill,m_Owner->GetAggroTarget()))
+	{
+		m_Owner->NextSkill->OnSkillComplete.BindUObject(this,&UY_Attack::OnSkillCompleted);
+		m_Owner->CastSkill(m_Owner->NextSkill,m_Owner->GetAggroTarget());
+	}
+
 }
 
 void UY_Attack::Execute(float dt)
 {
+	
 }
 
 void UY_Attack::Exit()
 {
 }
 
+
+void UY_Attack::OnSkillCompleted()
+{
+	LOG_SCREEN("Change State");
+	if (m_AiFSM) m_AiFSM->ChangeState(m_NextState);
+}
 
