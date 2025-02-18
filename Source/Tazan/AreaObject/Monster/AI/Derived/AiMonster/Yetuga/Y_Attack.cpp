@@ -13,11 +13,7 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
-	// LOG_PRINT(TEXT(""));
 	m_NextState = EAiStateType::Wait;
-	
-	m_Owner->CastSkill(m_Owner->GetCurrentSkill(),m_Owner->GetAggroTarget());
-	m_Owner->GetCurrentSkill()->SkillLogPrint();
 }
 
 void UY_Attack::Execute(float dt)

@@ -4,6 +4,7 @@
 
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
+#include "Algo/RandomShuffle.h"
 
 
 UY_SkillRoulette::UY_SkillRoulette()
@@ -29,43 +30,107 @@ void UY_SkillRoulette::InitSkill()
 	AYetuga* yetuga = Cast<AYetuga>(GetOwner());
 	if (yetuga)
 	{
-		Skill_IDArray = yetuga->GetSkillInstancesID().Array();
+		Skill_IDs = yetuga->GetSkillInstancesID().Array();
 	}
 }
 
-UBaseSkill* UY_SkillRoulette::GetRandomSkill() const
+UBaseSkill* UY_SkillRoulette::GetRandomAllSkill()
 {
 	while (true)
 	{
-		UBaseSkill* skill = Owner->GetSkillByID(GetIDAllRandom());
-		if (skill->GetCurrentPhase() == ESkillPhase::Ready) return skill;
+		int randIndex = FMath::RandRange(0, Skill_IDs.Num() - 1);
+		UBaseSkill* skill = Owner->GetSkillByID(Skill_IDs[randIndex]);
+		
+		if (skill->GetCurrentPhase() == ESkillPhase::Ready)
+		{
+			return skill;
+		}
 	}
 }
 
-int UY_SkillRoulette::GetIDAllRandom() const
+UBaseSkill* UY_SkillRoulette::GetRandomMainSkill()
 {
-	if (Skill_IDArray.Num() == 0)
+	TArray<int> mainSkill_IDs = {11000,11100,13000,12000,12100};
+	while (true)
 	{
-		LOG_SCREEN_ERROR(this,"SkillArray is empty.");
-		return 0;
+		int randIndex = FMath::RandRange(0,mainSkill_IDs.Num()-1);
+		UBaseSkill* skill = Owner->GetSkillByID(mainSkill_IDs[randIndex]);
+		
+		if (skill->GetCurrentPhase() == ESkillPhase::Ready)
+		{
+			return skill;
+		}
 	}
+}
+
+UBaseSkill* UY_SkillRoulette::GetRandSkillByArray(TArray<int> arr) const
+{
+	if (arr.Num() == 0)
+	{
+		LOG_SCREEN_ERROR(this,"스킬 배열이 비어잇어.");
+		return nullptr;
+	}
+
+	Algo::RandomShuffle(arr);
 	
-	int randIndex = FMath::RandRange(0,Skill_IDArray.Num()-1);
-	LOG_PRINT(TEXT("Random ID: %d"), Skill_IDArray[randIndex]);
-	return Skill_IDArray[randIndex];
+	for (int id :arr)
+	{
+		LOG_PRINT(TEXT("randIndex: %d"), id);
+		
+		UBaseSkill* skill = Owner->GetSkillByID(id);
+		if (skill == nullptr)
+		{
+			LOG_PRINT(TEXT("스킬이 NULL"));
+			return nullptr;
+		}
+		
+		if (skill->GetCurrentPhase() == ESkillPhase::Ready)
+		{
+			LOG_PRINT(TEXT("가져온 스킬: %s"),*skill->GetName());
+			return skill;
+		}
+	}
+	LOG_PRINT(TEXT("모든 스킬이 쿨타임 중이에요"));
+	return nullptr;
 }
 
-int UY_SkillRoulette::GetIDWeavingSkill() const
+TArray<int> UY_SkillRoulette::GetIDWeavingSkill() const
 {
-	return 11000;
+	TArray<int> skillArr;
+	for (int i=0; i<Skill_IDs.Num(); ++i)
+	{
+		if (Skill_IDs[i] % 100 == 0 && Skill_IDs[i] < 11000)
+		{
+			skillArr.Add(Skill_IDs[i]);
+		}
+	}
+	return skillArr;
 }
 
-int UY_SkillRoulette::GetIDShortSkill() const
+TArray<int> UY_SkillRoulette::GetIDShortSkill() const
 {
-	return 11000;
+	// TArray<int> skillArr;
+	// for (int i=0; i<Skill_IDs.Num(); ++i)
+	// {
+	// 	if (Skill_IDs[i] % 1000 == 0 && Skill_IDs[i]  >= 11000 && Skill_IDs[i] < 12000)
+	// 	{
+	// 		skillArr.Add(Skill_IDs[i]);
+	// 	}
+	// }
+	TArray<int> skillArr = {11000,11100,11200};
+	return skillArr;
 }
 
-int UY_SkillRoulette::GetIDLongSkill() const
+TArray<int> UY_SkillRoulette::GetIDLongSkill() const
 {
-	return 11000;
+	// TArray<int> skillArr;
+	// for (int i=0; i<Skill_IDs.Num(); ++i)
+	// {
+	// 	if (Skill_IDs[i] % 1000 == 0 && Skill_IDs[i] >= 12000)
+	// 	{
+	// 		skillArr.Add(Skill_IDs[i]);
+	// 	}
+	// }
+	TArray<int> skillArr = {12100};
+	return skillArr;
 }
