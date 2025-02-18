@@ -13,6 +13,8 @@ ASwordEnemy::ASwordEnemy()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	m_AreaObjectID = 10;
+
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(
 		TEXT("/Script/Engine.SkeletalMesh'/Game/_Resource/SkeletonSword/C_M_SkeletonSword.C_M_SkeletonSword'"));
 	if (TempMesh.Succeeded())
@@ -29,10 +31,18 @@ ASwordEnemy::ASwordEnemy()
 	characterMovement->MaxWalkSpeed = 350.0f;
 	characterMovement->bOrientRotationToMovement = true;
 
-	ConstructorHelpers::FClassFinder<UAnimInstance> TempAnim(TEXT("'/Game/_BluePrints/AreaObject/Monster/SwordMonsters/BluePrints/ABP_SwordMonster.ABP_SwordMonster'"));
+	ConstructorHelpers::FClassFinder<UAnimInstance> TempAnim(TEXT("'/Game/_BluePrints/AreaObject/Monster/SwordMonsters/BluePrints/ABP_SwordMonster.ABP_SwordMonster_C'"));
 	if (TempAnim.Succeeded())
 	{
 		GetMesh()->SetAnimInstanceClass(TempAnim.Class);
+	}
+
+	SwordComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SwordComp"));
+	SwordComp->SetupAttachment(GetMesh());
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>TempSword(TEXT("'/Game/_Resource/Sword/SKM_Sword.SKM_Sword'"));
+	if (TempSword.Succeeded())
+	{
+		SwordComp->SetSkeletalMesh(TempSword.Object);
 	}
 }
 
