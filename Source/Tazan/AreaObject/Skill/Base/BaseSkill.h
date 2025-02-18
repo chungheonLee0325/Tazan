@@ -13,6 +13,16 @@
 class AAreaObject;
 
 UENUM(BlueprintType)
+enum class ESkillFailCase : uint8
+{
+	OutRange,
+	Null,
+	NotReady,
+	OutStamina,
+	None
+};
+
+UENUM(BlueprintType)
 enum class ESkillPhase : uint8
 {
 	Ready, // 스킬 사용 가능
@@ -74,6 +84,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	void SkillLogPrint();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
+	mutable ESkillFailCase SkillFailCase = ESkillFailCase::None;
+
 protected:
 	UFUNCTION()
 	void AdjustCoolTime();
@@ -103,4 +116,6 @@ private:
 
 	FOnMontageEnded EndDelegate;
 	FOnMontageBlendingOutStarted CompleteDelegate;
+
+	
 };
