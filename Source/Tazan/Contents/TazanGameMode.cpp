@@ -44,7 +44,7 @@ void ATazanGameMode::BeginPlay()
 	}
 	SoundDataMap = gameInstance->SoundDataMap;
 
-	PlayBGM(1001, true);
+	//PlayBGM(BGMID, true);
 }
 
 
