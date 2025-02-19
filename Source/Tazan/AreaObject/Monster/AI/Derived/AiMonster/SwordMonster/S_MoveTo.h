@@ -20,6 +20,11 @@ public:
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
 
+	UBaseSkill* SelectRandomSkillBySkillBag();
+
+	TArray<int> SkillBag = {1000,1005,1010};
+	bool bIsNoSkill = false;
+
 	UPROPERTY(VisibleAnywhere,category = "S_FSM")
 	class APlayer_Kazan* Target;
 
@@ -27,17 +32,20 @@ public:
 	class ASwordEnemy* SwordEnemy;
 	
 	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="Debug")
+	bool bDebug = true;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
 	float CheckRadius = 1000.0f;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="MonsterStatus")
 	float Speed = 350.f;
+	float SKILL_RANGE_DELTA = 20.f;
 
 	UFUNCTION()
 	bool IsPlayerInCheckRadius();
 
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="S_FSM")
-	float AttackRadius = 99.0f;
+	float AttackRadius = 299.0f;
 
 	UFUNCTION()
 	bool IsPlayerInAttackRadius();
