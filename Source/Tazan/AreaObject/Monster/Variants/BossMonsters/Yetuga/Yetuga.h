@@ -38,6 +38,12 @@ public:
 
 	UPROPERTY()
 	UY_SkillRoulette* SkillRoulette;
+
+	UPROPERTY()
+	class UPlayerStatusWidget* StatusWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UPlayerStatusWidget> StatusWidgetClass;
 		
 protected:
 	virtual void BeginPlay() override;
@@ -50,5 +56,6 @@ public:
 	//TODO: AreaObject로 이전?
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 	
-	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType); 
+	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType);
+	void InitializeHUD();
 };

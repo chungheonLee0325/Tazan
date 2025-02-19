@@ -26,7 +26,7 @@ void UY_StandOff::Enter()
 	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
 
 	//TODO: 위빙스킬 사정거리로 조정
-	if (dist < 350.0f)
+	if (dist < 390.0f)
 	{
 		//TODO: 플레이어한테 맞고 있는지에 대한 조건 추가
 		AYetuga* yetuga = Cast<AYetuga>(m_Owner);
@@ -41,8 +41,8 @@ void UY_StandOff::Enter()
 		}
 		
 		//확률 테스트
-		// float probability = FMath::FRand()*100.0f;
-		if (forwardDot > 0.5f && forwardDot < -1.0f)
+		float probability = FMath::FRand()*100.0f;
+		if (forwardDot > 0.5f && probability > 75.0f)
 		{
 			UBaseSkill* sk = SkillRoulette->GetRandomWeavingSkill();
 			if (sk)
