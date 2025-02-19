@@ -15,7 +15,6 @@ void UY_SelectSkill::InitState()
 void UY_SelectSkill::Enter()
 {
 	LOG_PRINT(TEXT(""));
-	if (SkillRoulette == nullptr) LOG_SCREEN_ERROR(this, "스킬룰렛 없음");
 	
 	float dist = m_Owner->GetDistToTarget();
 
