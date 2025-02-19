@@ -144,7 +144,7 @@ protected:
 	UPROPERTY()
 	FVector m_SpawnLocation;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	UBaseAiFSM* m_AiFSM;
 
 private:
