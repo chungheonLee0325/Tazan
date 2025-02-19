@@ -11,6 +11,7 @@
 #include "Tazan/AreaObject/Attribute/Health.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
@@ -337,6 +338,8 @@ void AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
 	}
 	else
 	{
+		FString fail = UEnum::GetValueAsString(Skill->SkillFailCase);
+		LOG_PRINT(TEXT("CastSkill Failed: %s"), *fail);
 		LOG_SCREEN_ERROR(this, "CastSkill Failed");
 	}
 }
@@ -464,6 +467,10 @@ void AAreaObject::HandleGuard(AActor* DamageCauser)
 	// Regular guard stamina cost
 	m_Stamina->DecreaseStamina(GUARD_STAMINA_COST);
 
+	// Rotate AreaObject to Damage Causer
+	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation());
+	SetActorRotation(rotator);
+
 	// Spawn guard VFX
 	if (GuardEffect)
 	{
@@ -481,6 +488,10 @@ void AAreaObject::HandleGuard(AActor* DamageCauser)
 
 void AAreaObject::HandlePerfectGuard(AActor* DamageCauser)
 {
+	// Rotate AreaObject to Damage Causer
+	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation());
+	SetActorRotation(rotator);
+	
 	// Perfect guard stamina cost
 	m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_COST);
 
