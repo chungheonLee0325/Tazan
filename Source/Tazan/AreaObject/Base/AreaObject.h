@@ -7,9 +7,11 @@
 #include "Tazan/AreaObject/Attribute/Condition.h"
 #include "Tazan/AreaObject/Attribute/Health.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
+#include "Tazan/AreaObject/Utility/RotationComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
 #include "AreaObject.generated.h"
 
+class URotationComponent;
 class ATazanGameMode;
 class UCondition;
 
@@ -23,13 +25,15 @@ public:
 	AAreaObject();
 
 	UPROPERTY(BlueprintReadWrite)
-	class UHealth* m_Health;
+	UHealth* m_Health;
 	UPROPERTY(BlueprintReadWrite)
 	UCondition* m_Condition;
 	UPROPERTY(BlueprintReadWrite)
 	class UStamina* m_Stamina;
 	UPROPERTY(BlueprintReadWrite)
 	UPoiseComponent* m_PoiseComponent;
+	UPROPERTY(BlueprintReadWrite)
+	URotationComponent* m_RotationComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AreaObject Data Setting")
 	int m_AreaObjectID;
@@ -95,6 +99,41 @@ public:
 
 	bool IsDie() const { return m_Condition->IsDead(); }
 
+	// Health 기능 퍼사드 제공
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	float IncreaseHP(float Delta) const;
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	void SetHPByRate(float Rate) const;
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	float GetHP() const;
+
+	// Stamina 기능 퍼사드 제공
+	UFUNCTION(BlueprintCallable, Category = "Stamina")
+	float IncreaseStamina(float Delta) const;
+	UFUNCTION(BlueprintCallable, Category = "Stamina")
+	float DecreaseStamina(float Delta) const;
+	UFUNCTION(BlueprintCallable, Category = "Stamina")
+	float GetStamina() const;
+	UFUNCTION(BlueprintCallable, Category = "Stamina")
+	bool CanUseStamina(float Cost) const;
+
+	// Condition 기능 퍼사드 제공
+	UFUNCTION(BlueprintCallable, Category = "Condition")
+	bool AddCondition(EConditionBitsType AddConditionType, float Duration = 0.0f);
+	UFUNCTION(BlueprintCallable, Category = "Condition")
+	bool RemoveCondition(EConditionBitsType RemoveConditionType) const;
+	UFUNCTION(BlueprintCallable, Category = "Condition")
+	bool HasCondition(EConditionBitsType HasConditionType) const;
+	UFUNCTION(BlueprintCallable, Category = "Condition")
+	bool ExchangeDead() const;
+
+	// Rotate 기능 퍼사드 제공
+	UFUNCTION(BlueprintCallable, Category = "Rotation")
+	void LookAtLocation(const FVector& TargetLocation, float Duration,
+	                    float Ratio, EMovementInterpolationType InterpType = EMovementInterpolationType::Linear);
+	UFUNCTION(BlueprintCallable, Category = "Rotation")
+	void LookAtLocationDirect(const FVector& TargetLocation) const;
+
 	// Skill Interface
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual UBaseSkill* GetCurrentSkill();
@@ -114,24 +153,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void ClearCurrentSkill();
 	virtual void ClearThisCurrentSkill(UBaseSkill* Skill);
-
-	// Health 기능 퍼사드 제공
-	float IncreaseHP(float Delta) const;
-	void SetHPByRate(float Rate) const;
-	float GetHP() const;
-
-	// Stamina 기능 퍼사드 제공
-	float IncreaseStamina(float Delta) const;
-	float DecreaseStamina(float Delta) const;
-	float GetStamina() const;
-	bool CanUseStamina(float Cost) const;
-
-	// Condition 기능 퍼사드 제공
-	bool AddCondition(EConditionBitsType AddConditionType, float Duration = 0.0f);
-	bool RemoveCondition(EConditionBitsType RemoveConditionType) const;
-	bool HasCondition(EConditionBitsType HasConditionType) const;
-	bool ExchangeDead() const;
-
+	
+	// Interface Sounds
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayGlobalSound(int SoundID);
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayPositionalSound(int SoundID, FVector Position);
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayBGM(int SoundID, bool bLoop = true);
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void StopBGM();
+	
 	// Stagger 처리 핸들
 	UFUNCTION()
 	void HandleStaggerBegin(EStaggerType Type, float Duration);
@@ -173,16 +205,6 @@ public:
 
 	// 가드 상태 변경 시 호출
 	void SetGuardState(bool bIsGuarding);
-
-	// Interface Sounds
-	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void PlayGlobalSound(int SoundID);
-	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void PlayPositionalSound(int SoundID, FVector Position);
-	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void PlayBGM(int SoundID, bool bLoop = true);
-	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void StopBGM();
 
 private:
 	FAreaObjectData* dt_AreaObject;

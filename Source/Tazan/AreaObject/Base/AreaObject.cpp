@@ -16,6 +16,7 @@
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "Tazan/AreaObject/Attribute/Stamina.h"
+#include "Tazan/AreaObject/Utility/RotationComponent.h"
 #include "Tazan/Contents/TazanGameMode.h"
 
 // Sets default values
@@ -32,6 +33,9 @@ AAreaObject::AAreaObject()
 
 	// Stamina Component 생성
 	m_Stamina = CreateDefaultSubobject<UStamina>(TEXT("Stamina"));
+
+	// Rotation Component 생성
+	m_RotationComponent = CreateDefaultSubobject<URotationComponent>(TEXT("RotationComponent"));
 
 	//GetCapsuleComponent()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
@@ -377,6 +381,16 @@ bool AAreaObject::ExchangeDead() const
 	return m_Condition->ExchangeDead();
 }
 
+void AAreaObject::LookAtLocation(const FVector& TargetLocation, float Duration, float Ratio = 1.0f, EMovementInterpolationType InterpType)
+{
+	m_RotationComponent->LookAtLocation(TargetLocation, Duration, Ratio, InterpType);
+}
+
+void AAreaObject::LookAtLocationDirect(const FVector& TargetLocation) const
+{
+	m_RotationComponent->LookAtLocationDirect(TargetLocation);
+}
+
 void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
 {
 	// 애니메이션 재생
@@ -491,7 +505,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser)
 	// Rotate AreaObject to Damage Causer
 	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation());
 	SetActorRotation(rotator);
-	
+
 	// Perfect guard stamina cost
 	m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_COST);
 
