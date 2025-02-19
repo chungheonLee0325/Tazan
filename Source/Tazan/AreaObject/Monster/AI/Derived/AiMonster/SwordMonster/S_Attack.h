@@ -22,5 +22,8 @@ public:
 
 	UFUNCTION()
 	void OnSkillComplete();
+
+private:
+	bool bIsAttack = false;
 };
 
