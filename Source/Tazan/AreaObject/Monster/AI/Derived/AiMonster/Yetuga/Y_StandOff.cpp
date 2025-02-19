@@ -34,12 +34,12 @@ void UY_StandOff::Enter()
 		AYetuga* yetuga = Cast<AYetuga>(m_Owner);
 		if (forwardDot > -1.0f && forwardDot < -0.7) 
 		{
-			if (m_Owner->GetSkillByID(10400)->GetCurrentPhase() == ESkillPhase::CoolTime)
+			if (m_Owner->GetSkillByID(10900)->GetCurrentPhase() == ESkillPhase::CoolTime)
 			{
 				LOG_SCREEN("BackAttack Cooldown...");
 				return;
 			}
-			m_Owner->NextSkill = m_Owner->GetSkillByID(10400);
+			m_Owner->NextSkill = m_Owner->GetSkillByID(10900);
 			m_AiFSM->ChangeState(EAiStateType::Attack);
 			return;
 		}

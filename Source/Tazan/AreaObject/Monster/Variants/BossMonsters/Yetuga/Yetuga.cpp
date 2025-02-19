@@ -21,7 +21,7 @@ AYetuga::AYetuga()
 	if (move.Object)
 	{
 	}
-	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
 
 	m_AreaObjectID = 100;
 }

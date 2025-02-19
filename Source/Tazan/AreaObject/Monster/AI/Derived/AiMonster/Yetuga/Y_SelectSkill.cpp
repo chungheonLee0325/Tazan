@@ -5,7 +5,6 @@
 
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
-#include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_SkillRoulette.h"
 
@@ -20,7 +19,7 @@ void UY_SelectSkill::Enter()
 	
 	float dist = m_Owner->GetDistToTarget();
 
-	if (dist > 600.0f)
+	if (dist > 800.0f)
 	{
 		UBaseSkill* sk = SkillRoulette->GetRandomLongSkill();
 		if (sk != nullptr)

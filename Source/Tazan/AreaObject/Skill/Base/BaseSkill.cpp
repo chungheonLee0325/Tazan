@@ -22,11 +22,16 @@ void UBaseSkill::InitSkill(FSkillData* SkillData)
 
 bool UBaseSkill::CanCast(AAreaObject* Caster, const AAreaObject* Target) const
 {
-	if (!Caster || !Target) return false;
+	if (!Caster || !Target)
+	{
+		SkillFailCase = ESkillFailCase::Null;
+		return false;
+	}
 
 	// 스킬 상태 체크
 	if (m_CurrentPhase != ESkillPhase::Ready)
 	{
+		SkillFailCase = ESkillFailCase::NotReady;
 		return false;
 	}
 
@@ -35,6 +40,7 @@ bool UBaseSkill::CanCast(AAreaObject* Caster, const AAreaObject* Target) const
 	{
 		if (!Caster->CanUseStamina(m_SkillData->Cost))
 		{
+			SkillFailCase = ESkillFailCase::OutStamina;
 			return false;
 		}
 	}
@@ -219,7 +225,7 @@ bool UBaseSkill::IsInRange(const AAreaObject* Caster, const AAreaObject* Target)
 	}
 	else
 	{
-		LOG_PRINT(TEXT("Out of SkillRange, skill casting has failed."));
+		SkillFailCase = ESkillFailCase::OutRange;
 		return false;
 	}
 }
