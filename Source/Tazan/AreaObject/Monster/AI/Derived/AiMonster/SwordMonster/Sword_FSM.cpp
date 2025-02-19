@@ -49,8 +49,6 @@ void USword_FSM::BeginPlay()
 void USword_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	
 }
 
 void USword_FSM::InitStatePool()

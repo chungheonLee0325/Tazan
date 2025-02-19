@@ -17,5 +17,11 @@ public:
 	UPROPERTY()
 	class ASwordEnemy* SwordEnemy;
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="S_FSM")
+	float Speed = 0;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="S_FSM")
+	float direction = 0;
+	
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	
 };

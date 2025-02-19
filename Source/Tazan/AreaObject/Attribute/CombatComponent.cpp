@@ -47,7 +47,6 @@ void UCombatComponent::ExecuteAttack(int SkillID)
 	bCanAttack = false;
 
 	// 애니메이션 재생 등 실제 공격 로직 구현
-	// ... (여기에 애니메이션 몽타주 재생 코드 추가)
 	
 }
 
