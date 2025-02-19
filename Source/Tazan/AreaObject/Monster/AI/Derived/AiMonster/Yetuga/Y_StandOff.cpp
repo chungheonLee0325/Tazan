@@ -3,8 +3,6 @@
 
 #include "Y_StandOff.h"
 
-#include <Programs/UnrealBuildAccelerator/Core/Public/UbaBase.h>
-
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
@@ -18,43 +16,40 @@ void UY_StandOff::InitState()
 void UY_StandOff::Enter()
 {
 	LOG_PRINT(TEXT(""));
-	
 	//TODO: 플레이어가 탈진 상태인가?
+	bIsWeaving = false;
 	
 	float dist = m_Owner->GetDistanceTo(m_Owner->GetAggroTarget());
 	FVector dir = m_Owner->GetAggroTarget()->GetActorLocation()-m_Owner->GetActorLocation();
 	dir.Normalize();
 	
 	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
-	// LOG_PRINT(TEXT("플레이어 앞뒤: %f"), forwardDot);
-	
-	if (dist < 400.0f)
+
+	//TODO: 위빙스킬 사정거리로 조정
+	if (dist < 350.0f)
 	{
 		//TODO: 플레이어한테 맞고 있는지에 대한 조건 추가
 		AYetuga* yetuga = Cast<AYetuga>(m_Owner);
-		if (forwardDot > -1.0f && forwardDot < -0.7) 
+		if (forwardDot > -1.0f && forwardDot < -0.8) 
 		{
-			if (m_Owner->GetSkillByID(10900)->GetCurrentPhase() == ESkillPhase::CoolTime)
+			if (m_Owner->GetSkillByID(10900)->GetCurrentPhase() == ESkillPhase::Ready)
 			{
-				LOG_SCREEN("BackAttack Cooldown...");
+				m_Owner->NextSkill = m_Owner->GetSkillByID(10900);
+				bIsWeaving = true;
 				return;
 			}
-			m_Owner->NextSkill = m_Owner->GetSkillByID(10900);
-			m_AiFSM->ChangeState(EAiStateType::Attack);
-			return;
 		}
 		
 		//확률 테스트
-		float probability = FMath::FRand()*100.0f;
-		LOG_PRINT(TEXT("확률: %f"), probability);
-		if (probability > 75.0f)
+		// float probability = FMath::FRand()*100.0f;
+		if (forwardDot > 0.5f && forwardDot < -1.0f)
 		{
 			UBaseSkill* sk = SkillRoulette->GetRandomWeavingSkill();
 			if (sk)
 			{
 				LOG_SCREEN("견제기 실행");
 				m_Owner->NextSkill = sk;
-				m_AiFSM->ChangeState(EAiStateType::Attack);
+				bIsWeaving = true;
 			}
 		}
 	}
@@ -62,6 +57,11 @@ void UY_StandOff::Enter()
 
 void UY_StandOff::Execute(float DeltaTime)
 {
+	if (bIsWeaving)
+	{
+		m_AiFSM->ChangeState(EAiStateType::Attack);
+	}
+	
 	CurTime += DeltaTime;
 	FVector dir = m_Owner->GetDirToTarget();
 	dir.Normalize();

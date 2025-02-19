@@ -22,6 +22,7 @@ public:
 
 private:
 	UY_SkillRoulette* SkillRoulette;
+	UBaseSkill* Skill = nullptr;
 
 public:
 	void SetSkillRoulette(UY_SkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
