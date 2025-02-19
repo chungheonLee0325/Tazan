@@ -9,17 +9,20 @@ void URotateToTargetNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 	if (MeshComp && MeshComp->GetOwner())
 	{
 		ABaseMonster* owner = Cast<ABaseMonster>(MeshComp->GetOwner());
-		AAreaObject* target = Cast<AAreaObject>(owner->GetAggroTarget());
-		if (owner != nullptr && target != nullptr)
+		if (owner != nullptr)
 		{
-			FVector targetLocation = target->GetActorLocation();
-			if (DurationTime != 0)
+			AAreaObject* target = Cast<AAreaObject>(owner->GetAggroTarget());
+			if (target != nullptr)
 			{
-				owner->LookAtLocation(targetLocation, DurationTime, RotationRatio);
-			}
-			else
-			{
-				owner->LookAtLocationDirect(targetLocation);
+				FVector targetLocation = target->GetActorLocation();
+				if (DurationTime != 0)
+				{
+					owner->LookAtLocation(targetLocation, DurationTime, RotationRatio);
+				}
+				else
+				{
+					owner->LookAtLocationDirect(targetLocation);
+				}
 			}
 		}
 	}
