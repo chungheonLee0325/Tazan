@@ -64,8 +64,8 @@ private:
 UPROPERTY()
 	TMap<EAiStateType, UBaseAiState*> m_AiStates;
 	
-UPROPERTY()
+UPROPERTY(VisibleAnywhere)
 	UBaseAiState* m_CurrentState = nullptr;
-UPROPERTY()
+UPROPERTY(VisibleAnywhere)
 	UBaseAiState* m_PreviousState = nullptr;
 };

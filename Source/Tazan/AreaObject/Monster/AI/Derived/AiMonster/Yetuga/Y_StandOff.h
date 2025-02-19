@@ -23,7 +23,8 @@ public:
 	void SetSkillRoulette(UY_SkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; };
 
 private:
-	float bIsAnim = false;
+	bool bIsWeaving = false; 
 	float CurTime;
+	
 	UY_SkillRoulette* SkillRoulette;
 };

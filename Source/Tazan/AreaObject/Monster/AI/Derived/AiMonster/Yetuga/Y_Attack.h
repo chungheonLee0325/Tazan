@@ -22,4 +22,7 @@ public:
 
 	UFUNCTION()
 	void OnSkillCompleted();
+
+private:
+	bool bHasFailed = false;
 };

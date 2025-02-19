@@ -6,12 +6,9 @@
 #include "Y_Chase.h"
 #include "Y_Groggy.h"
 #include "Y_SelectSkill.h"
+#include "Y_StandOff.h"
+#include "Y_Attack.h"
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
-#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_StandOff.h"
-#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_Attack.h"
-#include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_Anim.h"
-// #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_Groggy.h"
-// #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/Y_Chase.h"
 
 
 UYetugaFSM::UYetugaFSM()
@@ -53,10 +50,6 @@ void UYetugaFSM::InitStatePool()
 	auto Attack = CreateState<UY_Attack>(this, m_Owner, EAiStateType::Attack);
 	AddState(EAiStateType::Attack, Attack);
 	Attack->SetNextState(EAiStateType::Wait);
-
-	// Return
-	auto Anim = CreateState<UY_Anim>(this, m_Owner, EAiStateType::Return);
-	AddState(EAiStateType::Return, Anim);
 
 	//SelectSkill
 	auto SelectSkill = CreateState<UY_SelectSkill>(this, m_Owner, EAiStateType::SelectSkill);

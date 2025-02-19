@@ -38,8 +38,6 @@ public:
 
 	UPROPERTY()
 	UY_SkillRoulette* SkillRoulette;
-
-	float SkillRange = 300.0f;
 		
 protected:
 	virtual void BeginPlay() override;
@@ -53,7 +51,4 @@ public:
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 	
 	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType); 
-
-private:
-	
 };

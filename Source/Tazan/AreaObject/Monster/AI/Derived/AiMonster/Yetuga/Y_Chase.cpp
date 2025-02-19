@@ -21,14 +21,19 @@ void UY_Chase::Enter()
 
 void UY_Chase::Execute(float dt)
 {
+	if (m_Owner->NextSkill == nullptr)
+	{
+		LOG_PRINT(TEXT("NextSkill is NULL"));
+		return;
+	}
+	
 	FVector dir = m_Owner->GetDirToTarget();
 	dir.Normalize();
 	m_Owner->AddMovementInput(dir * Speed,1.0f);
 	
 	float dist = m_Owner->GetDistToTarget();
-	if (dist < SkillRange)
+	if (dist < SkillRange - 50.0f)
 	{
-		//m_Owner->CastSkill(m_Owner->NextSkill,m_Owner->GetAggroTarget());
 		m_AiFSM->ChangeState(EAiStateType::Attack);
 	}
 }

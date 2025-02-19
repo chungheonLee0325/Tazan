@@ -13,6 +13,7 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
+	bHasFailed = false;
 	if (m_Owner->CanCastSkill(m_Owner->NextSkill,m_Owner->GetAggroTarget()))
 	{
 		m_Owner->NextSkill->OnSkillComplete.BindUObject(this,&UY_Attack::OnSkillCompleted);
@@ -21,14 +22,16 @@ void UY_Attack::Enter()
 	else
 	{
 		LOG_PRINT(TEXT("스킬 실행 실패"));
-		m_Owner->NextSkill = m_Owner->GetSkillByID(10600);
-		m_AiFSM->ChangeState(EAiStateType::Attack);
+		bHasFailed = true;
 	}
 }
 
 void UY_Attack::Execute(float dt)
 {
-	
+	if (bHasFailed)
+	{
+		m_AiFSM->ChangeState(EAiStateType::SelectSkill);
+	}
 }
 
 void UY_Attack::Exit()

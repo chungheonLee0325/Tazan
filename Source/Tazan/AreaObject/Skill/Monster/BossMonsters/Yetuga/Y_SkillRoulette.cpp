@@ -80,7 +80,7 @@ UBaseSkill* UY_SkillRoulette::GetRandSkillByArray(TArray<int> arr) const
 		UBaseSkill* skill = Owner->GetSkillByID(id);
 		if (skill == nullptr)
 		{
-			LOG_PRINT(TEXT("스킬이 NULL"));
+			LOG_PRINT(TEXT("해당 ID의 스킬 없음"));
 			return nullptr;
 		}
 		
