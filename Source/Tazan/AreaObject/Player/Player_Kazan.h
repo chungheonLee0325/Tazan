@@ -72,6 +72,12 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	// Special
+	UFUNCTION(BlueprintCallable)
+	void SpecialFUNCTION();
+	bool IsSpecial = false;
+	FTimerHandle SpecialTimerHandle;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -79,6 +85,8 @@ protected:
 	virtual void OnDie() override;
 
 public:
+	virtual void HandlePerfectDodge() override;
+
 	// Movement
 	/** Called for movement input */
 	void Move(FVector2D MovementVector);
@@ -98,7 +106,6 @@ public:
 	
 	/** Called for evade input */
 	void Dodge_Pressed();
-
 private:
 	/** Called for run input */
 	void On_Run_Pressed();
@@ -157,4 +164,7 @@ private:
 	// Data
 	const float MAX_WALK_SPEED = 500.f;
 	const float MAX_GUARD_WALK_SPEED = 200.f;
+
+	UPROPERTY(EditAnywhere, Category = "Monster Settings")
+	TArray<UMaterialInterface*> GhostTrailMaterials;
 };

@@ -25,8 +25,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-	void Init(USkeletalMeshComponent* Pawn);
-	void InitByMaterials(USkeletalMeshComponent* Pawn, const TArray<UMaterialInterface*>& Materials);
+	void Init(USkeletalMeshComponent* Pawn, float FadeOutDuration = 0.5f, float EnableDelay = 0.0f);
+	void InitByMaterials(USkeletalMeshComponent* Pawn, float FadeOutDuration = 0.5f, float EnableDelay = 0.0f);
+	void SetInitialOpacity(float Opacity) { InitialOpacity = Opacity; };
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -38,12 +39,15 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TArray<class UMaterialInstanceDynamic*> DynamicMaterials;
 
-	UPROPERTY(EditDefaultsOnly)
-	float FadeOutTime = 0.2f;
-
 	bool IsSpawned = false;
 	float FadeCountDown;
+	float EnableCountDown;
+	bool IsEnabled = false;
 
 	UPROPERTY()
 	TArray<UMaterialInterface*> OriginalMaterials;
+	UPROPERTY()
+	UMaterialInterface* GhostMaterial;
+	float FadeOutTime;
+	float InitialOpacity = 0.7f;
 };

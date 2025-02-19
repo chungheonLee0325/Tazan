@@ -12,6 +12,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Layers/LayersSubsystem.h"
 #include "Tazan/Animation/Player/KazanAniminstance.h"
+#include "Tazan/AreaObject/Utility/GhostTrail.h"
 #include "Tazan/Utilities/LogMacro.h"
 
 
@@ -110,6 +111,46 @@ APlayer_Kazan::APlayer_Kazan()
 	FollowCamera->FieldOfView = 100;
 }
 
+void APlayer_Kazan::SpecialFUNCTION()
+{
+	if (!IsSpecial)
+	{
+		IsSpecial = true;
+		TWeakObjectPtr<APlayer_Kazan> weakThis = this;
+		FTransform SpawnTransform = GetMesh()->GetComponentTransform();
+
+		AGhostTrail* GhostTrail = GetWorld()->SpawnActor<AGhostTrail>(AGhostTrail::StaticClass(), SpawnTransform);
+
+		if (GhostTrail)
+		{
+			GhostTrail->InitByMaterials(GetMesh(), 0.5, 0.2);
+		}
+
+		GetWorld()->GetTimerManager().SetTimer(SpecialTimerHandle, [weakThis]()
+		{
+			if (auto* StrongThis = weakThis.Get())
+			{
+				FTransform SpawnTransform = StrongThis->GetMesh()->GetComponentTransform();
+	
+				AGhostTrail* GhostTrail = StrongThis->GetWorld()->SpawnActor<AGhostTrail>(
+					AGhostTrail::StaticClass(),
+					SpawnTransform
+				);
+	
+				if (GhostTrail)
+				{
+					GhostTrail->InitByMaterials(StrongThis->GetMesh(), 0.5, 0.2);
+				}
+			}
+		}, 0.2f, true);
+	}
+	else
+	{
+		IsSpecial = false;
+		GetWorld()->GetTimerManager().ClearTimer(SpecialTimerHandle);
+	}
+}
+
 // Called when the game starts or when spawned
 void APlayer_Kazan::BeginPlay()
 {
@@ -123,6 +164,40 @@ void APlayer_Kazan::OnDie()
 	Super::OnDie();
 
 	//GetCharacterMovement()->SetMovementMode(MOVE_None);
+}
+
+void APlayer_Kazan::HandlePerfectDodge()
+{
+	Super::HandlePerfectDodge();
+
+	TWeakObjectPtr<APlayer_Kazan> weakThis = this;
+	FTransform SpawnTransform = GetMesh()->GetComponentTransform();
+
+	AGhostTrail* GhostTrail = GetWorld()->SpawnActor<AGhostTrail>(AGhostTrail::StaticClass(), SpawnTransform);
+
+	if (GhostTrail)
+	{
+		GhostTrail->InitByMaterials(GetMesh(), 0.5, 0.2);
+	}
+
+	FTimerHandle Handle1;
+	GetWorld()->GetTimerManager().SetTimer(Handle1, [weakThis]()
+	{
+		if (auto* StrongThis = weakThis.Get())
+		{
+			FTransform SpawnTransform = StrongThis->GetMesh()->GetComponentTransform();
+	
+			AGhostTrail* GhostTrail = StrongThis->GetWorld()->SpawnActor<AGhostTrail>(
+				AGhostTrail::StaticClass(),
+				SpawnTransform
+			);
+	
+			if (GhostTrail)
+			{
+				GhostTrail->InitByMaterials(StrongThis->GetMesh(), 0.5, 0.2);
+			}
+		}
+	}, 0.2f, false);
 }
 
 // Called every frame
@@ -214,7 +289,6 @@ void APlayer_Kazan::SetPlayerState(EPlayerState NewState)
 	// 회전 제한 적용
 	GetCharacterMovement()->bOrientRotationToMovement = NewRestrictions.bCanRotate;
 }
-
 
 void APlayer_Kazan::Move(const FVector2D MovementVector)
 {
