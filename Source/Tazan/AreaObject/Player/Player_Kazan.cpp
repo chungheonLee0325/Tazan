@@ -123,7 +123,7 @@ void APlayer_Kazan::SpecialFUNCTION()
 
 		if (GhostTrail)
 		{
-			GhostTrail->InitByMaterials(GetMesh(), 0.5, 0.2);
+			GhostTrail->Init(GetMesh(), 0.5, 0.2);
 		}
 
 		GetWorld()->GetTimerManager().SetTimer(SpecialTimerHandle, [weakThis]()
@@ -139,7 +139,7 @@ void APlayer_Kazan::SpecialFUNCTION()
 	
 				if (GhostTrail)
 				{
-					GhostTrail->InitByMaterials(StrongThis->GetMesh(), 0.5, 0.2);
+					GhostTrail->Init(StrongThis->GetMesh(), 0.5, 0.2);
 				}
 			}
 		}, 0.2f, true);
@@ -177,7 +177,7 @@ void APlayer_Kazan::HandlePerfectDodge()
 
 	if (GhostTrail)
 	{
-		GhostTrail->InitByMaterials(GetMesh(), 0.5, 0.2);
+		GhostTrail->Init(GetMesh(), 0.5, 0.2);
 	}
 
 	FTimerHandle Handle1;
@@ -194,7 +194,7 @@ void APlayer_Kazan::HandlePerfectDodge()
 	
 			if (GhostTrail)
 			{
-				GhostTrail->InitByMaterials(StrongThis->GetMesh(), 0.5, 0.2);
+				GhostTrail->Init(StrongThis->GetMesh(), 0.5, 0.2);
 			}
 		}
 	}, 0.2f, false);

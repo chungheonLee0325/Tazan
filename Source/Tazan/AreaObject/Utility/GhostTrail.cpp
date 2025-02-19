@@ -9,6 +9,7 @@ AGhostTrail::AGhostTrail()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false; // 초기에는 틱 비활성화
 
 	PoseableMesh = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("POSEABLEMESH"));
 	RootComponent = PoseableMesh;
@@ -30,102 +31,66 @@ void AGhostTrail::BeginPlay()
 void AGhostTrail::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	if (IsSpawned)
+
+	if (!IsSpawned) return;
+
+	if (!IsEnabled)
 	{
-		if (!IsEnabled)
+		EnableCountDown -= DeltaTime;
+		if (EnableCountDown <= 0.0f)
 		{
-			EnableCountDown -= DeltaTime;
-			if (EnableCountDown <= 0.0f)
-			{
-				IsEnabled = true;
-				// 초기 Opacity 설정
-				for (auto* Material : DynamicMaterials)
-				{
-					if (Material)
-					{
-						Material->SetScalarParameterValue("Opacity", InitialOpacity);
-					}
-				}
-			}
-			else
-			{
-				// 활성화되기 전까지는 투명하게 유지
-				for (auto* Material : DynamicMaterials)
-				{
-					if (Material)
-					{
-						Material->SetScalarParameterValue("Opacity", 0.0f);
-					}
-				}
-			}
-			return;
+			IsEnabled = true;
+			UpdateMaterialParameters();
 		}
+		return;
+	}
 
-		FadeCountDown -= DeltaTime;
-		if (FadeCountDown < 0)
-		{
-			Destroy();
-			return;
-		}
+	FadeCountDown -= DeltaTime;
+	if (FadeCountDown < 0)
+	{
+		Reset();
+		return;
+	}
 
-		float CurrentOpacity = FMath::Max(FadeCountDown / FadeOutTime, 0.2f);
-		
-		// 모든 머티리얼의 투명도 업데이트
-		for (auto* Material : DynamicMaterials)
+	float CurrentOpacity = FMath::Max(FadeCountDown / FadeOutTime * InitialOpacity, MinOpacity);
+	for (auto* Material : DynamicMaterials)
+	{
+		if (Material)
 		{
-			if (Material)
-			{
-				Material->SetScalarParameterValue("Opacity", CurrentOpacity);
-			}
+			Material->SetScalarParameterValue("Opacity", CurrentOpacity);
 		}
 	}
 }
 
-void AGhostTrail::Init(USkeletalMeshComponent* Pawn, float FadeOutDuration, float EnableDelay)
+void AGhostTrail::Init(USkeletalMeshComponent* Pawn, float FadeOutDuration, float EnableDelay, bool IsDynamicMaterial)
 {
 	PoseableMesh->SetSkinnedAssetAndUpdate(Pawn->GetSkeletalMeshAsset());
 	PoseableMesh->CopyPoseFromSkeletalComponent(Pawn);
 	PoseableMesh->SetRelativeScale3D(Pawn->GetRelativeScale3D());
 
 	int32 MatCount = Pawn->GetNumMaterials();
-	for (int32 i = 0; i < MatCount; i++)
+	if (IsDynamicMaterial)
 	{
-		if (UMaterialInterface* OriginalMaterial = Pawn->GetMaterial(i))
+		for (int32 i = 0; i < MatCount; i++)
 		{
-			UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(OriginalMaterial, this);
-			if (DynMaterial)
+			if (UMaterialInterface* OriginalMaterial = Pawn->GetMaterial(i))
 			{
-				DynMaterial->SetScalarParameterValue("Opacity", 0.0f);  // 초기에는 투명하게 시작
-				DynamicMaterials.Add(DynMaterial);
-				PoseableMesh->SetMaterial(i, DynMaterial);
+				UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(OriginalMaterial, this);
+				if (DynMaterial)
+				{
+					DynMaterial->SetScalarParameterValue("Opacity", 0.0f); // 초기에는 투명하게 시작
+					DynamicMaterials.Add(DynMaterial);
+					PoseableMesh->SetMaterial(i, DynMaterial);
+				}
 			}
 		}
 	}
-
-	FadeOutTime = FadeOutDuration;
-	FadeCountDown = FadeOutDuration;
-	EnableCountDown = EnableDelay;
-	IsSpawned = true;
-	IsEnabled = false;
-}
-
-void AGhostTrail::InitByMaterials(USkeletalMeshComponent* Pawn, float FadeOutDuration, float EnableDelay)
-{
-	PoseableMesh->SetSkinnedAssetAndUpdate(Pawn->GetSkeletalMeshAsset());
-	PoseableMesh->CopyPoseFromSkeletalComponent(Pawn);
-	PoseableMesh->SetRelativeScale3D(Pawn->GetRelativeScale3D());
-
-	// 기존 마테리얼 초기화
-	int32 OriginMatCount = Pawn->GetNumMaterials();
-	for (int32 i = 0; i < OriginMatCount; i++)
+	else
 	{
-		UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GhostMaterial, this);
-		if (DynMaterial)
+		DynamicMaterials.Empty();
+		for (int32 i = 0; i < MatCount; i++)
 		{
-			DynMaterial->SetScalarParameterValue("Opacity", 0.0f);  // 초기에는 투명하게 시작
-			DynamicMaterials.Add(DynMaterial);
-			PoseableMesh->SetMaterial(i, DynMaterial);
+			PoseableMesh->SetMaterial(i, GhostMaterial);
 		}
 	}
 
@@ -136,37 +101,46 @@ void AGhostTrail::InitByMaterials(USkeletalMeshComponent* Pawn, float FadeOutDur
 	IsEnabled = false;
 }
 
-/*
-void AGhostTrail::InitByMaterials2(USkeletalMeshComponent* Pawn, const TArray<UMaterialInterface*>& Materials)
+void AGhostTrail::Reset()
 {
-	PoseableMesh->SetSkinnedAssetAndUpdate(Pawn->GetSkeletalMeshAsset());
-	PoseableMesh->CopyPoseFromSkeletalComponent(Pawn);
-	PoseableMesh->SetRelativeScale3D(Pawn->GetRelativeScale3D());
+	IsSpawned = false;
+	IsEnabled = false;
+	SetActorTickEnabled(false); // 리셋 시 틱 비활성화
+	ClearMaterials();
+}
 
-	// 기존 마테리얼 초기화
-	int32 OriginMatCount = Pawn->GetNumMaterials();
-	for (int32 i = 0; i < OriginMatCount; i++)
+void AGhostTrail::SetGhostColor(const FLinearColor& Color)
+{
+	GhostColor = Color;
+	UpdateMaterialParameters();
+}
+
+void AGhostTrail::SetCustomMaterial(UMaterialInterface* NewMaterial)
+{
+	if (NewMaterial)
+	{
+		GhostMaterial = NewMaterial;
+	}
+}
+
+void AGhostTrail::UpdateMaterialParameters()
+{
+	for (auto* Material : DynamicMaterials)
+	{
+		if (Material)
+		{
+			Material->SetVectorParameterValue("Color", GhostColor);
+			Material->SetScalarParameterValue("Opacity", IsEnabled ? InitialOpacity : 0.0f);
+		}
+	}
+}
+
+
+void AGhostTrail::ClearMaterials()
+{
+	DynamicMaterials.Empty();
+	for (int32 i = 0; i < PoseableMesh->GetNumMaterials(); i++)
 	{
 		PoseableMesh->SetMaterial(i, nullptr);
 	}
-
-	int32 MatCount = Materials.Num();
-	for (int32 i = 0; i < MatCount; i++)
-	{
-		if (UMaterialInterface* OriginalMaterial = Materials[i])
-		{
-			// 원본 머티리얼의 동적 인스턴스 생성
-			UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(OriginalMaterial, this);
-			if (DynMaterial)
-			{
-				DynMaterial->SetScalarParameterValue("Opacity", 0.7f);
-				DynamicMaterials.Add(DynMaterial);
-				PoseableMesh->SetMaterial(i, DynMaterial);
-			}
-		}
-	}
-
-	FadeCountDown = FadeOutTime;
-	IsSpawned = true;
 }
- */

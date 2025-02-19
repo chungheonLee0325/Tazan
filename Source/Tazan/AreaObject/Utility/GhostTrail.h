@@ -24,10 +24,19 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
-	void Init(USkeletalMeshComponent* Pawn, float FadeOutDuration = 0.5f, float EnableDelay = 0.0f);
-	void InitByMaterials(USkeletalMeshComponent* Pawn, float FadeOutDuration = 0.5f, float EnableDelay = 0.0f);
-	void SetInitialOpacity(float Opacity) { InitialOpacity = Opacity; };
+	// 풀링 시스템을 위한 초기화/리셋 함수
+	void Init(USkeletalMeshComponent* Pawn, float FadeOutDuration = 0.5f, float EnableDelay = 0.0f, bool IsDynamicMaterial = false);
+	void Reset();
+
+	// 머티리얼 초기화 함수
+
+	
+	void SetInitialOpacity(float Opacity) { InitialOpacity = Opacity; }
+	void SetGhostColor(const FLinearColor& Color);
+	void SetCustomMaterial(UMaterialInterface* NewMaterial);
+
+	// 풀링 시스템에서 상태 확인용
+	bool IsSpawned = false;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -39,15 +48,19 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TArray<class UMaterialInstanceDynamic*> DynamicMaterials;
 
-	bool IsSpawned = false;
 	float FadeCountDown;
 	float EnableCountDown;
 	bool IsEnabled = false;
 
-	UPROPERTY()
-	TArray<UMaterialInterface*> OriginalMaterials;
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category = "Ghost Trail")
 	UMaterialInterface* GhostMaterial;
+	UPROPERTY(EditDefaultsOnly, Category = "Ghost Trail")
+	FLinearColor GhostColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	UPROPERTY(EditDefaultsOnly, Category = "Ghost Trail")
+	float MinOpacity = 0.2f;
 	float FadeOutTime;
 	float InitialOpacity = 0.7f;
+
+	void ClearMaterials();
+	void UpdateMaterialParameters();
 };
