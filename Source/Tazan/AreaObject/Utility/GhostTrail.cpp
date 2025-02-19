@@ -12,19 +12,13 @@ AGhostTrail::AGhostTrail()
 
 	PoseableMesh = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("POSEABLEMESH"));
 	RootComponent = PoseableMesh;
-	//ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_PoseMesh(
-	//	TEXT("SkeletalMesh'/Game/PP801_P3/Meshes/Characters/Combines/SK_PP801P3_G.SK_PP801P3_G'"));
-	//if (SK_PoseMesh.Succeeded())
-	//{
-	//	PoseableMesh->SetSkeletalMesh(SK_PoseMesh.Object);
-	//}
 
-	//ConstructorHelpers::FObjectFinder<UMaterialInstance> M_GhostTail(
-	//	TEXT("MaterialInstanceConstant'/Game/Blueprints/Player/MI_GhostTail.MI_GhostTail'"));
-	//if (M_GhostTail.Succeeded())
-	//{
-	//	GhostMaterial = M_GhostTail.Object;
-	//}
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> tempGhostTail(
+		TEXT("/Script/Engine.Material'/Game/_Resource/Materials/GhostMaterial.GhostMaterial'"));
+	if (tempGhostTail.Succeeded())
+	{
+		GhostMaterial = tempGhostTail.Object;
+	}
 }
 
 
@@ -36,16 +30,47 @@ void AGhostTrail::BeginPlay()
 void AGhostTrail::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	if (IsSpawned)
 	{
+		if (!IsEnabled)
+		{
+			EnableCountDown -= DeltaTime;
+			if (EnableCountDown <= 0.0f)
+			{
+				IsEnabled = true;
+				// 초기 Opacity 설정
+				for (auto* Material : DynamicMaterials)
+				{
+					if (Material)
+					{
+						Material->SetScalarParameterValue("Opacity", InitialOpacity);
+					}
+				}
+			}
+			else
+			{
+				// 활성화되기 전까지는 투명하게 유지
+				for (auto* Material : DynamicMaterials)
+				{
+					if (Material)
+					{
+						Material->SetScalarParameterValue("Opacity", 0.0f);
+					}
+				}
+			}
+			return;
+		}
+
 		FadeCountDown -= DeltaTime;
 		if (FadeCountDown < 0)
 		{
 			Destroy();
+			return;
 		}
 
 		float CurrentOpacity = FMath::Max(FadeCountDown / FadeOutTime, 0.2f);
-
+		
 		// 모든 머티리얼의 투명도 업데이트
 		for (auto* Material : DynamicMaterials)
 		{
@@ -57,7 +82,7 @@ void AGhostTrail::Tick(float DeltaTime)
 	}
 }
 
-void AGhostTrail::Init(USkeletalMeshComponent* Pawn)
+void AGhostTrail::Init(USkeletalMeshComponent* Pawn, float FadeOutDuration, float EnableDelay)
 {
 	PoseableMesh->SetSkinnedAssetAndUpdate(Pawn->GetSkeletalMeshAsset());
 	PoseableMesh->CopyPoseFromSkeletalComponent(Pawn);
@@ -68,35 +93,51 @@ void AGhostTrail::Init(USkeletalMeshComponent* Pawn)
 	{
 		if (UMaterialInterface* OriginalMaterial = Pawn->GetMaterial(i))
 		{
-			// 원본 머티리얼의 동적 인스턴스 생성
 			UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(OriginalMaterial, this);
 			if (DynMaterial)
 			{
-				DynMaterial->SetScalarParameterValue("Opacity", 0.7f);
+				DynMaterial->SetScalarParameterValue("Opacity", 0.0f);  // 초기에는 투명하게 시작
 				DynamicMaterials.Add(DynMaterial);
 				PoseableMesh->SetMaterial(i, DynMaterial);
 			}
 		}
 	}
 
-	FadeCountDown = FadeOutTime;
+	FadeOutTime = FadeOutDuration;
+	FadeCountDown = FadeOutDuration;
+	EnableCountDown = EnableDelay;
 	IsSpawned = true;
+	IsEnabled = false;
+}
 
-	/*
-PoseableMesh->CopyPoseFromSkeletalComponent(Pawn);
-TArray<UMaterialInterface*> Mats = PoseableMesh->GetMaterials();
-
-for (int i = 0; i < Mats.Num(); i++)
+void AGhostTrail::InitByMaterials(USkeletalMeshComponent* Pawn, float FadeOutDuration, float EnableDelay)
 {
-Materials.Add(UKismetMaterialLibrary::CreateDynamicMaterialInstance(GetWorld(), GhostMaterial));
-PoseableMesh->SetMaterial(i, Materials[i]);
-}
-FadeCountDown = FadeOutTime;
-IsSpawned = true;
- */
+	PoseableMesh->SetSkinnedAssetAndUpdate(Pawn->GetSkeletalMeshAsset());
+	PoseableMesh->CopyPoseFromSkeletalComponent(Pawn);
+	PoseableMesh->SetRelativeScale3D(Pawn->GetRelativeScale3D());
+
+	// 기존 마테리얼 초기화
+	int32 OriginMatCount = Pawn->GetNumMaterials();
+	for (int32 i = 0; i < OriginMatCount; i++)
+	{
+		UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GhostMaterial, this);
+		if (DynMaterial)
+		{
+			DynMaterial->SetScalarParameterValue("Opacity", 0.0f);  // 초기에는 투명하게 시작
+			DynamicMaterials.Add(DynMaterial);
+			PoseableMesh->SetMaterial(i, DynMaterial);
+		}
+	}
+
+	FadeOutTime = FadeOutDuration;
+	FadeCountDown = FadeOutDuration;
+	EnableCountDown = EnableDelay;
+	IsSpawned = true;
+	IsEnabled = false;
 }
 
-void AGhostTrail::InitByMaterials(USkeletalMeshComponent* Pawn, const TArray<UMaterialInterface*>& Materials)
+/*
+void AGhostTrail::InitByMaterials2(USkeletalMeshComponent* Pawn, const TArray<UMaterialInterface*>& Materials)
 {
 	PoseableMesh->SetSkinnedAssetAndUpdate(Pawn->GetSkeletalMeshAsset());
 	PoseableMesh->CopyPoseFromSkeletalComponent(Pawn);
@@ -128,3 +169,4 @@ void AGhostTrail::InitByMaterials(USkeletalMeshComponent* Pawn, const TArray<UMa
 	FadeCountDown = FadeOutTime;
 	IsSpawned = true;
 }
+ */
