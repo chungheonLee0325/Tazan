@@ -16,10 +16,13 @@ class TAZAN_API UEnableCollisionNotifyState : public UAnimNotifyState
 	GENERATED_BODY()
 
 public:
+	UFUNCTION()
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	                         float TotalDuration) override;
+	UFUNCTION()
 	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	                        float FrameDeltaTime) override;
+	UFUNCTION()
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
 	// 사용되는 AttackData의 Index값
@@ -27,7 +30,7 @@ public:
 	int AttackDataIndex;
 
 	// 사용하는 AttackData
-	FAttackData *AttackData;
+	FAttackData* AttackData;
 
 	// 디버그 드로잉 옵션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
