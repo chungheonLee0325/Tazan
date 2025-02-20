@@ -64,6 +64,9 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 
 	m_CurrentPhase = ESkillPhase::Casting;
 
+	// 애니메이션 Poise Bonus 적용
+	Caster->SetAnimationPoiseBonus(m_SkillData->AnimationPoiseBonusValue);
+
 	// 애니메이션 몽타주 재생
 	UAnimInstance* AnimInstance = Caster->GetMesh()->GetAnimInstance();
 	if (AnimInstance && m_SkillData->Montage)
@@ -99,6 +102,9 @@ void UBaseSkill::OnCastEnd()
 	if (!m_Caster || !m_Target) return;
 
 	m_CurrentPhase = ESkillPhase::CoolTime;
+	
+	// 애니메이션 Poise Bonus 해제
+	m_Caster->SetAnimationPoiseBonus(0);
 	// 애니메이션 인스턴스 얻기
 	if (UAnimInstance* AnimInstance = m_Caster->GetMesh()->GetAnimInstance())
 	{
@@ -132,6 +138,9 @@ void UBaseSkill::CancelCast()
 	// Casting Phase일때 한번만 처리
 	if (m_CurrentPhase != ESkillPhase::PostCasting) return;
 	if (!m_Caster) return;
+
+	// 애니메이션 Poise Bonus 해제
+	m_Caster->SetAnimationPoiseBonus(0);
 	if (UAnimInstance* AnimInstance = m_Caster->GetMesh()->GetAnimInstance())
 	{
 		// 델리게이트 정리

@@ -156,8 +156,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void ClearCurrentSkill();
 	virtual void ClearThisCurrentSkill(UBaseSkill* Skill);
+
+	// Stager Interface
+	void SetAnimationPoiseBonus(float Bonus) const;
 	
-	// Interface Sounds
+	// Sound Interface 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayGlobalSound(int SoundID);
 	UFUNCTION(BlueprintCallable, Category = "Audio")
@@ -203,6 +206,7 @@ public:
 	FTimerHandle HitStopTimerHandle;
 	
 	// 넉백 관련
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyKnockBack(const FVector& KnockbackForce);
 	bool bIsBeingKnockedBack = false;
 

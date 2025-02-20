@@ -399,6 +399,11 @@ void AAreaObject::ClearThisCurrentSkill(UBaseSkill* Skill)
 	}
 }
 
+void AAreaObject::SetAnimationPoiseBonus(float Bonus) const
+{
+	m_PoiseComponent->SetAnimationPoiseBonus(Bonus);
+}
+
 bool AAreaObject::AddCondition(EConditionBitsType AddConditionType, float Duration)
 {
 	return m_Condition->AddCondition(AddConditionType, Duration);

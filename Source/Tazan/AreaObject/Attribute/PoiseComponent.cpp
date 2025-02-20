@@ -117,20 +117,19 @@ void UPoiseComponent::AddPoiseModifier(int32 Value, float Duration)
 }
 
 
-void UPoiseComponent::SetAnimationPoiseBonus(int32 Bonus, float Duration)
+void UPoiseComponent::SetAnimationPoiseBonus(int32 Bonus)
 {
 	AnimationPoiseBonus = FMath::Max(0, Bonus);
-
 	// Todo : @@LCH 없어질수도 있을듯.. Animation Montage에서 Release 함수로 직접 제거
-	TWeakObjectPtr<UPoiseComponent> weakThis = this;
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [weakThis]()
-	                                       {
-		                                       UPoiseComponent* strongThis = weakThis.Get();
-		                                       if (strongThis != nullptr)
-		                                       {
-			                                       strongThis->AnimationPoiseBonus = 0;
-		                                       }
-	                                       }
-	                                       , Duration, false);
+	//TWeakObjectPtr<UPoiseComponent> weakThis = this;
+	//FTimerHandle TimerHandle;
+	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, [weakThis]()
+	//                                       {
+	//	                                       UPoiseComponent* strongThis = weakThis.Get();
+	//	                                       if (strongThis != nullptr)
+	//	                                       {
+	//		                                       strongThis->AnimationPoiseBonus = 0;
+	//	                                       }
+	//                                       }
+	//                                       , Duration, false);
 }
