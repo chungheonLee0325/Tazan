@@ -623,6 +623,11 @@ void AAreaObject::SetGuardState(bool bIsGuarding)
 	}
 }
 
+bool AAreaObject::IsWeakPointHit(FVector HitLoc)
+{
+	return false;
+}
+
 void AAreaObject::PlayGlobalSound(int SoundID)
 {
 	if (m_GameMode == nullptr)
