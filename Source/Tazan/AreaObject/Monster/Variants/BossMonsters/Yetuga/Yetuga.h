@@ -52,10 +52,12 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	virtual bool IsWeakPointHit(FVector HitLoc) override;
+	
 	//TODO: AreaObject로 이전?
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 	
 	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType);
 	void InitializeHUD();
+	
 };
