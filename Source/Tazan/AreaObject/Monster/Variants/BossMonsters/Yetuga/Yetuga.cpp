@@ -58,6 +58,20 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+bool AYetuga::IsWeakPointHit(FVector HitLoc)
+{
+	FVector hitDir = HitLoc - GetActorLocation();
+	hitDir.Normalize();
+
+	float dot = FVector::DotProduct(hitDir,GetActorForwardVector());
+	if (dot < -0.2f)
+	{
+		LOG_SCREEN("뒤에서 맞았다요.");
+		return true;
+	}
+	return false;
+}
+
 UAnimMontage* AYetuga::GetAnimMontage(EWeavingSkillAnim animType)
 {
 	if (const TObjectPtr<UAnimMontage>* MontagePtr = AnimMontageMap.Find(animType))
