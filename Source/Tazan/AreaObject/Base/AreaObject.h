@@ -40,7 +40,6 @@ public:
 	int m_AreaObjectID;
 	UPROPERTY(EditDefaultsOnly, Category = "TakeDamage")
 	EFloatingDamageType m_DefaultDamageType = EFloatingDamageType::Normal;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -65,7 +64,7 @@ protected:
 	const float PERFECT_DODGE_BUFF_DURATION = 5.0f;
 	const float PERFECT_DODGE_HIT_STOP_DURATION = 0.2f;
 	const float PERFECT_GUARD_HIT_STOP_DURATION = 0.2f;
-
+	const float GUARD_TO_TARGET_ROTATE_TIME = 0.2f;
 	// Perfect dodge damage multiplier
 	const float PERFECT_DODGE_DAMAGE_MULTIPLIER = 1.5f;
 	bool bPerfectDodgeBuffActive = false;
@@ -220,4 +219,6 @@ public:
 private:
 	UPROPERTY()
 	ATazanGameMode* m_GameMode = nullptr;
+
+	void RotateToGuardTarget(const FVector& Target);
 };

@@ -526,8 +526,7 @@ void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 	m_Stamina->DecreaseStamina(Data.StaminaDamageAmount * GUARD_STAMINA_MULTIPLY_RATE);
 
 	// Rotate AreaObject to Damage Causer
-	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation());
-	SetActorRotation(rotator);
+	RotateToGuardTarget(DamageCauser->GetActorLocation());
 
 	// Spawn guard VFX
 	if (GuardEffect)
@@ -535,7 +534,7 @@ void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 		UGameplayStatics::SpawnEmitterAtLocation(
 			GetWorld(),
 			GuardEffect,
-			GetActorLocation()
+			GetActorLocation(), FRotator::ZeroRotator, FVector(2.0f)
 		);
 	}
 	if (GuardSFXID != 0)
@@ -547,9 +546,7 @@ void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data)
 {
 	// Rotate AreaObject to Damage Causer
-	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation());
-	SetActorRotation(rotator);
-
+	RotateToGuardTarget(DamageCauser->GetActorLocation());
 	// Perfect guard stamina cost
 	m_Stamina->DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);
 
@@ -564,7 +561,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 		UGameplayStatics::SpawnEmitterAtLocation(
 			GetWorld(),
 			PerfectGuardEffect,
-			GetActorLocation()
+			GetActorLocation(), FRotator::ZeroRotator, FVector(2.0f)
 		);
 	}
 	if (PerfectGuardSFXID != 0)
@@ -707,3 +704,14 @@ void AAreaObject::StopBGM()
 	}
 	m_GameMode->StopBGM();
 }
+
+void AAreaObject::RotateToGuardTarget(const FVector& Target)
+{
+	float dotResult = FVector::DotProduct(GetActorLocation(),Target);
+	float rotateRatio = 1.0f;
+	if (dotResult > 0.5f) rotateRatio = 0.3f;
+	else if (dotResult < 0.5f && dotResult > -0.5f) rotateRatio = 0.6f;
+	LookAtLocation(Target, GUARD_TO_TARGET_ROTATE_TIME * rotateRatio);
+
+}
+
