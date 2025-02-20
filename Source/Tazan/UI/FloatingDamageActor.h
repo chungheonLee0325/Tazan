@@ -13,7 +13,7 @@ class TAZAN_API AFloatingDamageActor : public AActor
 public:
     AFloatingDamageActor();
 
-    void Initialize(float Damage, EDamageType DamageType = EDamageType::Normal, 
+    void Initialize(float Damage, EFloatingDamageType DamageType = EFloatingDamageType::Normal, 
                    float Duration = 2.0f, float RiseSpeed = 30.0f);
 
 protected:

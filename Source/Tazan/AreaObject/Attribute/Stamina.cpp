@@ -29,10 +29,11 @@ void UStamina::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
     }
 }
 
-void UStamina::InitStamina(float StaminaMax)
+void UStamina::InitStamina(float StaminaMax, float RecoveryRate)
 {
     m_StaminaMax = StaminaMax;
     m_Stamina = m_StaminaMax;
+    m_RecoveryRate = RecoveryRate;
     OnStaminaChanged.Broadcast(m_Stamina, 0, m_StaminaMax);
 }
 

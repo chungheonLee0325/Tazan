@@ -39,7 +39,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "AreaObject Data Setting")
 	int m_AreaObjectID;
 	UPROPERTY(EditDefaultsOnly, Category = "TakeDamage")
-	EDamageType m_DamageType = EDamageType::Normal;
+	EFloatingDamageType m_DefaultDamageType = EFloatingDamageType::Normal;
 
 protected:
 	// Called when the game starts or when spawned
@@ -59,9 +59,9 @@ protected:
 	TObjectPtr<UBaseSkill> m_CurrentSkill;
 
 	// Guard/Dodge constants
-	const float GUARD_STAMINA_COST = 20.0f;
-	const float PERFECT_GUARD_STAMINA_COST = 10.0f;
-	const float PERFECT_GUARD_STAMINA_DAMAGE = 30.0f;
+	const float PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE = 20.0f;
+	const float PERFECT_GUARD_STAMINA_MULTIPLY_RATE = 0.8f;
+	const float GUARD_STAMINA_MULTIPLY_RATE = 1.2f;
 	const float PERFECT_DODGE_BUFF_DURATION = 5.0f;
 	const float PERFECT_DODGE_HIT_STOP_DURATION = 0.2f;
 	const float PERFECT_GUARD_HIT_STOP_DURATION = 0.2f;
@@ -177,9 +177,9 @@ public:
 	float GetStaggerAnimationDuration(EStaggerType Type) const;
 
 	// 퍼펙트 가드 처리 핸들
-	virtual void HandlePerfectGuard(AActor* DamageCauser);
+	virtual void HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data);
 	// 가드 처리 핸들
-	virtual void HandleGuard(AActor* DamageCauser);
+	virtual void HandleGuard(AActor* DamageCauser, const FAttackData& Data);
 	// 퍼펙트 회피 처리 핸들
 	virtual void HandlePerfectDodge();
 
@@ -212,9 +212,8 @@ public:
 	//약점에 맞았는지
 	virtual bool IsWeakPointHit(FVector HitLoc);
 
-private:
 	FAreaObjectData* dt_AreaObject;
-
+private:
 	UPROPERTY()
 	ATazanGameMode* m_GameMode = nullptr;
 };

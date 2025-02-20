@@ -21,7 +21,7 @@ protected:
 
 public:
     // 초기화
-    void InitStamina(float StaminaMax);
+    void InitStamina(float StaminaMax, float RecoveryRate);
 
     // 스태미나 증감
     UFUNCTION()

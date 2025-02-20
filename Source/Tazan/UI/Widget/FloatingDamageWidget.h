@@ -5,7 +5,7 @@
 #include "FloatingDamageWidget.generated.h"
 
 UENUM(BlueprintType)
-enum class EDamageType : uint8
+enum class EFloatingDamageType : uint8
 {
     Normal,
     PlayerDamaged,
@@ -18,7 +18,7 @@ class TAZAN_API UFloatingDamageWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
-    void SetDamageInfo(float Damage, EDamageType Type);
+    void SetDamageInfo(float Damage, EFloatingDamageType Type);
     void PlayFadeAnimation();
 
 protected:
@@ -29,5 +29,5 @@ protected:
     UWidgetAnimation* FadeOutAnimation;
 
     UPROPERTY(EditDefaultsOnly, Category = "Appearance")
-    TMap<EDamageType, FLinearColor> DamageColors;
+    TMap<EFloatingDamageType, FLinearColor> DamageColors;
 }; 

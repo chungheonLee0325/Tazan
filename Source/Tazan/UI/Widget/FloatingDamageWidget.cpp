@@ -1,7 +1,7 @@
 #include "FloatingDamageWidget.h"
 #include "Components/TextBlock.h"
 
-void UFloatingDamageWidget::SetDamageInfo(float Damage, EDamageType Type)
+void UFloatingDamageWidget::SetDamageInfo(float Damage, EFloatingDamageType Type)
 {
     if (!DamageText) return;
 
@@ -19,10 +19,10 @@ void UFloatingDamageWidget::SetDamageInfo(float Damage, EDamageType Type)
         // 기본 색상 설정
         switch (Type)
         {
-        case EDamageType::PlayerDamaged:
+        case EFloatingDamageType::PlayerDamaged:
             DamageText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f))); // 빨간색
             break;
-        case EDamageType::WeakPointDamage:
+        case EFloatingDamageType::WeakPointDamage:
             DamageText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.5f, 0.0f, 1.0f))); // 초록색
             break;
         default:

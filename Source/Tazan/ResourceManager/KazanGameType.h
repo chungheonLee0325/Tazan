@@ -119,6 +119,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	float StaminaRecoveryRate = 20.0f;  // 초당 회복량
+
+	// ToDo : 고도화되면 Skill로 이관 예정  
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	int HitSoundID = 0;
 };
 
 // HitBox 동적으로 생성하기 위한 구조체 정보, FAttackData 멤버 변수

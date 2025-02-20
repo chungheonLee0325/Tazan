@@ -31,7 +31,7 @@ APlayer_Kazan::APlayer_Kazan()
 	PerfectGuardSFXID = 11;
 
 	// DamagedType 설정 - FloatingText 설정
-	m_DamageType = EDamageType::PlayerDamaged;
+	m_DefaultDamageType = EFloatingDamageType::PlayerDamaged;
 
 	// Set Size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
@@ -146,11 +146,13 @@ void APlayer_Kazan::SpecialFUNCTION()
 				}
 			}
 		}, 0.2f, true);
+		m_Health->InitHealth(10000000);
 	}
 	else
 	{
 		IsSpecial = false;
 		GetWorld()->GetTimerManager().ClearTimer(SpecialTimerHandle);
+		m_Health->InitHealth(dt_AreaObject->HPMax);
 	}
 }
 

@@ -20,7 +20,7 @@ AFloatingDamageActor::AFloatingDamageActor()
     }
 }
 
-void AFloatingDamageActor::Initialize(float Damage, EDamageType DamageType, float Duration, float RiseSpeed)
+void AFloatingDamageActor::Initialize(float Damage, EFloatingDamageType DamageType, float Duration, float RiseSpeed)
 {
     LifeTime = Duration;
     CurrentLifeTime = 0.0f;

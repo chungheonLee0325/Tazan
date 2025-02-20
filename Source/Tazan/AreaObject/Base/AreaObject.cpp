@@ -66,6 +66,7 @@ void AAreaObject::BeginPlay()
 	float hpMax = 1.0f;
 	int basePoise = 0;
 	float maxStamina = 100.0f; // Assuming a default value, actual implementation needed
+	float staminaRecoveryRate = 20.f;
 
 	if (dt_AreaObject != nullptr)
 	{
@@ -73,11 +74,12 @@ void AAreaObject::BeginPlay()
 		basePoise = dt_AreaObject->BasePoise;
 		m_OwnSkillIDSet = dt_AreaObject->SkillList;
 		maxStamina = dt_AreaObject->StaminaMax;
+		staminaRecoveryRate = dt_AreaObject->StaminaRecoveryRate;
 	}
 
 	m_Health->InitHealth(hpMax);
 	m_PoiseComponent->InitPoise(basePoise);
-	m_Stamina->InitStamina(maxStamina);
+	m_Stamina->InitStamina(maxStamina, staminaRecoveryRate);
 
 	// 스킬 인스턴스 생성
 	for (auto& skill : m_OwnSkillIDSet)
@@ -148,51 +150,51 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
                               AActor* DamageCauser)
 {
 	// ToDo : Can Attack Logic 추가? -> 설인 만들면 추가해야할듯
-
 	if (IsDie() || HasCondition(EConditionBitsType::Invincible))
 		return 0.0f;
 
 	float ActualDamage = Damage;
 
-	// Check for dodge conditions
-	if (HasCondition(EConditionBitsType::DodgeWindow) ||
-		HasCondition(EConditionBitsType::PerfectDodgeWindow))
-	{
-		// Complete dodge - no damage
-		ActualDamage = 0.0f;
-
-		// Handle perfect dodge
-		if (HasCondition(EConditionBitsType::PerfectDodgeWindow))
-		{
-			HandlePerfectDodge();
-		}
-		return ActualDamage;
-	}
-
-	// Check for guard conditions
-	if (HasCondition(EConditionBitsType::Guard) ||
-		HasCondition(EConditionBitsType::PerfectGuardWindow))
-	{
-		ActualDamage = 0.0f;
-
-		if (HasCondition(EConditionBitsType::PerfectGuardWindow))
-		{
-			HandlePerfectGuard(DamageCauser);
-		}
-		else
-		{
-			HandleGuard(DamageCauser);
-		}
-		return ActualDamage;
-	}
-
 	FHitResult hitResult;
 	FVector hitDir;
+
 	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
 	{
 		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
-		const FAttackData& attackData = customDamageEvent->AttackData;
-		customDamageEvent->GetBestHitInfo(this, DamageCauser,hitResult,hitDir);
+		FAttackData attackData = customDamageEvent->AttackData;
+		customDamageEvent->GetBestHitInfo(this, DamageCauser, hitResult, hitDir);
+
+		// Check for dodge conditions
+		if (HasCondition(EConditionBitsType::DodgeWindow) ||
+			HasCondition(EConditionBitsType::PerfectDodgeWindow))
+		{
+			// Complete dodge - no damage
+			ActualDamage = 0.0f;
+
+			// Handle perfect dodge
+			if (HasCondition(EConditionBitsType::PerfectDodgeWindow))
+			{
+				HandlePerfectDodge();
+			}
+			return ActualDamage;
+		}
+
+		// Check for guard conditions
+		if (HasCondition(EConditionBitsType::Guard) ||
+			HasCondition(EConditionBitsType::PerfectGuardWindow))
+		{
+			ActualDamage = 0.0f;
+
+			if (HasCondition(EConditionBitsType::PerfectGuardWindow))
+			{
+				HandlePerfectGuard(DamageCauser, attackData);
+			}
+			else
+			{
+				HandleGuard(DamageCauser, attackData);
+			}
+			return ActualDamage;
+		}
 
 		// HitStop 처리
 		if (attackData.bEnableHitStop)
@@ -225,8 +227,8 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
 
 	// apply hp damage
-	ActualDamage = IncreaseHP(-ActualDamage);
-	if (FMath::IsNearlyZero(ActualDamage))
+	float CurrentHP = IncreaseHP(-ActualDamage);
+	if (FMath::IsNearlyZero(CurrentHP))
 	{
 		if (true == ExchangeDead())
 		{
@@ -235,30 +237,34 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	}
 
 	// Spawn floating damage
-	if (ActualDamage > 0)
+	FVector SpawnLocation;
+	if (hitResult.Location == FVector::ZeroVector)
 	{
-		FVector SpawnLocation;
-		if (hitResult.Location == FVector::ZeroVector)
-		{
-			// 캐릭터 머리 위에 생성
-			SpawnLocation = GetActorLocation();
-			// SpawnLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-		}
-		else
-		{
-			// Hit 위치에서 생성
-			SpawnLocation = hitResult.Location;
-			SpawnLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-		}
+		// 캐릭터 중앙에서d 생성
+		SpawnLocation = GetActorLocation();
+	}
+	else
+	{
+		// Hit 위치에서 생성
+		SpawnLocation = hitResult.Location;
+	}
 
+	FTransform SpawnTransform(FRotator::ZeroRotator, SpawnLocation);
 
-		FTransform SpawnTransform(FRotator::ZeroRotator, SpawnLocation);
+	if (AFloatingDamageActor* DamageActor = GetWorld()->SpawnActor<AFloatingDamageActor>(
+		AFloatingDamageActor::StaticClass(), SpawnTransform))
+	{
+		// FloatingDamageType 계산
+		EFloatingDamageType damageType = IsWeakPointHit(hitResult.Location)
+			                                 ? EFloatingDamageType::WeakPointDamage
+			                                 : m_DefaultDamageType;
+		DamageActor->Initialize(ActualDamage, damageType);
+	}
 
-		if (AFloatingDamageActor* DamageActor = GetWorld()->SpawnActor<AFloatingDamageActor>(
-			AFloatingDamageActor::StaticClass(), SpawnTransform))
-		{
-			DamageActor->Initialize(ActualDamage, m_DamageType);
-		}
+	// Spawn Hit SFX
+	if (dt_AreaObject->HitSoundID != 0)
+	{
+		PlayPositionalSound(dt_AreaObject->HitSoundID, hitResult.Location);
 	}
 
 	return ActualDamage;
@@ -509,10 +515,10 @@ bool AAreaObject::CanUseStamina(float Cost) const
 	return m_Stamina->CanUseStamina(Cost);
 }
 
-void AAreaObject::HandleGuard(AActor* DamageCauser)
+void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 {
 	// Regular guard stamina cost
-	m_Stamina->DecreaseStamina(GUARD_STAMINA_COST);
+	m_Stamina->DecreaseStamina(Data.StaminaDamageAmount * GUARD_STAMINA_MULTIPLY_RATE);
 
 	// Rotate AreaObject to Damage Causer
 	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation());
@@ -533,19 +539,19 @@ void AAreaObject::HandleGuard(AActor* DamageCauser)
 	}
 }
 
-void AAreaObject::HandlePerfectGuard(AActor* DamageCauser)
+void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data)
 {
 	// Rotate AreaObject to Damage Causer
 	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation());
 	SetActorRotation(rotator);
 
 	// Perfect guard stamina cost
-	m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_COST);
+	m_Stamina->DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);
 
 	// Apply stamina damage to attacker
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
 	{
-		attacker->m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_DAMAGE);
+		attacker->m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
 	}
 	// Spawn perfect guard VFX
 	if (PerfectGuardEffect)
