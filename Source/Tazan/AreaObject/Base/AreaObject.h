@@ -206,6 +206,9 @@ public:
 	// 가드 상태 변경 시 호출
 	void SetGuardState(bool bIsGuarding);
 
+	//약점에 맞았는지
+	virtual bool IsWeakPointHit(FVector HitLoc);
+
 private:
 	FAreaObjectData* dt_AreaObject;
 
