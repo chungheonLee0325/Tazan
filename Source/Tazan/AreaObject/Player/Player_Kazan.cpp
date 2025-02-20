@@ -30,6 +30,9 @@ APlayer_Kazan::APlayer_Kazan()
 	GuardSFXID = 10;
 	PerfectGuardSFXID = 11;
 
+	// DamagedType 설정 - FloatingText 설정
+	m_DamageType = EDamageType::PlayerDamaged;
+
 	// Set Size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 

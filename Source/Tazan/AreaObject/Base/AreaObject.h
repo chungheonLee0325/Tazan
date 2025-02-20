@@ -9,6 +9,7 @@
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 #include "Tazan/AreaObject/Utility/RotationComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
+#include "Tazan/UI/Widget/FloatingDamageWidget.h"
 #include "AreaObject.generated.h"
 
 class URotationComponent;
@@ -37,6 +38,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AreaObject Data Setting")
 	int m_AreaObjectID;
+	UPROPERTY(EditDefaultsOnly, Category = "TakeDamage")
+	EDamageType m_DamageType = EDamageType::Normal;
 
 protected:
 	// Called when the game starts or when spawned

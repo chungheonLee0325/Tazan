@@ -18,6 +18,7 @@
 #include "Tazan/AreaObject/Attribute/Stamina.h"
 #include "Tazan/AreaObject/Utility/RotationComponent.h"
 #include "Tazan/Contents/TazanGameMode.h"
+#include "Tazan/UI/FloatingDamageActor.h"
 
 // Sets default values
 AAreaObject::AAreaObject()
@@ -185,10 +186,13 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 		return ActualDamage;
 	}
 
+	FHitResult hitResult;
+	FVector hitDir;
 	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
 	{
 		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
 		const FAttackData& attackData = customDamageEvent->AttackData;
+		customDamageEvent->GetBestHitInfo(this, DamageCauser,hitResult,hitDir);
 
 		// HitStop 처리
 		if (attackData.bEnableHitStop)
@@ -221,11 +225,39 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
 
 	// apply hp damage
-	if (FMath::IsNearlyZero(IncreaseHP(-ActualDamage)))
+	ActualDamage = IncreaseHP(-ActualDamage);
+	if (FMath::IsNearlyZero(ActualDamage))
 	{
 		if (true == ExchangeDead())
 		{
 			OnDie();
+		}
+	}
+
+	// Spawn floating damage
+	if (ActualDamage > 0)
+	{
+		FVector SpawnLocation;
+		if (hitResult.Location == FVector::ZeroVector)
+		{
+			// 캐릭터 머리 위에 생성
+			SpawnLocation = GetActorLocation();
+			// SpawnLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		}
+		else
+		{
+			// Hit 위치에서 생성
+			SpawnLocation = hitResult.Location;
+			SpawnLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		}
+
+
+		FTransform SpawnTransform(FRotator::ZeroRotator, SpawnLocation);
+
+		if (AFloatingDamageActor* DamageActor = GetWorld()->SpawnActor<AFloatingDamageActor>(
+			AFloatingDamageActor::StaticClass(), SpawnTransform))
+		{
+			DamageActor->Initialize(ActualDamage, m_DamageType);
 		}
 	}
 
@@ -381,7 +413,8 @@ bool AAreaObject::ExchangeDead() const
 	return m_Condition->ExchangeDead();
 }
 
-void AAreaObject::LookAtLocation(const FVector& TargetLocation, float Duration, float Ratio = 1.0f, EMovementInterpolationType InterpType)
+void AAreaObject::LookAtLocation(const FVector& TargetLocation, float Duration, float Ratio = 1.0f,
+                                 EMovementInterpolationType InterpType)
 {
 	m_RotationComponent->LookAtLocation(TargetLocation, Duration, Ratio, InterpType);
 }
