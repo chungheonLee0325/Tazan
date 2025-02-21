@@ -2,17 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Stamina.generated.h"
+#include "StaminaComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnStaminaChangedDelegate, float, CurrentStamina, float, Delta, float, MaxStamina);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class TAZAN_API UStamina : public UActorComponent
+class TAZAN_API UStaminaComponent : public UActorComponent
 {
     GENERATED_BODY()
 
 public:
-    UStamina();
+    UStaminaComponent();
 
 protected:
     virtual void BeginPlay() override;

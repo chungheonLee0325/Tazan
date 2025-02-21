@@ -6,7 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Player_Kazan.h"
-#include "Tazan/AreaObject/Attribute/Stamina.h"
+#include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 AKazanPlayerController::AKazanPlayerController()

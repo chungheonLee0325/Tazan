@@ -1,16 +1,16 @@
-#include "Stamina.h"
+#include "StaminaComponent.h"
 
-UStamina::UStamina()
+UStaminaComponent::UStaminaComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UStamina::BeginPlay()
+void UStaminaComponent::BeginPlay()
 {
     Super::BeginPlay();
 }
 
-void UStamina::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UStaminaComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -29,7 +29,7 @@ void UStamina::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
     }
 }
 
-void UStamina::InitStamina(float StaminaMax, float RecoveryRate)
+void UStaminaComponent::InitStamina(float StaminaMax, float RecoveryRate)
 {
     m_StaminaMax = StaminaMax;
     m_Stamina = m_StaminaMax;
@@ -37,7 +37,7 @@ void UStamina::InitStamina(float StaminaMax, float RecoveryRate)
     OnStaminaChanged.Broadcast(m_Stamina, 0, m_StaminaMax);
 }
 
-float UStamina::DecreaseStamina(float Delta)
+float UStaminaComponent::DecreaseStamina(float Delta)
 {
     if (Delta <= 0.0f) return m_Stamina;
     
@@ -54,7 +54,7 @@ float UStamina::DecreaseStamina(float Delta)
         GetWorld()->GetTimerManager().SetTimer(
             RecoveryDelayHandle,
             this,
-            &UStamina::StartStaminaRecovery,
+            &UStaminaComponent::StartStaminaRecovery,
             m_RecoveryDelay,
             false
         );
@@ -63,7 +63,7 @@ float UStamina::DecreaseStamina(float Delta)
     return m_Stamina;
 }
 
-float UStamina::IncreaseStamina(float Delta)
+float UStaminaComponent::IncreaseStamina(float Delta)
 {
     if (Delta <= 0.0f) return m_Stamina;
     
@@ -78,17 +78,17 @@ float UStamina::IncreaseStamina(float Delta)
     return m_Stamina;
 }
 
-void UStamina::StartStaminaRecovery()
+void UStaminaComponent::StartStaminaRecovery()
 {
     bCanRecover = true;
 }
 
-void UStamina::StopStaminaRecovery()
+void UStaminaComponent::StopStaminaRecovery()
 {
     bCanRecover = false;
 }
 
-void UStamina::SetGuardState(bool IsGuarding)
+void UStaminaComponent::SetGuardState(bool IsGuarding)
 {
     this->bIsGuarding = IsGuarding;
 } 
