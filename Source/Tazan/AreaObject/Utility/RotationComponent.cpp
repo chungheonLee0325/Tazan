@@ -52,17 +52,18 @@ void URotationComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 }
 
-void URotationComponent::RotateActorByRotator(const FRotator& TargetRotation, float Duration, float Ratio,
+void URotationComponent::RotateActorByRotator(const FRotator& TargetRotation, EPMRotationMode Mode, float Duration,
+                                              float Ratio,
                                               EMovementInterpolationType InterpType)
 {
 	if (!GetOwner() || Duration <= 0.0f) return;
-	StartNewRotation(TargetRotation, Duration, Ratio, InterpType);
+	StartNewRotation(TargetRotation, Mode, Duration, Ratio, InterpType);
 }
 
-void URotationComponent::LookAtLocation(const FVector& TargetLocation, float Duration, float Ratio,
+void URotationComponent::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed, float Ratio,
                                         EMovementInterpolationType InterpType)
 {
-	if (!GetOwner() || Duration <= 0.0f) return;
+	if (!GetOwner() || DurationOrSpeed <= 0.0f) return;
 
 	FVector actorLocation = GetOwner()->GetActorLocation();
 	FVector targetLocation = TargetLocation;
@@ -70,7 +71,7 @@ void URotationComponent::LookAtLocation(const FVector& TargetLocation, float Dur
 	targetLocation.Z = 0;
 	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(actorLocation, targetLocation);
 
-	RotateActorByRotator(rotator, Duration, Ratio, InterpType);
+	RotateActorByRotator(rotator, Mode, DurationOrSpeed, Ratio, InterpType);
 }
 
 void URotationComponent::LookAtLocationDirect(const FVector& TargetLocation) const
@@ -97,7 +98,8 @@ void URotationComponent::StopRotation()
 	RotationState = FRotationState();
 }
 
-void URotationComponent::StartNewRotation(const FRotator& TargetRot, float SpeedOrDuration, float Ratio,
+void URotationComponent::StartNewRotation(const FRotator& TargetRot, EPMRotationMode Mode, float SpeedOrDuration,
+                                          float Ratio,
                                           EMovementInterpolationType InterpType)
 {
 	StopRotation();
@@ -105,8 +107,25 @@ void URotationComponent::StartNewRotation(const FRotator& TargetRot, float Speed
 	RotationState.StartRotation = GetOwner()->GetActorRotation();
 	RotationState.TargetRotation = TargetRot;
 	RotationState.InterpType = InterpType;
-	RotationState.Duration = SpeedOrDuration;
 	RotationState.TargetRatio = Ratio;
+	if (Mode == EPMRotationMode::Duration)
+	{
+		RotationState.Duration = SpeedOrDuration;
+		RotationState.Speed = 0.0f;
+	}
+	else
+	{
+		RotationState.Speed = SpeedOrDuration;
+		const float MaxRotationDelta = FMath::Max(
+			FMath::Abs(FMath::FindDeltaAngleDegrees(RotationState.StartRotation.Yaw, TargetRot.Yaw)),
+			FMath::Max(
+				FMath::Abs(FMath::FindDeltaAngleDegrees(RotationState.StartRotation.Pitch, TargetRot.Pitch)),
+				FMath::Abs(FMath::FindDeltaAngleDegrees(RotationState.StartRotation.Roll, TargetRot.Roll))
+			)
+		);
+		RotationState.Duration = MaxRotationDelta / SpeedOrDuration;
+	}
+
 	RotationState.CurrentTime = 0.0f;
 	RotationState.bIsActive = true;
 }
@@ -158,6 +177,17 @@ void FRotationState::Update(float DeltaTime)
 {
 	if (!bIsActive) return;
 	CurrentTime += DeltaTime;
+	if (RotationMode == EPMRotationMode::Speed)
+	{
+		const float MaxRotationDelta = FMath::Max(
+			FMath::Abs(FMath::FindDeltaAngleDegrees(StartRotation.Yaw, TargetRotation.Yaw)),
+			FMath::Max(
+				FMath::Abs(FMath::FindDeltaAngleDegrees(StartRotation.Pitch, TargetRotation.Pitch)),
+				FMath::Abs(FMath::FindDeltaAngleDegrees(StartRotation.Roll, TargetRotation.Roll))
+			)
+		);
+		Duration = MaxRotationDelta / Speed;
+	}
 }
 
 void FRotationState::Stop()
@@ -165,8 +195,10 @@ void FRotationState::Stop()
 	bIsActive = false;
 	CurrentTime = 0.0f;
 	Duration = 0.0f;
+	Speed = 0.0f;
 	TargetRatio = 1.0f;
 	StartRotation = FRotator::ZeroRotator;
 	TargetRotation = FRotator::ZeroRotator;
+	RotationMode = EPMRotationMode::Duration;
 	InterpType = EMovementInterpolationType::Linear;
 }

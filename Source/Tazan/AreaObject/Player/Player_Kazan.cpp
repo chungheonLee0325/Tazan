@@ -62,10 +62,18 @@ APlayer_Kazan::APlayer_Kazan()
 		{
 			WeaponComponent->SetMaterial(0, tempWeaponMaterial.Object);
 		}
-		//FTransform attachTransform = GetMesh()->GetSocketTransform(TEXT("Weapon_R_BackPack_GSword"));
-		//WeaponComponent->SetRelativeTransform(attachTransform);
 	}
 
+	// Set Animation Blueprint
+	ConstructorHelpers::FClassFinder<UAnimInstance> TempABP(TEXT(
+		"/Script/Engine.AnimBlueprint'/Game/_BluePrints/AreaObject/Player/ABP_Player_Kazan_AnimInstance.ABP_Player_Kazan_AnimInstance_C'"));
+
+	if (TempABP.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(TempABP.Class);
+	}
+
+	// Set Anim Montage
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> tempDodgeAnimMontage(TEXT(
 		"/Script/Engine.AnimMontage'/Game/_Resource/Kazan/Animation/GSword/CA_P_Kazan_GSword_Dodge_F_Montage.CA_P_Kazan_GSword_Dodge_F_Montage'"));
 	if (tempDodgeAnimMontage.Succeeded())
@@ -134,12 +142,12 @@ void APlayer_Kazan::SpecialFUNCTION()
 			if (auto* StrongThis = weakThis.Get())
 			{
 				FTransform SpawnTransform = StrongThis->GetMesh()->GetComponentTransform();
-	
+
 				AGhostTrail* GhostTrail = StrongThis->GetWorld()->SpawnActor<AGhostTrail>(
 					AGhostTrail::StaticClass(),
 					SpawnTransform
 				);
-	
+
 				if (GhostTrail)
 				{
 					GhostTrail->InitByMaterials(StrongThis->GetMesh(), 0.5, 0.2);
@@ -191,12 +199,12 @@ void APlayer_Kazan::HandlePerfectDodge()
 		if (auto* StrongThis = weakThis.Get())
 		{
 			FTransform SpawnTransform = StrongThis->GetMesh()->GetComponentTransform();
-	
+
 			AGhostTrail* GhostTrail = StrongThis->GetWorld()->SpawnActor<AGhostTrail>(
 				AGhostTrail::StaticClass(),
 				SpawnTransform
 			);
-	
+
 			if (GhostTrail)
 			{
 				GhostTrail->InitByMaterials(StrongThis->GetMesh(), 0.5, 0.2);

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Tazan/ResourceManager/KazanGameType.h"
 #include "RotationComponent.generated.h"
 
 // Enums
@@ -30,9 +31,11 @@ public:
 	bool bIsActive = false;
 	float CurrentTime = 0.0f;
 	float Duration = 0.0f;
+	float Speed = 5.0f;
 	float TargetRatio = 1.0f;
 	FRotator StartRotation = FRotator::ZeroRotator;
 	FRotator TargetRotation = FRotator::ZeroRotator;
+	EPMRotationMode RotationMode = EPMRotationMode::Speed;
 	EMovementInterpolationType InterpType = EMovementInterpolationType::Linear;
 };
 
@@ -55,12 +58,14 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
-	void RotateActorByRotator(const FRotator& TargetRotation, float Duration, float Ratio,
+	void RotateActorByRotator(const FRotator& TargetRotation, EPMRotationMode Mode, float Duration, float Ratio,
 	                          EMovementInterpolationType InterpType = EMovementInterpolationType::Linear);
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
-	void LookAtLocation(const FVector& TargetLocation, float Duration, float Ratio = 1.0f,
+	void LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed, float Ratio = 1.0f,
 	                    EMovementInterpolationType InterpType = EMovementInterpolationType::Linear);
+
+	
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
 	void LookAtLocationDirect(const FVector& TargetLocation) const;
 
@@ -86,7 +91,7 @@ private:
 	float LastUpdateTime = 0.0f;
 
 	// Internal Methods
-	void StartNewRotation(const FRotator& TargetRot, float SpeedOrDuration, float Ratio,
+	void StartNewRotation(const FRotator& TargetRot, EPMRotationMode Mode, float SpeedOrDuration, float Ratio,
 	                      EMovementInterpolationType InterpType);
 	static float CalculateInterpolationAlpha(float RawAlpha, EMovementInterpolationType InterpType);
 };

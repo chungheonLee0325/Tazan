@@ -15,9 +15,9 @@ void URotateToTargetNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 			if (target != nullptr)
 			{
 				FVector targetLocation = target->GetActorLocation();
-				if (DurationTime != 0)
+				if (DurationOrSpeed != 0)
 				{
-					owner->LookAtLocation(targetLocation, DurationTime, RotationRatio);
+					owner->LookAtLocation(targetLocation, RotationMode, DurationOrSpeed, RotationRatio);
 				}
 				else
 				{

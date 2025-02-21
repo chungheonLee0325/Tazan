@@ -79,6 +79,13 @@ enum class EStaggerType : uint8
 	AirBone // 넘어짐
 };
 
+UENUM(BlueprintType)
+enum class EPMRotationMode : uint8
+{
+	Duration UMETA(DisplayName = "Duration Based"),
+	Speed UMETA(DisplayName = "Speed Based")
+};
+
 // Struct
 // AreaObject 데이터 테이블용 구조체
 USTRUCT(BlueprintType)

@@ -40,6 +40,7 @@ public:
 	int m_AreaObjectID;
 	UPROPERTY(EditDefaultsOnly, Category = "TakeDamage")
 	EFloatingDamageType m_DefaultDamageType = EFloatingDamageType::Normal;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -64,7 +65,7 @@ protected:
 	const float PERFECT_DODGE_BUFF_DURATION = 5.0f;
 	const float PERFECT_DODGE_HIT_STOP_DURATION = 0.2f;
 	const float PERFECT_GUARD_HIT_STOP_DURATION = 0.2f;
-	const float GUARD_TO_TARGET_ROTATE_TIME = 0.2f;
+	const float GUARD_TO_TARGET_ROTATE_SPEED = 600.f;
 	// Perfect dodge damage multiplier
 	const float PERFECT_DODGE_DAMAGE_MULTIPLIER = 1.5f;
 	bool bPerfectDodgeBuffActive = false;
@@ -84,7 +85,7 @@ protected:
 	int GuardSFXID;
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|SFX")
 	int PerfectDodgeSFXID;
-	
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -113,7 +114,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
 	float IncreaseStamina(float Delta) const;
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
-	float DecreaseStamina(float Delta) const;
+	float DecreaseStamina(float Delta, bool bIsDamaged = true) const;
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
 	float GetStamina() const;
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
@@ -131,8 +132,8 @@ public:
 
 	// Rotate 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
-	void LookAtLocation(const FVector& TargetLocation, float Duration,
-	                    float Ratio, EMovementInterpolationType InterpType = EMovementInterpolationType::Linear);
+	void LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed,
+	                    float Ratio = 1.0f, EMovementInterpolationType InterpType = EMovementInterpolationType::Linear);
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
 	void LookAtLocationDirect(const FVector& TargetLocation) const;
 
@@ -158,7 +159,7 @@ public:
 
 	// Stager Interface
 	void SetAnimationPoiseBonus(float Bonus) const;
-	
+
 	// Sound Interface 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayGlobalSound(int SoundID);
@@ -168,7 +169,7 @@ public:
 	void PlayBGM(int SoundID, bool bLoop = true);
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void StopBGM();
-	
+
 	// Stagger 처리 핸들
 	UFUNCTION()
 	void HandleStaggerBegin(EStaggerType Type, float Duration);
@@ -201,21 +202,22 @@ public:
 
 	// HitStop 관련
 	void ApplyHitStop(float Duration);
-	void ResetTimeScale();
+	void ResetTimeScale() const;
 	FTimerHandle HitStopTimerHandle;
-	
+
 	// 넉백 관련
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyKnockBack(const FVector& KnockbackForce);
 	bool bIsBeingKnockedBack = false;
 
 	// 가드 상태 변경 시 호출
-	void SetGuardState(bool bIsGuarding);
+	virtual void SetGuardState(bool bIsGuarding);
 
 	//약점에 맞았는지
 	virtual bool IsWeakPointHit(FVector HitLoc);
 
 	FAreaObjectData* dt_AreaObject;
+
 private:
 	UPROPERTY()
 	ATazanGameMode* m_GameMode = nullptr;

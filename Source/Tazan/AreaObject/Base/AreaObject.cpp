@@ -3,7 +3,6 @@
 
 #include "AreaObject.h"
 
-#include <ThirdParty/ShaderConductor/ShaderConductor/External/DirectXShaderCompiler/include/dxc/DXIL/DxilConstants.h>
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -11,7 +10,6 @@
 #include "Tazan/AreaObject/Attribute/Health.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
@@ -157,12 +155,16 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 
 	FHitResult hitResult;
 	FVector hitDir;
+	bool bIsWeakPointHit = false;
 
 	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
 	{
 		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
 		FAttackData attackData = customDamageEvent->AttackData;
 		customDamageEvent->GetBestHitInfo(this, DamageCauser, hitResult, hitDir);
+
+		// Check for weak point hit
+		bIsWeakPointHit = IsWeakPointHit(hitResult.Location);
 
 		// Check for dodge conditions
 		if (HasCondition(EConditionBitsType::DodgeWindow) ||
@@ -226,7 +228,10 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 
 	ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
 
-	// apply hp damage
+	// damage multiply by weakpoint Hit
+	ActualDamage = bIsWeakPointHit ? ActualDamage * 1.5f : ActualDamage;
+
+	// apply actual hp damage
 	float CurrentHP = IncreaseHP(-ActualDamage);
 	if (FMath::IsNearlyZero(CurrentHP))
 	{
@@ -255,7 +260,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 		AFloatingDamageActor::StaticClass(), SpawnTransform))
 	{
 		// FloatingDamageType 계산
-		EFloatingDamageType damageType = IsWeakPointHit(hitResult.Location)
+		EFloatingDamageType damageType = bIsWeakPointHit
 			                                 ? EFloatingDamageType::WeakPointDamage
 			                                 : m_DefaultDamageType;
 		DamageActor->Initialize(ActualDamage, damageType);
@@ -424,10 +429,11 @@ bool AAreaObject::ExchangeDead() const
 	return m_Condition->ExchangeDead();
 }
 
-void AAreaObject::LookAtLocation(const FVector& TargetLocation, float Duration, float Ratio = 1.0f,
+void AAreaObject::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed,
+                                 float Ratio,
                                  EMovementInterpolationType InterpType)
 {
-	m_RotationComponent->LookAtLocation(TargetLocation, Duration, Ratio, InterpType);
+	m_RotationComponent->LookAtLocation(TargetLocation, Mode, DurationOrSpeed, Ratio, InterpType);
 }
 
 void AAreaObject::LookAtLocationDirect(const FVector& TargetLocation) const
@@ -505,8 +511,9 @@ float AAreaObject::IncreaseStamina(float Delta) const
 	return m_Stamina->IncreaseStamina(Delta);
 }
 
-float AAreaObject::DecreaseStamina(float Delta) const
+float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged) const
 {
+	// ToDo : 탈진상태 추가 및 브루탈 어택 변수 셋팅, 탈진 델리게이트 호출 - bIsDamaged == true일때만
 	return m_Stamina->DecreaseStamina(Delta);
 }
 
@@ -545,10 +552,11 @@ void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 
 void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data)
 {
-	// Rotate AreaObject to Damage Causer
-	RotateToGuardTarget(DamageCauser->GetActorLocation());
 	// Perfect guard stamina cost
 	m_Stamina->DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);
+
+	// Rotate AreaObject to Damage Causer
+	RotateToGuardTarget(DamageCauser->GetActorLocation());
 
 	// Apply stamina damage to attacker
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
@@ -623,7 +631,7 @@ void AAreaObject::ApplyHitStop(float Duration)
 	);
 }
 
-void AAreaObject::ResetTimeScale()
+void AAreaObject::ResetTimeScale() const
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 }
@@ -707,11 +715,12 @@ void AAreaObject::StopBGM()
 
 void AAreaObject::RotateToGuardTarget(const FVector& Target)
 {
-	float dotResult = FVector::DotProduct(GetActorLocation(),Target);
-	float rotateRatio = 1.0f;
-	if (dotResult > 0.5f) rotateRatio = 0.3f;
-	else if (dotResult < 0.5f && dotResult > -0.5f) rotateRatio = 0.6f;
-	LookAtLocation(Target, GUARD_TO_TARGET_ROTATE_TIME * rotateRatio);
+	//FVector ForwardVector = GetActorForwardVector();
+	//FVector DirectionToTarget = (Target - GetActorLocation()).GetSafeNormal();
+	//
+	//float DotProduct = FVector::DotProduct(ForwardVector, DirectionToTarget);
+	//float RotateRatio = 1.0f - ((DotProduct + 1.0f) / 2.0f);
+	//RotateRatio = FMath::Clamp(RotateRatio, 0.1f, 1.0f);
 
+	LookAtLocation(Target, EPMRotationMode::Speed, GUARD_TO_TARGET_ROTATE_SPEED);
 }
-
