@@ -7,6 +7,8 @@
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Player_Kazan.generated.h"
 
+class AKazanPlayerController;
+class ABaseItem;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -85,8 +87,6 @@ protected:
 	virtual void OnDie() override;
 
 public:
-	virtual void HandlePerfectDodge() override;
-
 	// Movement
 	/** Called for movement input */
 	void Move(FVector2D MovementVector);
@@ -106,11 +106,16 @@ public:
 	
 	/** Called for evade input */
 	void Dodge_Pressed();
-private:
+
 	/** Called for run input */
 	void On_Run_Pressed();
 	void On_Run_Released();
 	
+	virtual void HandlePerfectDodge() override;
+
+	void Reward(FItemData* ItemData, int ItemValue) const;
+	
+private:
 	// Weapon Setting
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* WeaponComponent;
@@ -137,7 +142,9 @@ private:
 
 	UPROPERTY()
 	UKazanAniminstance* KazanAnimInstance;
-
+	UPROPERTY()
+	AKazanPlayerController* KazanPlayerController;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* DodgeAnimMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")

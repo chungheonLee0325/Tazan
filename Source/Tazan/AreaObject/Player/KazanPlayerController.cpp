@@ -54,11 +54,13 @@ AKazanPlayerController::AKazanPlayerController()
 	{
 		EvadeAction = tempEvadeAction.Object;
 	}
-	
+
 	Kazan = nullptr;
-	
+
 	// UI 클래스 설정
-	static ConstructorHelpers::FClassFinder<UPlayerStatusWidget> WidgetClassFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_PlayerStatusWidget.WB_PlayerStatusWidget_C'"));
+	static ConstructorHelpers::FClassFinder<UPlayerStatusWidget> WidgetClassFinder(
+		TEXT(
+			"/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_PlayerStatusWidget.WB_PlayerStatusWidget_C'"));
 	if (WidgetClassFinder.Succeeded())
 	{
 		StatusWidgetClass = WidgetClassFinder.Class;
@@ -74,7 +76,7 @@ void AKazanPlayerController::BeginPlay()
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 	Kazan = Cast<APlayer_Kazan>(GetPawn());
-	
+
 	// UI 초기화
 	InitializeHUD();
 }
@@ -82,13 +84,13 @@ void AKazanPlayerController::BeginPlay()
 void AKazanPlayerController::InitializeHUD()
 {
 	if (!StatusWidgetClass || !Kazan) return;
-	
+
 	// UI 위젯 생성
 	StatusWidget = CreateWidget<UPlayerStatusWidget>(this, StatusWidgetClass);
 	if (StatusWidget)
 	{
 		StatusWidget->AddToViewport();
-		
+
 		// HP 변경 이벤트 바인딩
 		if (Kazan->m_Health)
 		{
@@ -96,7 +98,7 @@ void AKazanPlayerController::InitializeHUD()
 			// 초기값 설정
 			StatusWidget->UpdateHealth(Kazan->GetHP(), 0.0f, Kazan->m_Health->GetMaxHP());
 		}
-		
+
 		// Stamina 변경 이벤트 바인딩
 		if (Kazan->m_Stamina)
 		{
@@ -121,23 +123,26 @@ void AKazanPlayerController::SetupInputComponent()
 
 		// Attack
 		EnhancedInputComponent->BindAction(AttackCAction, ETriggerEvent::Started, this,
-										   &AKazanPlayerController::On_Attack_Weak_Pressed);
+		                                   &AKazanPlayerController::On_Attack_Weak_Pressed);
 		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Started, this,
-										   &AKazanPlayerController::On_Attack_Strong_Pressed);
+		                                   &AKazanPlayerController::On_Attack_Strong_Pressed);
 
 		// Parry
-		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Started, this, &AKazanPlayerController::On_Parry_Pressed);
-		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Completed, this, &AKazanPlayerController::On_Parry_Released);
+		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Started, this,
+		                                   &AKazanPlayerController::On_Parry_Pressed);
+		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Completed, this,
+		                                   &AKazanPlayerController::On_Parry_Released);
 
 		// Evade
-		EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Started, this, &AKazanPlayerController::On_Dodge_Pressed);
+		EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Started, this,
+		                                   &AKazanPlayerController::On_Dodge_Pressed);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error,
-			   TEXT(
-				   "'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."
-			   ), *GetNameSafe(this));
+		       TEXT(
+			       "'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."
+		       ), *GetNameSafe(this));
 	}
 }
 
@@ -182,4 +187,25 @@ void AKazanPlayerController::On_Run_Pressed(const FInputActionValue& InputAction
 
 void AKazanPlayerController::On_Run_Released(const FInputActionValue& InputActionValue)
 {
+}
+
+void AKazanPlayerController::AddCurrency(ECurrencyType CurrencyType, int CurrencyValue)
+{
+	if (CurrencyValue < 0) return;
+	CurrencyValues[CurrencyType] += CurrencyValue;
+	this->OnCurrencyChange.Broadcast(CurrencyType,CurrencyValues[CurrencyType],CurrencyValue);
+}
+
+void AKazanPlayerController::RemoveCurrency(ECurrencyType CurrencyType, int CurrencyValue)
+{
+	if (CurrencyValue < 0) return;
+	// 스태미나 감소
+	float oldCurrency = CurrencyValues[CurrencyType];
+	CurrencyValues[CurrencyType] = FMath::Max(CurrencyValues[CurrencyType] - CurrencyValue, 0);
+	this->OnCurrencyChange.Broadcast(CurrencyType,CurrencyValues[CurrencyType],-(oldCurrency - CurrencyValues[CurrencyType]));
+}
+
+int AKazanPlayerController::GetCurrencyValue(ECurrencyType CurrencyType)
+{
+	return CurrencyValues[CurrencyType];
 }

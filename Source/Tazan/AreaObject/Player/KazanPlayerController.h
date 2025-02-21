@@ -8,6 +8,9 @@
 #include "KazanPlayerController.generated.h"
 
 struct FInputActionValue;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCurrencyChangeDelegate, ECurrencyType, CurrencyType, int,
+                                               CurrencyValue, int, Delta);
+
 /**
  * 
  */
@@ -22,7 +25,17 @@ public:
 
 	virtual void BeginPlay() override;
 
+	void AddCurrency(ECurrencyType CurrencyType, int CurrencyValue);
+	void RemoveCurrency(ECurrencyType CurrencyType, int CurrencyValue);
+	int GetCurrencyValue(ECurrencyType CurrencyType);
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnCurrencyChangeDelegate OnCurrencyChange;
+
 private:
+	// UI 초기화 및 바인딩
+	void InitializeHUD();
+
 	// Input Action
 	/** Called for movement input */
 	void OnMove(const FInputActionValue& Value);
@@ -39,6 +52,20 @@ private:
 	/** Called for run input */
 	void On_Run_Pressed(const FInputActionValue& InputActionValue);
 	void On_Run_Released(const FInputActionValue& InputActionValue);
+
+	// Owner
+	UPROPERTY(VisibleAnywhere)
+	APlayer_Kazan* Kazan;
+
+	// 재화 관련 데이터
+	TMap<ECurrencyType, int> CurrencyValues;
+
+	// UI 관련
+	UPROPERTY()
+	class UPlayerStatusWidget* StatusWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UPlayerStatusWidget> StatusWidgetClass;
 
 	// Input Setting
 	/** MappingContext */
@@ -68,18 +95,4 @@ private:
 	/** Evade Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EvadeAction;
-
-	// Owner
-	UPROPERTY(VisibleAnywhere)
-	APlayer_Kazan* Kazan;
-
-	// UI 관련
-	UPROPERTY()
-	class UPlayerStatusWidget* StatusWidget;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class UPlayerStatusWidget> StatusWidgetClass;
-	
-	// UI 초기화 및 바인딩
-	void InitializeHUD();
 };
