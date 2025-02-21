@@ -23,7 +23,6 @@ void UHealth::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
 }
 
 
@@ -35,21 +34,40 @@ void UHealth::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponen
 	// ...
 }
 
-void UHealth::InitHealth(float _hpMax)	// 추후 사용에따라 구조체나 다른 형식으로 변환 예정
+void UHealth::InitHealth(float _hpMax) // 추후 사용에따라 구조체나 다른 형식으로 변환 예정
 {
 	m_HPMax = _hpMax;
 	m_HP = m_HPMax;
-	this->OnHealthChanged.Broadcast(m_HP,0,m_HPMax);
+	this->OnHealthChanged.Broadcast(m_HP, 0, m_HPMax);
 }
 
 float UHealth::IncreaseHP(float Delta)
 {
+	if (Delta <= 0.0f) return m_HP;
+
 	float oldHP = m_HP;
-	m_HP = FMath::Clamp(m_HP + Delta,0.0f,m_HPMax);
-	if (false == FMath::IsNearlyEqual((oldHP), (m_HP)))
+	m_HP = FMath::Clamp(m_HP + Delta, 0.0f, m_HPMax);
+
+	if (!FMath::IsNearlyEqual(oldHP, m_HP))
 	{
-		this->OnHealthChanged.Broadcast(m_HP,Delta,m_HPMax);
-  	}
+		OnHealthChanged.Broadcast(m_HP, m_HP - oldHP, m_HPMax);
+	}
+
+	return m_HP;
+}
+
+float UHealth::DecreaseHP(float Delta)
+{
+	if (Delta <= 0.0f) return m_HP;
+
+	float oldHP = m_HP;
+	m_HP = FMath::Clamp(m_HP - Delta, 0.0f, m_HPMax);
+
+	if (!FMath::IsNearlyEqual(oldHP, m_HP))
+	{
+		OnHealthChanged.Broadcast(m_HP, -(oldHP - m_HP), m_HPMax);
+	}
+
 	return m_HP;
 }
 
@@ -59,7 +77,7 @@ void UHealth::SetHPByRate(float Rate)
 	m_HP = m_HPMax * Rate;
 	if (false == FMath::IsNearlyEqual((oldHP), (m_HP)))
 	{
-		this->OnHealthChanged.Broadcast(m_HP,m_HP - oldHP, m_HPMax);
+		this->OnHealthChanged.Broadcast(m_HP, m_HP - oldHP, m_HPMax);
 	}
 }
 
@@ -67,4 +85,3 @@ float UHealth::GetHP() const
 {
 	return m_HP;
 }
-

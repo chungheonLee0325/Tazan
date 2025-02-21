@@ -106,6 +106,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	float IncreaseHP(float Delta) const;
 	UFUNCTION(BlueprintCallable, Category = "HP")
+	float DecreaseHP(float Delta) const;
+	UFUNCTION(BlueprintCallable, Category = "HP")
 	void SetHPByRate(float Rate) const;
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	float GetHP() const;

@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Health.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHealthChangedDelegate, float, CurrentHP,float, Delta ,float, MaxHP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHealthChangedDelegate, float, CurrentHP, float, Delta, float, MaxHP);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TAZAN_API UHealth : public UActorComponent
@@ -32,6 +32,9 @@ public:
 	UFUNCTION()
 	float IncreaseHP(float Delta);
 
+	UFUNCTION()
+	float DecreaseHP(float Delta);
+
 	//최대체력기준 현재체력
 	UFUNCTION()
 	void SetHPByRate(float Rate);
@@ -42,19 +45,16 @@ public:
 
 	// 최대체력
 	UFUNCTION()
-	float GetMaxHP() const {return m_HPMax;};
+	float GetMaxHP() const { return m_HPMax; };
 
 	// 체력 변경 델리게이트
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChangedDelegate OnHealthChanged;
 
-
 private:
-	
-UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	float m_HPMax = 1.0f;
-	
-UPROPERTY(VisibleAnywhere)
+
+	UPROPERTY(VisibleAnywhere)
 	float m_HP;
 };
-

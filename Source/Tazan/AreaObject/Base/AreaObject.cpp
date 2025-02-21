@@ -232,7 +232,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	ActualDamage = bIsWeakPointHit ? ActualDamage * 1.5f : ActualDamage;
 
 	// apply actual hp damage
-	float CurrentHP = IncreaseHP(-ActualDamage);
+	float CurrentHP = DecreaseHP(ActualDamage);
 	if (FMath::IsNearlyZero(CurrentHP))
 	{
 		if (true == ExchangeDead())
@@ -494,6 +494,11 @@ void AAreaObject::PlayStaggerAnimation(EStaggerType Type) const
 float AAreaObject::IncreaseHP(float Delta) const
 {
 	return m_Health->IncreaseHP(Delta);
+}
+
+float AAreaObject::DecreaseHP(float Delta) const
+{
+	return m_Health->DecreaseHP(Delta);
 }
 
 void AAreaObject::SetHPByRate(float Rate) const
