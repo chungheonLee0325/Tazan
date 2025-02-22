@@ -131,7 +131,7 @@ USTRUCT(BlueprintType)
 struct FAreaObjectData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	int AreaObjectID = 0;
 
@@ -345,6 +345,19 @@ inline int32 FCustomDamageEvent::GetTypeID() const
 {
 	return ClassID;
 }
+
+// FXDataTable 데이터, GameMode에서 관리
+USTRUCT(BlueprintType)
+struct FVfxData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	int VfxID = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	UParticleSystem* Vfx = nullptr;
+};
 
 // SoundDataTable 데이터, GameMode에서 관리
 // Why Not GameInstance? AudioComponent가질수없음 -> BGM 관리 불가
