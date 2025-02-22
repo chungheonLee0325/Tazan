@@ -214,7 +214,7 @@ public:
 	virtual void SetGuardState(bool bIsGuarding);
 
 	//약점에 맞았는지
-	virtual bool IsWeakPointHit(FVector HitLoc);
+	virtual bool IsWeakPointHit(const FVector& HitLoc);
 
 	FAreaObjectData* dt_AreaObject;
 

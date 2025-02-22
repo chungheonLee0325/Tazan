@@ -39,6 +39,7 @@ BaseMonster System
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Containers/Queue.h"
+#include "Tazan/Contents/TazanGameInstance.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "BaseMonster.generated.h"
 
@@ -126,6 +127,8 @@ public:
 	UPROPERTY()
 	FTimerHandle OnDieHandle;
 	
+	FSkillBagData* dt_SkillBag;
+
 	UBaseAiFSM* GetFSM() const {return m_AiFSM;}
 	
 	UBaseSkill* NextSkill;
