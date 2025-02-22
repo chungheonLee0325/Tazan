@@ -28,6 +28,12 @@ AYetuga::AYetuga()
 	{
 		StatusWidgetClass = WidgetClassFinder.Class;
 	}
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> missionCompWidget(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_MissionComplete.WB_MissionComplete_C'"));
+	if (missionCompWidget.Succeeded())
+	{
+		MissionCompleteClass = missionCompWidget.Class;
+	}
 }
 
 void AYetuga::BeginPlay()
@@ -39,7 +45,7 @@ void AYetuga::BeginPlay()
 	SkillRoulette->InitSkill();
 
 	//시작시 어퍼컷 콤보공격 확정 실행
-	NextSkill = GetSkillByID(11000);
+	NextSkill = GetSkillByID(12000);
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
@@ -58,7 +64,7 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-bool AYetuga::IsWeakPointHit(FVector HitLoc)
+bool AYetuga::IsWeakPointHit(const FVector& HitLoc)
 {
 	FVector hitDir = HitLoc - GetActorLocation();
 	hitDir.Normalize();
@@ -66,28 +72,28 @@ bool AYetuga::IsWeakPointHit(FVector HitLoc)
 	float dot = FVector::DotProduct(hitDir,GetActorForwardVector());
 	if (dot < -0.2f)
 	{
-		LOG_SCREEN("뒤에서 맞았다요.");
+		// LOG_SCREEN("뒤에서 맞았다요.");
 		return true;
 	}
 	return false;
 }
 
-UAnimMontage* AYetuga::GetAnimMontage(EWeavingSkillAnim animType)
+void AYetuga::OnDie()
 {
-	if (const TObjectPtr<UAnimMontage>* MontagePtr = AnimMontageMap.Find(animType))
-	{
-		return *MontagePtr;
-	}
-	return nullptr;
+	Super::OnDie();
+	CompleteWidget->AddToViewport();
 }
 
 void AYetuga::InitializeHUD()
 {
 	if (!StatusWidgetClass) return;
+	if (!MissionCompleteClass) return;
 	
 	// UI 위젯 생성
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	StatusWidget = CreateWidget<UPlayerStatusWidget>(pc, StatusWidgetClass);
+	CompleteWidget = CreateWidget<UUserWidget>(pc, MissionCompleteClass);
+	
 	if (StatusWidget)
 	{
 		StatusWidget->AddToViewport();
