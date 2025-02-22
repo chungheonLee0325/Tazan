@@ -39,8 +39,8 @@ class TAZAN_API UBaseSkill : public UObject
 public:
 	UBaseSkill();
 	// 스킬 초기화 - 데이터 초기화
-	void InitSkill(FSkillData* SkillData);
-
+	virtual void InitSkill(FSkillData* SkillData);
+	
 	// 스킬 완료 델리게이트 -> 상태머신에서 사용(다음 상태 전이용)
 	DECLARE_DELEGATE(FOnSkillComplete)
 	FOnSkillComplete OnSkillComplete;
@@ -50,6 +50,8 @@ public:
 
 	virtual bool CanCast(class AAreaObject* Caster, const AAreaObject* Target) const;
 	virtual void OnCastStart(class AAreaObject* Caster, AAreaObject* Target);
+
+	virtual void OnCastTick(float DeltaTime);
 
 	// Notify를 이용한 Cast Fire(투사체, 장판 등)
 	virtual void OnCastFire();
@@ -94,12 +96,14 @@ protected:
 	UPROPERTY()
 	ESkillPhase m_CurrentPhase;
 
+	// Caster
 	UPROPERTY()
 	AAreaObject* m_Caster;
 
+	// Target
 	UPROPERTY()
 	AAreaObject* m_Target;
-
+	
 	UPROPERTY()
 	FVector m_TargetPos;
 
@@ -109,13 +113,11 @@ protected:
 	UPROPERTY()
 	UBaseSkill* m_NextSkill;
 
-private:
 	FSkillData* m_SkillData;
+private:
 
 	float m_CurrentCoolTime;
 
 	FOnMontageEnded EndDelegate;
 	FOnMontageBlendingOutStarted CompleteDelegate;
-
-	
 };

@@ -4,29 +4,44 @@
 #include "EnableCollisionNotifyState.h"
 
 #include "Tazan/AreaObject/Base/AreaObject.h"
+#include "Tazan/AreaObject/Skill/CollisionSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
 
 void UEnableCollisionNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                               float TotalDuration)
 {
+	//if (MeshComp && MeshComp->GetOwner())
+	//{
+	//	HitActors.Empty();
+	//
+	//	m_Owner = Cast<AAreaObject>(MeshComp->GetOwner());
+	//	if (m_Owner != nullptr)
+	//	{
+	//		AttackData = m_Owner->GetCurrentSkillAttackData(AttackDataIndex);
+	//		if (AttackData == nullptr) LOG_PRINT(TEXT("AttackData is Empty"));
+	//
+	//		// Test용 디버그 데이터 로직
+	//		if (bDebugData == true)
+	//		{
+	//			LOG_SCREEN("디버그용 데이터로 계산!! AnimNotifyState 설정 변경하기!")
+	//			AttackData = &DebugAttackData;
+	//		}
+	//		
+	//		OwnerSourceMesh = GetTargetMesh(m_Owner);
+	//	}
+	//}
 	if (MeshComp && MeshComp->GetOwner())
 	{
 		HitActors.Empty();
 
 		m_Owner = Cast<AAreaObject>(MeshComp->GetOwner());
-		if (m_Owner != nullptr)
+		if (m_Owner != nullptr && m_Owner->GetCurrentSkill() != nullptr)
 		{
-			AttackData = m_Owner->GetCurrentSkillAttackData(AttackDataIndex);
-			if (AttackData == nullptr) LOG_PRINT(TEXT("AttackData is Empty"));
-
-			// Test용 디버그 데이터 로직
-			if (bDebugData == true)
+			UCollisionSkill* collisionSkill = Cast<UCollisionSkill>(m_Owner->GetCurrentSkill());
+			if (collisionSkill != nullptr)
 			{
-				LOG_SCREEN("디버그용 데이터로 계산!! AnimNotifyState 설정 변경하기!")
-				AttackData = &DebugAttackData;
+				collisionSkill->SetCasterMesh(AttackDataIndex);
 			}
-			
-			OwnerSourceMesh = GetTargetMesh(m_Owner);
 		}
 	}
 }
@@ -34,15 +49,29 @@ void UEnableCollisionNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 void UEnableCollisionNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                              float FrameDeltaTime)
 {
-	if (OwnerSourceMesh && m_Owner && AttackData)
-	{
-		ProcessHitDetection(m_Owner, OwnerSourceMesh);
-	}
+	//if (OwnerSourceMesh && m_Owner && AttackData)
+	//{
+	//	ProcessHitDetection(m_Owner, OwnerSourceMesh);
+	//}
 }
 
 void UEnableCollisionNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	HitActors.Empty();
+	if (MeshComp && MeshComp->GetOwner())
+	{
+		HitActors.Empty();
+
+		m_Owner = Cast<AAreaObject>(MeshComp->GetOwner());
+		if (m_Owner != nullptr && m_Owner->GetCurrentSkill() != nullptr)
+		{
+			UCollisionSkill* collisionSkill = Cast<UCollisionSkill>(m_Owner->GetCurrentSkill());
+			if (collisionSkill != nullptr)
+			{
+				collisionSkill->ResetCollisionData();
+			}
+		}
+	}
+	//HitActors.Empty();
 }
 
 USkeletalMeshComponent* UEnableCollisionNotifyState::GetTargetMesh(AAreaObject* TargetAreaObject) const
@@ -85,7 +114,6 @@ void UEnableCollisionNotifyState::ProcessHitDetection(AAreaObject* OwnerAreaObje
 
 	TArray<FHitResult> HitResults;
 	bool bHit = false;
-
 
 
 	switch (AttackData->HitBoxData.DetectionType)

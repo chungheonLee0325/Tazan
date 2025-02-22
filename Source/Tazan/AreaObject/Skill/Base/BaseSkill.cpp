@@ -2,8 +2,6 @@
 
 #include "BaseSkill.h"
 
-#include "Chaos/Deformable/MuscleActivationConstraints.h"
-#include "Tazan/Animation/Player/KazanAniminstance.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 
@@ -89,6 +87,10 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 		CompleteDelegate.BindUObject(this, &UBaseSkill::OnMontageBlendOut);
 		AnimInstance->Montage_SetBlendingOutDelegate(CompleteDelegate, m_SkillData->Montage);
 	}
+}
+
+void UBaseSkill::OnCastTick(float DeltaTime)
+{
 }
 
 void UBaseSkill::OnCastFire()

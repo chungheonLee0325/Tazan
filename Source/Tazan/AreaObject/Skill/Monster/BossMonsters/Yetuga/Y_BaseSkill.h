@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Tazan/AreaObject/Skill/CollisionSkill.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Y_BaseSkill.generated.h"
 
@@ -10,7 +11,7 @@
  * 
  */
 UCLASS()
-class TAZAN_API UY_BaseSkill : public UBaseSkill
+class TAZAN_API UY_BaseSkill : public UCollisionSkill
 {
 	GENERATED_BODY()
 

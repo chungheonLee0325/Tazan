@@ -2,8 +2,6 @@
 
 
 #include "AreaObject.h"
-
-
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Attribute/HealthComponent.h"
@@ -24,13 +22,13 @@ AAreaObject::AAreaObject()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Health Component 생성
-	m_Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
+	m_Health = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
 
 	// Stamina Component 생성
-	m_Stamina = CreateDefaultSubobject<UStaminaComponent>(TEXT("Stamina"));
+	m_Stamina = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaComponent"));
 
 	// Condition Component 생성
 	m_ConditionComponent = CreateDefaultSubobject<UConditionComponent>(TEXT("ConditionComponent"));
@@ -112,6 +110,11 @@ void AAreaObject::PostInitializeComponents()
 void AAreaObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (m_CurrentSkill != nullptr)
+	{
+		m_CurrentSkill->OnCastTick(DeltaTime);
+	}
 }
 
 // Called to bind functionality to input
@@ -154,12 +157,13 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 
 	FHitResult hitResult;
 	FVector hitDir;
+	FAttackData attackData;
 	bool bIsWeakPointHit = false;
 
 	if (DamageEvent.IsOfType(FCustomDamageEvent::ClassID))
 	{
 		FCustomDamageEvent* const customDamageEvent = (FCustomDamageEvent*)&DamageEvent;
-		FAttackData attackData = customDamageEvent->AttackData;
+		attackData = customDamageEvent->AttackData;
 		customDamageEvent->GetBestHitInfo(this, DamageCauser, hitResult, hitDir);
 
 		// Check for weak point hit
@@ -239,6 +243,9 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 			OnDie();
 		}
 	}
+
+	// apply stamina damage
+	DecreaseStamina(attackData.StaminaDamageAmount);
 
 	// Spawn floating damage
 	FVector SpawnLocation;
