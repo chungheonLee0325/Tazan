@@ -1,11 +1,19 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Condition.h"
+#include "ConditionComponent.h"
+
+
+// Sets default values for this component's properties
+UConditionComponent::UConditionComponent()
+{
+	PrimaryComponentTick.bCanEverTick = false;
+}
+
 
 #include "Tazan/Utilities/LogMacro.h"
 
-bool UCondition::AddCondition(EConditionBitsType Condition, float Duration)
+bool UConditionComponent::AddCondition(EConditionBitsType Condition, float Duration)
 {
 	// Condition 적용
 	bool bApplied = _addCondition(Condition);
@@ -27,7 +35,7 @@ bool UCondition::AddCondition(EConditionBitsType Condition, float Duration)
 			FTimerHandle& TimerHandle = ConditionTimers.FindOrAdd(Condition);
 
 			FTimerDelegate TimerDelegate;
-			TimerDelegate.BindUObject(this, &UCondition::RemoveConditionInternal, Condition);
+			TimerDelegate.BindUObject(this, &UConditionComponent::RemoveConditionInternal, Condition);
 
 			World->GetTimerManager().SetTimer(
 				TimerHandle,
@@ -41,7 +49,7 @@ bool UCondition::AddCondition(EConditionBitsType Condition, float Duration)
 	return bApplied;
 }
 
-void UCondition::RemoveConditionInternal(EConditionBitsType Condition)
+void UConditionComponent::RemoveConditionInternal(EConditionBitsType Condition)
 {
 	// 타이머 제거
 	ConditionTimers.Remove(Condition);
@@ -50,7 +58,7 @@ void UCondition::RemoveConditionInternal(EConditionBitsType Condition)
 	RemoveCondition(Condition);
 }
 
-bool UCondition::RemoveCondition(EConditionBitsType Condition)
+bool UConditionComponent::RemoveCondition(EConditionBitsType Condition)
 {
 	// 기존 타이머가 있다면 제거
 	if (FTimerHandle* ExistingTimer = ConditionTimers.Find(Condition))
@@ -67,7 +75,7 @@ bool UCondition::RemoveCondition(EConditionBitsType Condition)
 	return bApplied;
 }
 
-bool UCondition::_addCondition(EConditionBitsType Condition)
+bool UConditionComponent::_addCondition(EConditionBitsType Condition)
 {
 	if (HasCondition(Condition))
 		return false;
@@ -76,7 +84,7 @@ bool UCondition::_addCondition(EConditionBitsType Condition)
 	return true;
 }
 
-bool UCondition::_removeCondition(EConditionBitsType Condition)
+bool UConditionComponent::_removeCondition(EConditionBitsType Condition)
 {
 	if (!HasCondition(Condition))
 		return false;
@@ -85,14 +93,14 @@ bool UCondition::_removeCondition(EConditionBitsType Condition)
 	return true;
 }
 
-bool UCondition::HasCondition(EConditionBitsType Condition) const
+bool UConditionComponent::HasCondition(EConditionBitsType Condition) const
 {
 	//상태 활성화 확인
 	return (((ConditionFlags) & (static_cast<uint32>(Condition))) != 0);
 }
 
 //dead로 전환
-bool UCondition::ExchangeDead()
+bool UConditionComponent::ExchangeDead()
 {
 	if (HasCondition(EConditionBitsType::Dead))
 		return false;
@@ -101,7 +109,7 @@ bool UCondition::ExchangeDead()
 }
 
 //상태 초기화
-void UCondition::Restart()
+void UConditionComponent::Restart()
 {
 	ConditionFlags = 0;
 }

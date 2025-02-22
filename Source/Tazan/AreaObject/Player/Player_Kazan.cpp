@@ -5,6 +5,7 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "KazanPlayerController.h"
 #include "MaterialHLSLTree.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -170,6 +171,7 @@ void APlayer_Kazan::BeginPlay()
 	Super::BeginPlay();
 
 	KazanAnimInstance = Cast<UKazanAniminstance>(GetMesh()->GetAnimInstance());
+	KazanPlayerController = Cast<AKazanPlayerController>(GetController());
 }
 
 void APlayer_Kazan::OnDie()
@@ -211,6 +213,14 @@ void APlayer_Kazan::HandlePerfectDodge()
 			}
 		}
 	}, 0.2f, false);
+}
+
+void APlayer_Kazan::Reward(FItemData* ItemData, int ItemValue) const
+{
+	if (ItemData->ItemType == EItemType::Currency)
+	{
+		KazanPlayerController->AddCurrency(ItemData->CurrencyType, ItemValue);
+	}
 }
 
 // Called every frame

@@ -4,17 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Tazan/AreaObject/Attribute/Condition.h"
-#include "Tazan/AreaObject/Attribute/Health.h"
+#include "Tazan/AreaObject/Attribute/ConditionComponent.h"
+#include "Tazan/AreaObject/Attribute/HealthComponent.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 #include "Tazan/AreaObject/Utility/RotationComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
 #include "Tazan/UI/Widget/FloatingDamageWidget.h"
 #include "AreaObject.generated.h"
 
-class URotationComponent;
 class ATazanGameMode;
-class UCondition;
 
 UCLASS()
 class TAZAN_API AAreaObject : public ACharacter
@@ -26,11 +24,11 @@ public:
 	AAreaObject();
 
 	UPROPERTY(BlueprintReadWrite)
-	UHealth* m_Health;
+	UHealthComponent* m_Health;
 	UPROPERTY(BlueprintReadWrite)
-	UCondition* m_Condition;
+	UConditionComponent* m_ConditionComponent;
 	UPROPERTY(BlueprintReadWrite)
-	class UStamina* m_Stamina;
+	class UStaminaComponent* m_Stamina;
 	UPROPERTY(BlueprintReadWrite)
 	UPoiseComponent* m_PoiseComponent;
 	UPROPERTY(BlueprintReadWrite)
@@ -100,11 +98,13 @@ public:
 	virtual void OnKill();
 	virtual void OnRevival();
 
-	bool IsDie() const { return m_Condition->IsDead(); }
+	bool IsDie() const { return m_ConditionComponent->IsDead(); }
 
 	// Health 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	float IncreaseHP(float Delta) const;
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	float DecreaseHP(float Delta) const;
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	void SetHPByRate(float Rate) const;
 	UFUNCTION(BlueprintCallable, Category = "HP")

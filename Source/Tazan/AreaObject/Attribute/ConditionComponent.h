@@ -3,20 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include "Components/ActorComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
-#include "Condition.generated.h"
+#include "ConditionComponent.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class TAZAN_API UCondition : public UObject
+
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class TAZAN_API UConditionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	
+	// Sets default values for this component's properties
+	UConditionComponent();
+		
 	UFUNCTION(BlueprintCallable, Category = "Condition")
 	bool IsDead() const { return HasCondition(EConditionBitsType::Dead); }
 
@@ -42,7 +42,6 @@ private:
 	// Condition별 타이머 핸들 관리
 	UPROPERTY()
 	TMap<EConditionBitsType, FTimerHandle> ConditionTimers;
-	
 
 	bool _addCondition(EConditionBitsType Condition);
 	bool _removeCondition(EConditionBitsType Condition);

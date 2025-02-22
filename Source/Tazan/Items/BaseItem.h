@@ -19,12 +19,13 @@ public:
 	virtual bool CanBeCollectedBy(APlayer_Kazan* Player);
 	virtual void OnCollected(APlayer_Kazan* Player);
 	virtual void Tick(float DeltaTime) override;
+	void SetItemValue(int ItemValue) { m_ItemValue = ItemValue;}
 
 protected:
 	virtual void BeginPlay() override;
 
 	// 아이템 효과 적용(자식 클래스에서 구현)
-	virtual void ApplyEffect(class APlayer_Kazan* Player) PURE_VIRTUAL(ABaseItem::ApplyEffect,);
+	virtual void ApplyEffect(class APlayer_Kazan* Player);
 
 	UPROPERTY(EditAnywhere, Category = "Collection")
 	USoundBase* CollectionSound;
@@ -48,16 +49,7 @@ protected:
 
 	bool m_IsCollected;
 
-	// 아이템 진동 라디안
-	UPROPERTY(EditAnywhere)
-	float Radian;
-	// 아이템 진동 진폭
-	UPROPERTY(EditAnywhere)
-	float Amplitude;
-	// 아이템 진동 주기
-	UPROPERTY(EditAnywhere)
-	float Period;
-	// 아이템 회전 속도
-	FRotator ItemRotator = FRotator(0, 100.f , 0);
+	int m_ItemValue = 0;
 
+	FItemData* dt_ItemData;
 };

@@ -6,14 +6,13 @@
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Tazan/AreaObject/Attribute/Condition.h"
-#include "Tazan/AreaObject/Attribute/Health.h"
+#include "Tazan/AreaObject/Attribute/HealthComponent.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
-#include "Tazan/AreaObject/Attribute/Stamina.h"
+#include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Utility/RotationComponent.h"
 #include "Tazan/Contents/TazanGameMode.h"
 #include "Tazan/UI/FloatingDamageActor.h"
@@ -25,13 +24,16 @@ AAreaObject::AAreaObject()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Health Component 생성
-	m_Health = CreateDefaultSubobject<UHealth>(TEXT("Health"));
+	m_Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
 
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
 
 	// Stamina Component 생성
-	m_Stamina = CreateDefaultSubobject<UStamina>(TEXT("Stamina"));
+	m_Stamina = CreateDefaultSubobject<UStaminaComponent>(TEXT("Stamina"));
+
+	// Condition Component 생성
+	m_ConditionComponent = CreateDefaultSubobject<UConditionComponent>(TEXT("ConditionComponent"));
 
 	// Rotation Component 생성
 	m_RotationComponent = CreateDefaultSubobject<URotationComponent>(TEXT("RotationComponent"));
@@ -45,9 +47,6 @@ AAreaObject::AAreaObject()
 void AAreaObject::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Condition Component 생성
-	m_Condition = NewObject<UCondition>(this, UCondition::StaticClass());
 
 	// AreaObject ID 는 반드시 셋팅되어야 함!!
 	if (m_AreaObjectID == 0)
@@ -232,7 +231,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	ActualDamage = bIsWeakPointHit ? ActualDamage * 1.5f : ActualDamage;
 
 	// apply actual hp damage
-	float CurrentHP = IncreaseHP(-ActualDamage);
+	float CurrentHP = DecreaseHP(ActualDamage);
 	if (FMath::IsNearlyZero(CurrentHP))
 	{
 		if (true == ExchangeDead())
@@ -411,22 +410,22 @@ void AAreaObject::SetAnimationPoiseBonus(float Bonus) const
 
 bool AAreaObject::AddCondition(EConditionBitsType AddConditionType, float Duration)
 {
-	return m_Condition->AddCondition(AddConditionType, Duration);
+	return m_ConditionComponent->AddCondition(AddConditionType, Duration);
 }
 
 bool AAreaObject::RemoveCondition(EConditionBitsType RemoveConditionType) const
 {
-	return m_Condition->RemoveCondition(RemoveConditionType);
+	return m_ConditionComponent->RemoveCondition(RemoveConditionType);
 }
 
 bool AAreaObject::HasCondition(EConditionBitsType HasConditionType) const
 {
-	return m_Condition->HasCondition(HasConditionType);
+	return m_ConditionComponent->HasCondition(HasConditionType);
 }
 
 bool AAreaObject::ExchangeDead() const
 {
-	return m_Condition->ExchangeDead();
+	return m_ConditionComponent->ExchangeDead();
 }
 
 void AAreaObject::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed,
@@ -494,6 +493,11 @@ void AAreaObject::PlayStaggerAnimation(EStaggerType Type) const
 float AAreaObject::IncreaseHP(float Delta) const
 {
 	return m_Health->IncreaseHP(Delta);
+}
+
+float AAreaObject::DecreaseHP(float Delta) const
+{
+	return m_Health->DecreaseHP(Delta);
 }
 
 void AAreaObject::SetHPByRate(float Rate) const
@@ -715,12 +719,5 @@ void AAreaObject::StopBGM()
 
 void AAreaObject::RotateToGuardTarget(const FVector& Target)
 {
-	//FVector ForwardVector = GetActorForwardVector();
-	//FVector DirectionToTarget = (Target - GetActorLocation()).GetSafeNormal();
-	//
-	//float DotProduct = FVector::DotProduct(ForwardVector, DirectionToTarget);
-	//float RotateRatio = 1.0f - ((DotProduct + 1.0f) / 2.0f);
-	//RotateRatio = FMath::Clamp(RotateRatio, 0.1f, 1.0f);
-
 	LookAtLocation(Target, EPMRotationMode::Speed, GUARD_TO_TARGET_ROTATE_SPEED);
 }
