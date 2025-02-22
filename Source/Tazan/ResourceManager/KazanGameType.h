@@ -45,6 +45,19 @@ enum class EEnemyType : uint8
 	Boss UMETA(DisplayName = "Boss"),
 };
 
+// Ai의 SkillBag에서 랜덤 확률로 사용될 스킬들 - 개시스킬들만 포함
+UENUM(BlueprintType)
+enum class EAiSkillType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Main UMETA(DisplayName = "Main"),
+	Weaving UMETA(DisplayName = "Weaving"),
+	Short UMETA(DisplayName = "Short"),
+	Middle UMETA(DisplayName = "Middle"),
+	Long UMETA(DisplayName = "Long"),
+	Grappling UMETA(DisplayName = "Grappling"),
+};
+
 // AiFSM을 위한 Enum Type
 UENUM(BlueprintType)
 enum class EAiStateType : uint8
@@ -106,6 +119,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	EEnemyType EnemyType = EEnemyType::None;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data",
+		meta=(EditCondition="AreaObjectType == EAreaObjectType::Enemy"))
+	int SkillBagID = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	float HPMax = 1.0f;
 
@@ -125,7 +142,7 @@ public:
 	float StaminaMax = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
-	float StaminaRecoveryRate = 20.0f;  // 초당 회복량
+	float StaminaRecoveryRate = 20.0f; // 초당 회복량
 
 	// ToDo : 고도화되면 Skill로 이관 예정  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
@@ -194,20 +211,20 @@ struct FAttackData
 
 	// HitStop 관련 데이터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bEnableHitStop = false;  // HitStop 적용 여부
-	
+	bool bEnableHitStop = false; // HitStop 적용 여부
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bEnableHitStop"))
-	float HitStopDuration = 0.1f;  // HitStop 지속 시간
-	
+	float HitStopDuration = 0.1f; // HitStop 지속 시간
+
 	// 넉백 관련 데이터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float KnockBackForce = 0.0f;	// 넉백 거리
-	
+	float KnockBackForce = 0.0f; // 넉백 거리
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bUseCustomKnockBackDirection = false;  // 커스텀 넉백 방향 사용 여부
-	
+	bool bUseCustomKnockBackDirection = false; // 커스텀 넉백 방향 사용 여부
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUseCustomKnockbackDirection"))
-	FVector KnockBackDirection = FVector::ForwardVector;  // 커스텀 넉백 방향
+	FVector KnockBackDirection = FVector::ForwardVector; // 커스텀 넉백 방향
 };
 
 // m_SkillData 테이블 정보, 데미지 정보등 관리
@@ -290,4 +307,27 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	USoundBase* Sound = nullptr;
+};
+
+// 몬스터가 확률에의해 사용하는 Skill목록 - Weight는 가중치
+USTRUCT(BlueprintType)
+struct FSkillBag
+{
+	GENERATED_BODY()
+
+	// <SkillID, Weight>
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<int, int> SkillID_Weight;
+};
+
+USTRUCT(BlueprintType)
+struct FSkillBagData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	int SkillBagID = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	TMap<EAiSkillType, FSkillBag> TypeSkillBag;
 };
