@@ -5,6 +5,7 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tazan/Animation/Monster/YetugaAnimInstance.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
@@ -39,19 +40,26 @@ AYetuga::AYetuga()
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
-	InitializeHUD();
 	
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
+	YetugaABP = Cast<UYetugaAnimInstance>(GetMesh()->GetAnimInstance());
+	InitializeHUD();
 	SkillRoulette->InitSkill();
 
 	//시작시 어퍼컷 콤보공격 확정 실행
-	NextSkill = GetSkillByID(12000);
+	NextSkill = GetSkillByID(11000);
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
 UBaseAiFSM* AYetuga::CreateFSM()
 {
 	return CreateDefaultSubobject<UYetugaFSM>(TEXT("FSM"));
+}
+
+void AYetuga::ParryStackPenalty()
+{
+	Super::ParryStackPenalty();
+	YetugaABP->bIsGroggy = true;
 }
 
 void AYetuga::Tick(float DeltaTime)
