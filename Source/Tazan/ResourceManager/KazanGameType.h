@@ -51,6 +51,19 @@ enum class EEnemyType : uint8
 	Boss UMETA(DisplayName = "Boss"),
 };
 
+// Ai의 SkillBag에서 랜덤 확률로 사용될 스킬들 - 개시스킬들만 포함
+UENUM(BlueprintType)
+enum class EAiSkillType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Main UMETA(DisplayName = "Main"),
+	Weaving UMETA(DisplayName = "Weaving"),
+	Short UMETA(DisplayName = "Short"),
+	Middle UMETA(DisplayName = "Middle"),
+	Long UMETA(DisplayName = "Long"),
+	Grappling UMETA(DisplayName = "Grappling"),
+};
+
 // AiFSM을 위한 Enum Type
 UENUM(BlueprintType)
 enum class EAiStateType : uint8
@@ -145,7 +158,7 @@ USTRUCT(BlueprintType)
 struct FAreaObjectData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	int AreaObjectID = 0;
 
@@ -157,6 +170,10 @@ struct FAreaObjectData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	EEnemyType EnemyType = EEnemyType::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data",
+		meta=(EditCondition="AreaObjectType == EAreaObjectType::Enemy"))
+	int SkillBagID = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	float HPMax = 1.0f;
@@ -383,4 +400,27 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	USoundBase* Sound = nullptr;
+};
+
+// 몬스터가 확률에의해 사용하는 Skill목록 - Weight는 가중치
+USTRUCT(BlueprintType)
+struct FSkillBag
+{
+	GENERATED_BODY()
+
+	// <SkillID, Weight>
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<int, int> SkillID_Weight;
+};
+
+USTRUCT(BlueprintType)
+struct FSkillBagData : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	int SkillBagID = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	TMap<EAiSkillType, FSkillBag> TypeSkillBag;
 };

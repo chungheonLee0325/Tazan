@@ -6,8 +6,9 @@
 #include "AI/Base/BaseAiFSM.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
+#include "Tazan/Contents/TazanGameInstance.h"
 
 
 // Sets default values
@@ -31,6 +32,17 @@ ABaseMonster::ABaseMonster()
 void ABaseMonster::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UTazanGameInstance* gameInstance = Cast<UTazanGameInstance>(GetGameInstance());
+	int skillbagID = dt_AreaObject->SkillBagID;
+	if (skillbagID != 0)
+	{
+		dt_SkillBag = gameInstance->GetDataSkillBag(skillbagID);
+	}
+	else
+	{
+		LOG_PRINT(TEXT("SkillBag is 0"));
+	}
 
 	m_SpawnLocation = GetActorLocation();
 	

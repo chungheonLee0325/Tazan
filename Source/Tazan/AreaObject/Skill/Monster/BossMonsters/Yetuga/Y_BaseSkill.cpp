@@ -2,18 +2,26 @@
 
 #include "Y_BaseSkill.h"
 
-void UY_BaseSkill::Begin()
+#include "Tazan/Utilities/LogMacro.h"
+
+void UY_BaseSkill::NotifyBegin()
 {
-	
 }
 
 
-void UY_BaseSkill::Tick(float dt)
+void UY_BaseSkill::NotifyTick(float dt)
 {
-	
 }
 
 
-void UY_BaseSkill::End()
+void UY_BaseSkill::NotifyEnd()
+{
+}
+
+void UY_BaseSkill::NotifyTrigger()
+{
+}
+
+void UY_BaseSkill::AttackTick(float dt)
 {
 }

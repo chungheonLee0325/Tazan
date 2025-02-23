@@ -28,7 +28,6 @@ void UTazanGameInstance::Init()
 		}
 	}
 	// Skill Data
-	// AreaObject Data
 	UDataTable* SkillTable = LoadObject<UDataTable>(
 		nullptr, TEXT("/Script/Engine.DataTable'/Game/_BluePrints/ResourceManager/db_Skill.db_Skill'"));
 	if (nullptr != SkillTable)
@@ -44,7 +43,22 @@ void UTazanGameInstance::Init()
 			}
 		}
 	}
+	// SkillBag Data
+	UDataTable* SkillBagTable = LoadObject<UDataTable>(
+		nullptr, TEXT("/Game/_BluePrints/ResourceManager/db_Skillbag.db_Skillbag"));
+	if (nullptr != SkillTable)
+	{
+		TArray<FName> RowNames = SkillBagTable->GetRowNames();
 
+		for (const FName& RowName : RowNames)
+		{
+			FSkillBagData* Row = SkillBagTable->FindRow<FSkillBagData>(RowName, TEXT(""));
+			if (nullptr != Row)
+			{
+				dt_SkillBag.Add(Row->SkillBagID, *Row);
+			}
+		}
+	}
 
 	// Sound Data
 	UDataTable* SoundTable = LoadObject<UDataTable>(
@@ -77,6 +91,16 @@ FAreaObjectData* UTazanGameInstance::GetDataAreaObject(const int AreaObjectID)
 FSkillData* UTazanGameInstance::GetDataSkill(int SkillID)
 {
 	if (FSkillData* data = dt_Skill.Find(SkillID))
+	{
+		return data;
+	}
+	
+	return nullptr;
+}
+
+FSkillBagData* UTazanGameInstance::GetDataSkillBag(int SkillBagID)
+{
+	if (FSkillBagData* data = dt_SkillBag.Find(SkillBagID))
 	{
 		return data;
 	}

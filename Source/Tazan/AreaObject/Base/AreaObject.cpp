@@ -685,7 +685,7 @@ void AAreaObject::SetGuardState(bool bIsGuarding)
 	}
 }
 
-bool AAreaObject::IsWeakPointHit(FVector HitLoc)
+bool AAreaObject::IsWeakPointHit(const FVector& HitLoc)
 {
 	return false;
 }

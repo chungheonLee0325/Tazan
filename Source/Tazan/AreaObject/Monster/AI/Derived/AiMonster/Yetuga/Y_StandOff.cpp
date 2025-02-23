@@ -47,7 +47,7 @@ void UY_StandOff::Enter()
 			UBaseSkill* sk = SkillRoulette->GetRandomWeavingSkill();
 			if (sk)
 			{
-				LOG_SCREEN("견제기 실행");
+				// LOG_SCREEN("견제기 실행");
 				m_Owner->NextSkill = sk;
 				bIsWeaving = true;
 			}

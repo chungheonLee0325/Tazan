@@ -7,6 +7,7 @@
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Y_BaseSkill.generated.h"
 
+class ABaseMonster;
 /**
  * 
  */
@@ -16,7 +17,11 @@ class TAZAN_API UY_BaseSkill : public UCollisionSkill
 	GENERATED_BODY()
 
 public:
-	virtual void Begin();
-	virtual void Tick(float dt);
-	virtual void End();
+	virtual void NotifyBegin();
+	virtual void NotifyTick(float dt);
+	virtual void NotifyEnd();
+
+	virtual void NotifyTrigger();
+
+	virtual void AttackTick(float dt);
 };

@@ -6,24 +6,11 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Yetuga.generated.h"
 
+class UYetugaAnimInstance;
+class UY_BaseSkill;
 class UY_SkillRoulette;
 class UY_SelectSkill;
 class APlayer_Kazan;
-
-UENUM(BlueprintType)
-enum class EWeavingSkillAnim : uint8
-{
-	MovingAtk		UMETA(DisplayName = "MovingAtk"),
-	SweapAtk		UMETA(DisplayName = "SweepAtk"),
-	TurnAtk			UMETA(DisplayName = "TurnAtk"),
-	BackMove		UMETA(DisplayName = "BackMove"),
-	ShortMoveR 		UMETA(DisplayName = "ShortMoveR"),
-	ShortMoveAtkR 	UMETA(DisplayName = "ShortMoveAtkR"),
-	ShortMoveL 		UMETA(DisplayName = "ShortMoveL"),
-	ShortMoveAtkL 	UMETA(DisplayName = "ShortMoveAtkL"),
-	UpperCut		UMETA(DisplayName = "UpperCut"),
-	BackAtk			UMETA(DisplayName = "BackAtk")
-};
 
 UCLASS()
 class TAZAN_API AYetuga : public ABaseMonster
@@ -33,17 +20,24 @@ class TAZAN_API AYetuga : public ABaseMonster
 public:
 	AYetuga();
 
-	UPROPERTY(EditAnywhere, Category = "Skill Anim | WeavingSkill")
-	TMap<EWeavingSkillAnim, TObjectPtr<UAnimMontage>> AnimMontageMap;
+	UPROPERTY()
+	UYetugaAnimInstance* YetugaABP;
 
 	UPROPERTY()
 	UY_SkillRoulette* SkillRoulette;
 
-	UPROPERTY()
-	class UPlayerStatusWidget* StatusWidget;
-
+	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UPlayerStatusWidget> StatusWidgetClass;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> MissionCompleteClass;
+
+private:
+	// UI
+	UPROPERTY()
+	class UPlayerStatusWidget* StatusWidget;
+	UPROPERTY()
+	class UUserWidget* CompleteWidget;
 		
 protected:
 	virtual void BeginPlay() override;
@@ -52,12 +46,17 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual bool IsWeakPointHit(FVector HitLoc) override;
 	
-	//TODO: AreaObject로 이전?
+	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
+	
+	// virtual void ParryStackPenalty() override;
+	
+	virtual void OnDie() override;
+	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
-	
-	UAnimMontage* GetAnimMontage(EWeavingSkillAnim animType);
+
+
+private:
 	void InitializeHUD();
 	
 };
