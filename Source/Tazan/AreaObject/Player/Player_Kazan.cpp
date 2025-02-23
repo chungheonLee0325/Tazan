@@ -182,6 +182,12 @@ void APlayer_Kazan::OnDie()
 	//GetCharacterMovement()->SetMovementMode(MOVE_None);
 }
 
+void APlayer_Kazan::HandleStaggerEnd()
+{
+	Super::HandleStaggerEnd();
+	SetPlayerState(EPlayerState::NORMAL);
+}
+
 void APlayer_Kazan::HandlePerfectDodge()
 {
 	Super::HandlePerfectDodge();
@@ -295,6 +301,12 @@ bool APlayer_Kazan::CanPerformAction(EPlayerState State, FString ActionName)
 	return false;
 }
 
+void APlayer_Kazan::SetComboState(bool bCanCombo, int SkillID)
+{
+	CanCombo = bCanCombo;
+	NextComboSkillID = SkillID;	
+}
+
 void APlayer_Kazan::SetPlayerState(EPlayerState NewState)
 {
 	CurrentPlayerState = NewState;
@@ -377,9 +389,19 @@ void APlayer_Kazan::Attack_Weak_Pressed()
 {
 	//LOG_PRINT(TEXT("Input WAttack At %f"), GetWorld()->GetTimeSeconds());
 	if (!CanPerformAction(CurrentPlayerState, "Action")) return;
+
+	if (CanCombo && NextComboSkillID)
+	{
+		TObjectPtr<UBaseSkill> comboSkill = GetSkillByID(NextComboSkillID);
+		if (CastSkill(comboSkill,this))
+		{
+			SetPlayerState(EPlayerState::ACTION);
+			comboSkill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
+		}
+	}
+
 	int weakAttackID = 10;
 	TObjectPtr<UBaseSkill> skill = GetSkillByID(weakAttackID);
-
 	if (CastSkill(skill, this))
 	{
 		SetPlayerState(EPlayerState::ACTION);

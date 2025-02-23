@@ -632,14 +632,14 @@ void AAreaObject::HandlePerfectDodge()
 void AAreaObject::ApplyHitStop(float Duration)
 {
 	// 월드 전체 시간 조절
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.005f);
 
 	// 타이머로 원래 속도로 복구
 	GetWorld()->GetTimerManager().SetTimer(
 		HitStopTimerHandle,
 		this,
 		&AAreaObject::ResetTimeScale,
-		Duration * 0.01f, // 실제 시간으로 변환
+		Duration * 0.005f, // 실제 시간으로 변환
 		false
 	);
 }

@@ -187,7 +187,7 @@ public:
 	UFUNCTION()
 	void HandleStaggerBegin(EStaggerType Type, float Duration);
 	UFUNCTION()
-	void HandleStaggerEnd();
+	virtual void HandleStaggerEnd();
 	// ToDo : 종료 Bind 인자 추가?
 	void PlayStaggerAnimation(EStaggerType Type) const;
 	float GetStaggerAnimationDuration(EStaggerType Type) const;

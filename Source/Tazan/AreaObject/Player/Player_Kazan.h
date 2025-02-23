@@ -83,6 +83,7 @@ public:
 
 	void SetPlayerState(EPlayerState NewState);
 	void SetPlayerNormalState() { SetPlayerState(EPlayerState::NORMAL); }
+	void SetComboState(bool bCanCombo, int SkillID);
 
 protected:
 	// Called when the game starts or when spawned
@@ -91,6 +92,8 @@ protected:
 	virtual void OnDie() override;
 
 public:
+	virtual void HandleStaggerEnd() override;
+
 	// Movement
 	/** Called for movement input */
 	void Move(FVector2D MovementVector);
@@ -165,7 +168,6 @@ private:
 	void InitializeStateRestrictions();
 	bool CanPerformAction(EPlayerState State, FString ActionName);
 
-
 	// 가드 상태 변경 시 호출
 	virtual void SetGuardState(bool bIsGuarding) override;
 	//virtual void SetActionState(bool bIsAction);
@@ -194,4 +196,6 @@ private:
 	bool bIsGuardRequested = false;  // 가드 해제 요청 상태
 	FTimerHandle GuardMinDurationTimer;
 
+	bool CanCombo;
+	int NextComboSkillID = 0;
 };
