@@ -45,7 +45,7 @@ void UTazanGameInstance::Init()
 	}
 	// SkillBag Data
 	UDataTable* SkillBagTable = LoadObject<UDataTable>(
-		nullptr, TEXT("/Script/Engine.DataTable'/Game/_BluePrints/ResourceManager/db_Skill.db_Skill'"));
+		nullptr, TEXT("/Game/_BluePrints/ResourceManager/db_Skillbag.db_Skillbag"));
 	if (nullptr != SkillTable)
 	{
 		TArray<FName> RowNames = SkillBagTable->GetRowNames();

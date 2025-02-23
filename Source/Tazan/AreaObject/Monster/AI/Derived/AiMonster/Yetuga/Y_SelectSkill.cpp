@@ -53,16 +53,7 @@ void UY_SelectSkill::Enter()
 void UY_SelectSkill::Execute(float DeltaTime)
 {
 	LOG_PRINT(TEXT(""));
-	float dist = FVector::Dist(m_Owner->GetAggroTarget()->GetActorLocation(), m_Owner->GetActorLocation());
-	
-	if (CheckRange(dist,Skill->GetSkillRange()))
-	{
-		m_AiFSM->ChangeState(EAiStateType::Attack);
-	}
-	else
-	{
-		m_AiFSM->ChangeState(EAiStateType::Chase);
-	}
+	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
 void UY_SelectSkill::Exit()

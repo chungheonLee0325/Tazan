@@ -5,6 +5,7 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tazan/Animation/Monster/YetugaAnimInstance.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
@@ -28,14 +29,21 @@ AYetuga::AYetuga()
 	{
 		StatusWidgetClass = WidgetClassFinder.Class;
 	}
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> missionCompWidget(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_MissionComplete.WB_MissionComplete_C'"));
+	if (missionCompWidget.Succeeded())
+	{
+		MissionCompleteClass = missionCompWidget.Class;
+	}
 }
 
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
-	InitializeHUD();
 	
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
+	YetugaABP = Cast<UYetugaAnimInstance>(GetMesh()->GetAnimInstance());
+	InitializeHUD();
 	SkillRoulette->InitSkill();
 
 	//시작시 어퍼컷 콤보공격 확정 실행
@@ -48,6 +56,12 @@ UBaseAiFSM* AYetuga::CreateFSM()
 	return CreateDefaultSubobject<UYetugaFSM>(TEXT("FSM"));
 }
 
+// void AYetuga::ParryStackPenalty()
+// {
+// 	Super::ParryStackPenalty();
+// 	YetugaABP->bIsGroggy = true;
+// }
+
 void AYetuga::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -58,7 +72,7 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-bool AYetuga::IsWeakPointHit(FVector HitLoc)
+bool AYetuga::IsWeakPointHit(const FVector& HitLoc)
 {
 	FVector hitDir = HitLoc - GetActorLocation();
 	hitDir.Normalize();
@@ -66,28 +80,28 @@ bool AYetuga::IsWeakPointHit(FVector HitLoc)
 	float dot = FVector::DotProduct(hitDir,GetActorForwardVector());
 	if (dot < -0.2f)
 	{
-		LOG_SCREEN("뒤에서 맞았다요.");
+		// LOG_SCREEN("뒤에서 맞았다요.");
 		return true;
 	}
 	return false;
 }
 
-UAnimMontage* AYetuga::GetAnimMontage(EWeavingSkillAnim animType)
+void AYetuga::OnDie()
 {
-	if (const TObjectPtr<UAnimMontage>* MontagePtr = AnimMontageMap.Find(animType))
-	{
-		return *MontagePtr;
-	}
-	return nullptr;
+	Super::OnDie();
+	CompleteWidget->AddToViewport();
 }
 
 void AYetuga::InitializeHUD()
 {
 	if (!StatusWidgetClass) return;
+	if (!MissionCompleteClass) return;
 	
 	// UI 위젯 생성
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	StatusWidget = CreateWidget<UPlayerStatusWidget>(pc, StatusWidgetClass);
+	CompleteWidget = CreateWidget<UUserWidget>(pc, MissionCompleteClass);
+	
 	if (StatusWidget)
 	{
 		StatusWidget->AddToViewport();
