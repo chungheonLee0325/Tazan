@@ -33,6 +33,7 @@ int32 UPoiseComponent::CalculateTotalDefensePoise() const
 
 void UPoiseComponent::PoiseProcess(const FAttackData& AttackData)
 {
+	if (AttackData.StaggerType == EStaggerType::None) return;
 	// 우선순위 비교 로직
 	EStaggerType staggerType = AttackData.StaggerType;
 	const int32 newPriority = GetStaggerPriority(staggerType);
