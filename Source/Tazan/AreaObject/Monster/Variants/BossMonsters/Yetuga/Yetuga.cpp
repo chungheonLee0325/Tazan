@@ -56,11 +56,11 @@ UBaseAiFSM* AYetuga::CreateFSM()
 	return CreateDefaultSubobject<UYetugaFSM>(TEXT("FSM"));
 }
 
-void AYetuga::ParryStackPenalty()
-{
-	Super::ParryStackPenalty();
-	YetugaABP->bIsGroggy = true;
-}
+// void AYetuga::ParryStackPenalty()
+// {
+// 	Super::ParryStackPenalty();
+// 	YetugaABP->bIsGroggy = true;
+// }
 
 void AYetuga::Tick(float DeltaTime)
 {

@@ -49,7 +49,7 @@ public:
 	
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
 	
-	virtual void ParryStackPenalty() override;
+	// virtual void ParryStackPenalty() override;
 	
 	virtual void OnDie() override;
 	
