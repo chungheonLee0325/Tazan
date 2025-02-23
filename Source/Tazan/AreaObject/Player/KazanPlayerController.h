@@ -44,6 +44,8 @@ private:
 	/** Called for attack input */
 	void On_Attack_Weak_Pressed(const FInputActionValue& InputActionValue);
 	void On_Attack_Strong_Pressed(const FInputActionValue& InputActionValue);
+	void On_Attack_Strong_Released(const FInputActionValue& InputActionValue);
+	void On_Attack_Strong_Triggered(const FInputActionValue& InputActionValue);
 	/** Called for parry input */
 	void On_Parry_Pressed(const FInputActionValue& InputActionValue);
 	void On_Parry_Released(const FInputActionValue& InputActionValue);

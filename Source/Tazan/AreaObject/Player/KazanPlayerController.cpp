@@ -8,6 +8,7 @@
 #include "Player_Kazan.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
+#include "Tazan/Utilities/LogMacro.h"
 
 AKazanPlayerController::AKazanPlayerController()
 {
@@ -126,6 +127,10 @@ void AKazanPlayerController::SetupInputComponent()
 		                                   &AKazanPlayerController::On_Attack_Weak_Pressed);
 		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Started, this,
 		                                   &AKazanPlayerController::On_Attack_Strong_Pressed);
+		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Completed, this,
+		                                   &AKazanPlayerController::On_Attack_Strong_Released);
+		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Triggered, this,
+		                                   &AKazanPlayerController::On_Attack_Strong_Triggered);
 
 		// Parry
 		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Started, this,
@@ -164,6 +169,18 @@ void AKazanPlayerController::On_Attack_Weak_Pressed(const FInputActionValue& Inp
 void AKazanPlayerController::On_Attack_Strong_Pressed(const FInputActionValue& InputActionValue)
 {
 	Kazan->Attack_Strong_Pressed();
+	//LOG_PRINT(TEXT("Press"));
+}
+
+void AKazanPlayerController::On_Attack_Strong_Released(const FInputActionValue& InputActionValue)
+{
+	Kazan->Attack_Strong_Released();
+	//LOG_PRINT(TEXT("Release"));
+}
+
+void AKazanPlayerController::On_Attack_Strong_Triggered(const FInputActionValue& InputActionValue)
+{
+	//LOG_PRINT(TEXT("Trigger"));
 }
 
 void AKazanPlayerController::On_Parry_Pressed(const FInputActionValue& InputActionValue)

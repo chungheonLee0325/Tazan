@@ -111,6 +111,8 @@ public:
 	/** Called for attack input */
 	void Attack_Weak_Pressed();
 	void Attack_Strong_Pressed();
+	void Attack_Strong_Released();
+	void ChargeTimerCallback();
 
 	/** Called for evade input */
 	void Dodge_Pressed();
@@ -198,4 +200,9 @@ private:
 
 	bool CanCombo;
 	int NextComboSkillID = 0;
+	
+	float MaxChargeTime = 1.2f;
+	float CurrentChargeTime = 0.0f;
+	bool bIsCharging = false;
+	FTimerHandle ChargeTimerHandle;
 };

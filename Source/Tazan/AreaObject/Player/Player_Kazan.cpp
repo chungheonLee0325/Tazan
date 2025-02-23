@@ -304,7 +304,7 @@ bool APlayer_Kazan::CanPerformAction(EPlayerState State, FString ActionName)
 void APlayer_Kazan::SetComboState(bool bCanCombo, int SkillID)
 {
 	CanCombo = bCanCombo;
-	NextComboSkillID = SkillID;	
+	NextComboSkillID = SkillID;
 }
 
 void APlayer_Kazan::SetPlayerState(EPlayerState NewState)
@@ -393,7 +393,7 @@ void APlayer_Kazan::Attack_Weak_Pressed()
 	if (CanCombo && NextComboSkillID)
 	{
 		TObjectPtr<UBaseSkill> comboSkill = GetSkillByID(NextComboSkillID);
-		if (CastSkill(comboSkill,this))
+		if (CastSkill(comboSkill, this))
 		{
 			SetPlayerState(EPlayerState::ACTION);
 			comboSkill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
@@ -418,8 +418,60 @@ void APlayer_Kazan::Attack_Strong_Pressed()
 	if (CastSkill(skill, this))
 	{
 		SetPlayerState(EPlayerState::ACTION);
-		skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
+		bIsCharging = true;
+		CurrentChargeTime = 0.0f;
+
+		// Start the charge timer
+		GetWorld()->GetTimerManager().SetTimer(
+			ChargeTimerHandle,
+			this,
+			&APlayer_Kazan::ChargeTimerCallback,
+			MaxChargeTime,
+			false
+		);
+
+		//skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
 		//skill->OnSkillCancel.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
+	}
+}
+
+void APlayer_Kazan::Attack_Strong_Released()
+{
+	if (bIsCharging)
+	{
+		bIsCharging = false;
+		ClearCurrentSkill();
+
+		float chargeTime = GetWorld()->GetTimerManager().GetTimerElapsed(ChargeTimerHandle);
+		LOG_PRINT(TEXT("Charge Time: %f"), chargeTime);
+		GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
+
+		int strongAttackID = chargeTime >= 1.0f ? 22 : 21;
+		LOG_PRINT(TEXT("strongAttackID : %d"), strongAttackID);
+
+
+		TObjectPtr<UBaseSkill> skill = GetSkillByID(strongAttackID);
+		if (CastSkill(skill, this))
+		{
+			SetPlayerState(EPlayerState::ACTION);
+		}
+		else
+		{
+			SetPlayerState(EPlayerState::NORMAL);
+		}
+
+
+		// Calculate charge power (0.0 to 1.0)
+		//float ChargePower = FMath::Clamp(CurrentChargeTime / MaxChargeTime, 0.0f, 1.0f);
+		//PerformHeavyAttack(ChargePower);
+	}
+}
+
+void APlayer_Kazan::ChargeTimerCallback()
+{
+	if (bIsCharging)
+	{
+		Attack_Strong_Released();
 	}
 }
 
@@ -442,7 +494,7 @@ void APlayer_Kazan::Guard_Pressed()
 			MinGuardDuration,
 			false);
 	}
-	
+
 	//SetGuardState(true);
 }
 
@@ -458,8 +510,6 @@ void APlayer_Kazan::Guard_Released()
 		SetPlayerState(EPlayerState::NORMAL);
 		KazanAnimInstance->bIsGuard = false;
 	}
-
-
 }
 
 void APlayer_Kazan::TryEndGuard()
