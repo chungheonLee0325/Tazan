@@ -103,6 +103,7 @@ public:
 	/** Called for parry input */
 	void Guard_Pressed();
 	void Guard_Released();
+	void TryEndGuard();
 
 	/** Called for attack input */
 	void Attack_Weak_Pressed();
@@ -186,6 +187,11 @@ private:
 	const float MAX_WALK_SPEED = 500.f;
 	const float MAX_GUARD_WALK_SPEED = 200.f;
 
-	UPROPERTY(EditAnywhere, Category = "Monster Settings")
-	TArray<UMaterialInterface*> GhostTrailMaterials;
+	// 가드 관련 변수들    
+	UPROPERTY(EditDefaultsOnly, Category = "Guard")
+	float MinGuardDuration = 0.2f;  // 최소 가드 지속 시간
+    
+	bool bIsGuardRequested = false;  // 가드 해제 요청 상태
+	FTimerHandle GuardMinDurationTimer;
+
 };

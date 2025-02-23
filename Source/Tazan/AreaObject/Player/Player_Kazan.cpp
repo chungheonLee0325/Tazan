@@ -408,9 +408,17 @@ void APlayer_Kazan::Guard_Pressed()
 	TObjectPtr<UBaseSkill> skill = GetSkillByID(guardSkillID);
 	if (CastSkill(skill, this))
 	{
+		KazanAnimInstance->bIsGuard = true;
 		SetPlayerState(EPlayerState::ACTION);
 		//skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerGuardState);
 		//skill->OnSkillCancel.BindUObject(this, &APlayer_Kazan::SetPlayerGuardState);
+		bIsGuardRequested = false;
+		GetWorld()->GetTimerManager().SetTimer(
+			GuardMinDurationTimer,
+			this,
+			&APlayer_Kazan::TryEndGuard,
+			MinGuardDuration,
+			false);
 	}
 	
 	//SetGuardState(true);
@@ -418,11 +426,30 @@ void APlayer_Kazan::Guard_Pressed()
 
 void APlayer_Kazan::Guard_Released()
 {
-	KazanAnimInstance->bIsGuard = false;
+	bIsGuardRequested = true;
 
-	// 플레이어 셋팅
-	SetGuardState(false);
-	SetPlayerState(EPlayerState::NORMAL);
+	// 최소 지속 시간이 지났는지 확인
+	if (!GetWorld()->GetTimerManager().IsTimerActive(GuardMinDurationTimer))
+	{
+		// 플레이어 셋팅
+		SetGuardState(false);
+		SetPlayerState(EPlayerState::NORMAL);
+		KazanAnimInstance->bIsGuard = false;
+	}
+
+
+}
+
+void APlayer_Kazan::TryEndGuard()
+{
+	// 가드 해제가 요청된 상태라면 가드 해제
+	if (bIsGuardRequested)
+	{
+		// 플레이어 셋팅
+		SetGuardState(false);
+		SetPlayerState(EPlayerState::NORMAL);
+		KazanAnimInstance->bIsGuard = false;
+	}
 }
 
 void APlayer_Kazan::Dodge_Pressed()
