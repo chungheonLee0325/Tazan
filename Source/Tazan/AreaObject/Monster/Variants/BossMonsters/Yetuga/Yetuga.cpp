@@ -93,19 +93,19 @@ void AYetuga::InitializeHUD()
 		StatusWidget->AddToViewport();
 		
 		// HP 변경 이벤트 바인딩
-		if (m_Health)
+		if (m_HealthComponent)
 		{
-			m_Health->OnHealthChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateHealth);
+			m_HealthComponent->OnHealthChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateHealth);
 			// 초기값 설정
-			StatusWidget->UpdateHealth(GetHP(), 0.0f, m_Health->GetMaxHP());
+			StatusWidget->UpdateHealth(GetHP(), 0.0f, m_HealthComponent->GetMaxHP());
 		}
 		
 		// Stamina 변경 이벤트 바인딩
-		if (m_Stamina)
+		if (m_StaminaComponent)
 		{
-			m_Stamina->OnStaminaChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateStamina);
+			m_StaminaComponent->OnStaminaChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateStamina);
 			// 초기값 설정
-			StatusWidget->UpdateStamina(GetStamina(), 0.0f, m_Stamina->GetMaxStamina());
+			StatusWidget->UpdateStamina(GetStamina(), 0.0f, m_StaminaComponent->GetMaxStamina());
 		}
 	}
 }

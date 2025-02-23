@@ -24,11 +24,11 @@ public:
 	AAreaObject();
 
 	UPROPERTY(BlueprintReadWrite)
-	UHealthComponent* m_Health;
+	UHealthComponent* m_HealthComponent;
 	UPROPERTY(BlueprintReadWrite)
 	UConditionComponent* m_ConditionComponent;
 	UPROPERTY(BlueprintReadWrite)
-	class UStaminaComponent* m_Stamina;
+	class UStaminaComponent* m_StaminaComponent;
 	UPROPERTY(BlueprintReadWrite)
 	UPoiseComponent* m_PoiseComponent;
 	UPROPERTY(BlueprintReadWrite)
@@ -83,7 +83,17 @@ protected:
 	int GuardSFXID;
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|SFX")
 	int PerfectDodgeSFXID;
+	
+	// Death Setting
+	// 죽음 후 destroy 지연 시간
+	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
+	float DestroyDelayTime = 5.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
+	UParticleSystem* DeathEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
+	FTimerHandle DeathTimerHandle;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -148,7 +158,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual bool CanCastNextSkill(UBaseSkill* Skill, AAreaObject* Target);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void CastSkill(UBaseSkill* Skill, AAreaObject* Target);
+	virtual bool CastSkill(UBaseSkill* Skill, AAreaObject* Target);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void UpdateCurrentSkill(UBaseSkill* NewSkill);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
@@ -159,7 +169,7 @@ public:
 	virtual void ClearCurrentSkill();
 	virtual void ClearThisCurrentSkill(UBaseSkill* Skill);
 
-	// Stager Interface
+	// Stagger Interface
 	void SetAnimationPoiseBonus(float Bonus) const;
 
 	// Sound Interface 
@@ -172,6 +182,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void StopBGM();
 
+#pragma region DamageSystem
 	// Stagger 처리 핸들
 	UFUNCTION()
 	void HandleStaggerBegin(EStaggerType Type, float Duration);
@@ -190,18 +201,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	bool bCanNextSkill = false;
-
-	// Death Setting
-	// 죽음 후 destroy 지연 시간
-	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
-	float DestroyDelayTime = 5.0f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
-	UParticleSystem* DeathEffect;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
-	FTimerHandle DeathTimerHandle;
-
+	
 	// HitStop 관련
 	void ApplyHitStop(float Duration);
 	void ResetTimeScale() const;
@@ -211,9 +211,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyKnockBack(const FVector& KnockbackForce);
 	bool bIsBeingKnockedBack = false;
-
+#pragma endregion DamageSystem
 	// 가드 상태 변경 시 호출
 	virtual void SetGuardState(bool bIsGuarding);
+	//virtual void SetState(bool bIsGuarding);
 
 	//약점에 맞았는지
 	virtual bool IsWeakPointHit(FVector HitLoc);

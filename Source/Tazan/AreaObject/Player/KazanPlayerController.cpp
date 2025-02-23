@@ -92,19 +92,19 @@ void AKazanPlayerController::InitializeHUD()
 		StatusWidget->AddToViewport();
 
 		// HP 변경 이벤트 바인딩
-		if (Kazan->m_Health)
+		if (Kazan->m_HealthComponent)
 		{
-			Kazan->m_Health->OnHealthChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateHealth);
+			Kazan->m_HealthComponent->OnHealthChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateHealth);
 			// 초기값 설정
-			StatusWidget->UpdateHealth(Kazan->GetHP(), 0.0f, Kazan->m_Health->GetMaxHP());
+			StatusWidget->UpdateHealth(Kazan->GetHP(), 0.0f, Kazan->m_HealthComponent->GetMaxHP());
 		}
 
 		// Stamina 변경 이벤트 바인딩
-		if (Kazan->m_Stamina)
+		if (Kazan->m_StaminaComponent)
 		{
-			Kazan->m_Stamina->OnStaminaChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateStamina);
+			Kazan->m_StaminaComponent->OnStaminaChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateStamina);
 			// 초기값 설정
-			StatusWidget->UpdateStamina(Kazan->GetStamina(), 0.0f, Kazan->m_Stamina->GetMaxStamina());
+			StatusWidget->UpdateStamina(Kazan->GetStamina(), 0.0f, Kazan->m_StaminaComponent->GetMaxStamina());
 		}
 	}
 }

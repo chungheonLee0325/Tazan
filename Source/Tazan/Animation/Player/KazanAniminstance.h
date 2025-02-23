@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "KazanAniminstance.generated.h"
+#include "Tazan/Animation/Common/BaseAnimInstance.h"
+#include "KazanAnimInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TAZAN_API UKazanAniminstance : public UAnimInstance
+class TAZAN_API UKazanAnimInstance : public UBaseAnimInstance
 {
 	GENERATED_BODY()
 

@@ -22,13 +22,13 @@ AAreaObject::AAreaObject()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Health Component 생성
-	m_Health = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	m_HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	// Poise Component 생성
 	m_PoiseComponent = CreateDefaultSubobject<UPoiseComponent>(TEXT("PoiseComponent"));
 
 	// Stamina Component 생성
-	m_Stamina = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaComponent"));
+	m_StaminaComponent = CreateDefaultSubobject<UStaminaComponent>(TEXT("StaminaComponent"));
 
 	// Condition Component 생성
 	m_ConditionComponent = CreateDefaultSubobject<UConditionComponent>(TEXT("ConditionComponent"));
@@ -72,9 +72,9 @@ void AAreaObject::BeginPlay()
 		staminaRecoveryRate = dt_AreaObject->StaminaRecoveryRate;
 	}
 
-	m_Health->InitHealth(hpMax);
+	m_HealthComponent->InitHealth(hpMax);
 	m_PoiseComponent->InitPoise(basePoise);
-	m_Stamina->InitStamina(maxStamina, staminaRecoveryRate);
+	m_StaminaComponent->InitStamina(maxStamina, staminaRecoveryRate);
 
 	// 스킬 인스턴스 생성
 	for (auto& skill : m_OwnSkillIDSet)
@@ -382,18 +382,20 @@ bool AAreaObject::CanCastNextSkill(UBaseSkill* Skill, AAreaObject* Target)
 	return bCanNextSkill && Skill && Skill->CanCast(this, Target);
 }
 
-void AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
+bool AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
 {
 	if (CanCastSkill(Skill, Target))
 	{
 		UpdateCurrentSkill(Skill);
 		Skill->OnCastStart(this, Target);
+		return true;
 	}
 	else
 	{
 		FString fail = UEnum::GetValueAsString(Skill->SkillFailCase);
 		LOG_PRINT(TEXT("CastSkill Failed: %s"), *fail);
 		LOG_SCREEN_ERROR(this, "CastSkill Failed");
+		return false;
 	}
 }
 
@@ -499,49 +501,49 @@ void AAreaObject::PlayStaggerAnimation(EStaggerType Type) const
 
 float AAreaObject::IncreaseHP(float Delta) const
 {
-	return m_Health->IncreaseHP(Delta);
+	return m_HealthComponent->IncreaseHP(Delta);
 }
 
 float AAreaObject::DecreaseHP(float Delta) const
 {
-	return m_Health->DecreaseHP(Delta);
+	return m_HealthComponent->DecreaseHP(Delta);
 }
 
 void AAreaObject::SetHPByRate(float Rate) const
 {
-	m_Health->SetHPByRate(Rate);
+	m_HealthComponent->SetHPByRate(Rate);
 }
 
 float AAreaObject::GetHP() const
 {
-	return m_Health->GetHP();
+	return m_HealthComponent->GetHP();
 }
 
 float AAreaObject::IncreaseStamina(float Delta) const
 {
-	return m_Stamina->IncreaseStamina(Delta);
+	return m_StaminaComponent->IncreaseStamina(Delta);
 }
 
 float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged) const
 {
 	// ToDo : 탈진상태 추가 및 브루탈 어택 변수 셋팅, 탈진 델리게이트 호출 - bIsDamaged == true일때만
-	return m_Stamina->DecreaseStamina(Delta);
+	return m_StaminaComponent->DecreaseStamina(Delta);
 }
 
 float AAreaObject::GetStamina() const
 {
-	return m_Stamina->GetStamina();
+	return m_StaminaComponent->GetStamina();
 }
 
 bool AAreaObject::CanUseStamina(float Cost) const
 {
-	return m_Stamina->CanUseStamina(Cost);
+	return m_StaminaComponent->CanUseStamina(Cost);
 }
 
 void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 {
 	// Regular guard stamina cost
-	m_Stamina->DecreaseStamina(Data.StaminaDamageAmount * GUARD_STAMINA_MULTIPLY_RATE);
+	m_StaminaComponent->DecreaseStamina(Data.StaminaDamageAmount * GUARD_STAMINA_MULTIPLY_RATE);
 
 	// Rotate AreaObject to Damage Causer
 	RotateToGuardTarget(DamageCauser->GetActorLocation());
@@ -564,7 +566,7 @@ void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data)
 {
 	// Perfect guard stamina cost
-	m_Stamina->DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);
+	m_StaminaComponent->DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);
 
 	// Rotate AreaObject to Damage Causer
 	RotateToGuardTarget(DamageCauser->GetActorLocation());
@@ -572,7 +574,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	// Apply stamina damage to attacker
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
 	{
-		attacker->m_Stamina->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
+		attacker->m_StaminaComponent->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
 	}
 	// Spawn perfect guard VFX
 	if (PerfectGuardEffect)
@@ -677,9 +679,9 @@ void AAreaObject::ApplyKnockBack(const FVector& KnockbackForce)
 
 void AAreaObject::SetGuardState(bool bIsGuarding)
 {
-	if (m_Stamina)
+	if (m_StaminaComponent)
 	{
-		m_Stamina->SetGuardState(bIsGuarding);
+		m_StaminaComponent->SetGuardState(bIsGuarding);
 	}
 }
 

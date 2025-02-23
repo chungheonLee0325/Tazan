@@ -157,6 +157,11 @@ void UBaseSkill::CancelCast()
 	{
 		OnSkillComplete.Unbind();
 	}
+	if (OnSkillCancel.IsBound() == true)
+	{
+		OnSkillCancel.Execute();
+		OnSkillCancel.Unbind();
+	}
 	//if (m_CurrentPhase != ESkillPhase::CoolTime)
 	{
 		m_Caster->ClearThisCurrentSkill(this);
@@ -182,17 +187,17 @@ void UBaseSkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 
 void UBaseSkill::OnMontageBlendOut(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage == m_SkillData->Montage)
-	{
-		if (bInterrupted)
-		{
-			CancelCast();
-		}
-		else
-		{
-			OnCastEnd();
-		}
-	}
+	//if (Montage == m_SkillData->Montage)
+	//{
+	//	if (bInterrupted)
+	//	{
+	//		CancelCast();
+	//	}
+	//	else
+	//	{
+	//		OnCastEnd();
+	//	}
+	//}
 }
 
 FAttackData* UBaseSkill::GetAttackDataByIndex(int Index) const

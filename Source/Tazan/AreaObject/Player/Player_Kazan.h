@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tazan/Animation/Player/KazanAniminstance.h"
+#include "Tazan/Animation/Player/KazanAnimInstance.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Player_Kazan.generated.h"
 
@@ -19,13 +19,20 @@ struct FInputActionValue;
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
-	NORMAL,           // 일반 상태
-	SKILL_PREPARE,	  // 스킬 시전 준비중 - 이동 / 회전 불가
-	SKILL_CASTING,    // 스킬 시전 중 - 이동 불가
-	GUARDING,         // 가드 중
-	EVADING,          // 회피 중
-	STAGERING,        // 경직 상태
-	DYING             // 사망 상태
+	// 일반 상태
+	NORMAL,
+	// 회전만 가능한 상태 (공격 Casting 중 1tick)
+	ONLY_ROTATE,
+	// Action 상태
+	ACTION,
+	// Guard 상태
+	GUARD,
+	// Action 사용 가능한 상태
+	CANACTION,
+	// 경직 상태
+	STAGER,
+	// 사망 상태
+	DIE,
 };
 
 // 액션 제한을 관리하는 구조체
@@ -35,25 +42,19 @@ struct FActionRestrictions
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanLook = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanMove = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanRotate = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanLook = true;
+	bool bCanOnlyRotate = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanAttack = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanGuard = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanEvade = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanUseSkills = true;
+	bool bCanAction = true;
 };
 
 UCLASS()
@@ -80,6 +81,9 @@ public:
 	bool IsSpecial = false;
 	FTimerHandle SpecialTimerHandle;
 
+	void SetPlayerState(EPlayerState NewState);
+	void SetPlayerNormalState() { SetPlayerState(EPlayerState::NORMAL); }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -103,18 +107,18 @@ public:
 	/** Called for attack input */
 	void Attack_Weak_Pressed();
 	void Attack_Strong_Pressed();
-	
+
 	/** Called for evade input */
 	void Dodge_Pressed();
 
 	/** Called for run input */
 	void On_Run_Pressed();
 	void On_Run_Released();
-	
+
 	virtual void HandlePerfectDodge() override;
 
 	void Reward(FItemData* ItemData, int ItemValue) const;
-	
+
 private:
 	// Weapon Setting
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -141,14 +145,14 @@ private:
 	float CurrentPitchAngle = 0.0f;
 
 	UPROPERTY()
-	UKazanAniminstance* KazanAnimInstance;
+	UKazanAnimInstance* KazanAnimInstance;
 	UPROPERTY()
 	AKazanPlayerController* KazanPlayerController;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	UAnimMontage* DodgeAnimMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	UAnimMontage* BackDodgeAnimMontage;
+
+	// UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	// UAnimMontage* DodgeAnimMontage;
+	// UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	// UAnimMontage* BackDodgeAnimMontage;
 
 	// 플레이어 상태 관리
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
@@ -159,13 +163,23 @@ private:
 
 	void InitializeStateRestrictions();
 	bool CanPerformAction(EPlayerState State, FString ActionName);
-	void SetPlayerState(EPlayerState NewState);
-	
-	bool CanDodge = true;
-	float DodgeCoolTime = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "STATUS")
-	float DODGE_COST = 30.f;
-	
+
+
+	// 가드 상태 변경 시 호출
+	virtual void SetGuardState(bool bIsGuarding) override;
+	//virtual void SetActionState(bool bIsAction);
+
+	//bool CanDodge = true;
+	//float DodgeCoolTime = 1.0f;
+	//UPROPERTY(EditDefaultsOnly, Category = "STATUS")
+	//float DODGE_COST = 30.f;
+
+	//bool CanAction = true;
+	//bool CanMove = true;
+	//bool CanOnlyRotate = false;
+
+	//TMap<EActionAbility, bool> ActionAbilityMap;
+
 	FTimerHandle DodgeTimerHandle;
 
 	// Data

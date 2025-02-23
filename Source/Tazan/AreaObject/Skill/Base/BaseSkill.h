@@ -44,6 +44,8 @@ public:
 	// 스킬 완료 델리게이트 -> 상태머신에서 사용(다음 상태 전이용)
 	DECLARE_DELEGATE(FOnSkillComplete)
 	FOnSkillComplete OnSkillComplete;
+	DECLARE_DELEGATE(FOnSkillCancel)
+	FOnSkillCancel OnSkillCancel;
 
 	// 쿨타임 타이머 핸들
 	FTimerHandle CoolTimeTimerHandle;

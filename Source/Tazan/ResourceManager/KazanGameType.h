@@ -103,6 +103,7 @@ enum class EItemType : uint8
 	Currency UMETA(DisplayName = "Currency"),
 	Loot UMETA(DisplayName = "Loot"),
 };
+
 UENUM(BlueprintType)
 enum class ECurrencyType : uint8
 {
@@ -111,6 +112,32 @@ enum class ECurrencyType : uint8
 	Coin UMETA(DisplayName = "Coin"),
 };
 
+UENUM(BlueprintType)
+enum class EAnimationPriority : uint8
+{
+	None = 0,
+	Movement = 1,
+	Action = 2,
+	Skill = 3,
+	Guard = 4,
+	Dodge = 4,
+	Stagger = 7,
+	Death = 10
+};
+
+UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Idle UMETA(DisplayName = "Idle"),
+	Move UMETA(DisplayName = "Move"),
+	Fall UMETA(DisplayName = "Fall"),
+	Attack UMETA(DisplayName = "Attack"),
+	Guard UMETA(DisplayName = "Guard"),
+	Dodge UMETA(DisplayName = "Dodge"),
+	Stagger UMETA(DisplayName = "Stagger"),
+	Dead UMETA(DisplayName = "Dead")
+};
 
 // Struct
 // AreaObject 데이터 테이블용 구조체
@@ -290,9 +317,10 @@ struct FItemData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	EItemType ItemType = EItemType::None;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data", meta = (EditCondition = "ItemType == EItemType::Currency"))
-	ECurrencyType CurrencyType = ECurrencyType::None; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data",
+		meta = (EditCondition = "ItemType == EItemType::Currency"))
+	ECurrencyType CurrencyType = ECurrencyType::None;
 	// 획득시 사운드ID
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	int SoundID = 0;
