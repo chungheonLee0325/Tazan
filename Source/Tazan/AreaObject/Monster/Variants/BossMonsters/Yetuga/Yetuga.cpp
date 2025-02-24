@@ -59,11 +59,11 @@ UBaseAiFSM* AYetuga::CreateFSM()
 	return CreateDefaultSubobject<UYetugaFSM>(TEXT("FSM"));
 }
 
-// void AYetuga::ParryStackPenalty()
-// {
-// 	Super::ParryStackPenalty();
-// 	YetugaABP->bIsGroggy = true;
-// }
+void AYetuga::ParryStackPenalty()
+{
+	Super::ParryStackPenalty();
+	YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
+}
 
 void AYetuga::Tick(float DeltaTime)
 {
@@ -93,6 +93,21 @@ void AYetuga::OnDie()
 {
 	Super::OnDie();
 	CompleteWidget->AddToViewport();
+}
+
+void AYetuga::ChangeStateToWait()
+{
+	m_AiFSM->ChangeState(EAiStateType::Wait);
+}
+
+void AYetuga::ChangeStateToChase()
+{
+	m_AiFSM->ChangeState(EAiStateType::Chase);
+}
+
+void AYetuga::ChangeStateToAttack()
+{
+	m_AiFSM->ChangeState(EAiStateType::Attack);
 }
 
 void AYetuga::InitializeHUD()

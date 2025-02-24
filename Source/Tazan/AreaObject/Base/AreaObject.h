@@ -43,6 +43,15 @@ public:
 	EFloatingDamageType m_DefaultDamageType = EFloatingDamageType::Normal;
 	FVector AdjustKnockBackForce;
 
+	//퍼펙트 가드시 누적될 데미지
+	UPROPERTY(EditDefaultsOnly, Category = "Parry")
+	int ParryStack = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Parry")
+	int ParryStackMax = 5;
+	//퍼펙트 가드 패널티 애니메이션
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parry | Animation")
+	UAnimMontage* ParryPenaltyAnimation;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -71,6 +80,7 @@ protected:
 	// Perfect dodge damage multiplier
 	const float PERFECT_DODGE_DAMAGE_MULTIPLIER = 1.5f;
 	bool bPerfectDodgeBuffActive = false;
+	
 
 	// VFX references
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|VFX")
@@ -214,6 +224,11 @@ public:
 
 	// 퍼펙트 가드 처리 핸들
 	virtual void HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data);
+	// 퍼펙트 가드시 몬스터에 가할 스택
+	virtual void AddParryStack();
+	virtual void ParryStackPenalty();
+	void InitParryStack();
+	
 	// 가드 처리 핸들
 	virtual void HandleGuard(AActor* DamageCauser, const FAttackData& Data);
 	// 퍼펙트 회피 처리 핸들

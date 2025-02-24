@@ -6,6 +6,7 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
 #include "Y_Attack.generated.h"
 
+class UY_BaseSkill;
 /**
  * 
  */
@@ -25,4 +26,6 @@ public:
 
 private:
 	bool bHasFailed = false;
+	bool bIsYSkill;
+	UY_BaseSkill* ySkill;
 };

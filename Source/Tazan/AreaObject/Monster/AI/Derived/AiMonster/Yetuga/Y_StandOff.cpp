@@ -24,13 +24,14 @@ void UY_StandOff::Enter()
 	dir.Normalize();
 	
 	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
+	LOG_SCREEN("포워드 닷: %f", forwardDot);
 
 	//TODO: 위빙스킬 사정거리로 조정
 	if (dist < 390.0f)
 	{
 		//TODO: 플레이어한테 맞고 있는지에 대한 조건 추가
 		AYetuga* yetuga = Cast<AYetuga>(m_Owner);
-		if (forwardDot > -1.0f && forwardDot < -0.8) 
+		if (forwardDot > -1.0f && forwardDot < -0.75f) 
 		{
 			if (m_Owner->GetSkillByID(10900)->GetCurrentPhase() == ESkillPhase::Ready)
 			{

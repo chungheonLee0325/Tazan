@@ -48,12 +48,15 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
-	
-	// virtual void ParryStackPenalty() override;
+	virtual void ParryStackPenalty() override;
 	
 	virtual void OnDie() override;
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
+
+	void ChangeStateToWait();
+	void ChangeStateToChase();
+	void ChangeStateToAttack();
 
 
 private:
