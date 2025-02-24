@@ -214,7 +214,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 		}
 
 		// 넉백 처리
-		if (attackData.KnockBackForce > 0.0f)
+		if (attackData.KnockBackForce > 0.0f && KnockBackForceMultiplier > 0.0f)
 		{
 			FVector knockBackDir;
 			if (attackData.bUseCustomKnockBackDirection)
@@ -227,8 +227,9 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal2D();
 				//knockBackDir = (GetActorLocation() - hitResult.Location).GetSafeNormal2D();
 			}
-
-			ApplyKnockBack(GetActorLocation() + knockBackDir * attackData.KnockBackForce);
+			FVector targetLocation = GetActorLocation() + knockBackDir * attackData.KnockBackForce * KnockBackForceMultiplier;
+			
+			ApplyKnockBack(targetLocation);
 		}
 
 		m_PoiseComponent->PoiseProcess(attackData);
@@ -460,13 +461,13 @@ bool AAreaObject::ExchangeDead() const
 }
 
 void AAreaObject::MoveActorTo(const FVector& TargetPosition, float Duration, EMovementInterpolationType InterpType,
-	bool bStickToGround)
+                              bool bStickToGround)
 {
 	m_MoveUtilComponent->MoveActorTo(TargetPosition, Duration, InterpType, bStickToGround);
 }
 
 void AAreaObject::MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
-	EMovementInterpolationType InterpType, bool bStickToGround)
+                                       EMovementInterpolationType InterpType, bool bStickToGround)
 {
 	m_MoveUtilComponent->MoveActorToWithSpeed(TargetPosition, Speed, InterpType, bStickToGround);
 }

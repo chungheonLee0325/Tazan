@@ -24,6 +24,9 @@ AYetuga::AYetuga()
 
 	m_AreaObjectID = 100;
 
+	// 예투가 넉백 거리 배율 설정
+	KnockBackForceMultiplier = 0.0f;
+
 	static ConstructorHelpers::FClassFinder<UPlayerStatusWidget> WidgetClassFinder(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_YetugaStatusWidget.WB_YetugaStatusWidget_C'"));
 	if (WidgetClassFinder.Succeeded())
 	{
