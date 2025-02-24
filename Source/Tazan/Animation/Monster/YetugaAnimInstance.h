@@ -7,9 +7,13 @@
 #include "YetugaAnimInstance.generated.h"
 
 UENUM(BlueprintType)
-enum class EYetugaAnimState : uint8
+enum class EYAnimState : uint8
 {
-	ParryGroggyEnter
+	None,
+	ParryGroggyEnter,
+	NormalGroggyEnter,
+	GroggyProcess,
+	GroggyEnd
 };
 
 class AYetuga;
@@ -21,24 +25,32 @@ class TAZAN_API UYetugaAnimInstance : public UBaseAnimInstance
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
-	AYetuga* Yetuga;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
-	float Speed = 0.0f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
-	bool bIsGroggy = false;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
-	bool bIsGroggyStr = false;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
-	bool bIsGroggyParry = false;
+	EYAnimState CurrentAnimState = EYAnimState::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=FSM)
+	float GroggyDuration = 4.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParryGroggy | BlendSpace")
 	float BlendDuration = 1.2f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParryGroggy | BlendSpace")
 	float BlendValue = 0.0f;
 
-protected:
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Speed = 0.0f;
 	
-	void UpdateBlendValue(float DeltaSeconds);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AYetuga* Yetuga;
+
+private:
+	
+	
+	float curTime = 0.0f;
+	
+protected:
+	virtual void NativeUpdateAnimation(float dt) override;;
+
+	void GroggyInProgress(float dt);
+	void ParryEntering(float dt);
+	void GroggyEnd();
 
 };
