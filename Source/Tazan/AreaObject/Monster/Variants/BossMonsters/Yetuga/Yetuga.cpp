@@ -59,13 +59,7 @@ UBaseAiFSM* AYetuga::CreateFSM()
 void AYetuga::ParryStackPenalty()
 {
 	Super::ParryStackPenalty();
-	UAnimInstance* ani = GetMesh()->GetAnimInstance();
-	if (ani)
-	{
-		ani->Montage_Play(ParryAnimation);
-	}
-	
-	YetugaABP->bIsGroggy = true;
+	YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
 }
 
 void AYetuga::Tick(float DeltaTime)
@@ -96,6 +90,11 @@ void AYetuga::OnDie()
 {
 	Super::OnDie();
 	CompleteWidget->AddToViewport();
+}
+
+void AYetuga::ChangeStateToWait()
+{
+	m_AiFSM->ChangeState(EAiStateType::Wait);
 }
 
 void AYetuga::InitializeHUD()

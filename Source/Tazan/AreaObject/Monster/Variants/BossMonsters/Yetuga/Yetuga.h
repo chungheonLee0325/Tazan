@@ -23,9 +23,6 @@ public:
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Montage")
-	UAnimMontage* ParryAnimation;
-
 	UPROPERTY()
 	UY_SkillRoulette* SkillRoulette;
 
@@ -51,12 +48,13 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
-	
 	virtual void ParryStackPenalty() override;
 	
 	virtual void OnDie() override;
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
+
+	void ChangeStateToWait();
 
 
 private:
