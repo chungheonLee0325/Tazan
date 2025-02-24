@@ -19,7 +19,7 @@ bool UConditionComponent::AddCondition(EConditionBitsType Condition, float Durat
 	bool bApplied = _addCondition(Condition);
 
 	// Debug
-	if (bApplied) 	LOG_SCREEN("%d : Condition 적용",Condition);
+	// if (bApplied) 	LOG_SCREEN("%d : Condition 적용",Condition);
 	
 	// Duration이 유효한 경우 타이머 설정
 	if (Duration > 0.0f)
@@ -71,7 +71,7 @@ bool UConditionComponent::RemoveCondition(EConditionBitsType Condition)
 	}
 	bool bApplied = _removeCondition(Condition);
 	// Debug
-	if (bApplied) 	LOG_SCREEN("%d : Condition 해제",Condition);
+	// if (bApplied) 	LOG_SCREEN("%d : Condition 해제",Condition);
 	return bApplied;
 }
 
