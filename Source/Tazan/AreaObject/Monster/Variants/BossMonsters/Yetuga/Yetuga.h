@@ -23,6 +23,9 @@ public:
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Montage")
+	UAnimMontage* ParryAnimation;
+
 	UPROPERTY()
 	UY_SkillRoulette* SkillRoulette;
 
@@ -49,7 +52,7 @@ public:
 	
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
 	
-	// virtual void ParryStackPenalty() override;
+	virtual void ParryStackPenalty() override;
 	
 	virtual void OnDie() override;
 	

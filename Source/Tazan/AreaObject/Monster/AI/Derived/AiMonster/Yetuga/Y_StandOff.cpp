@@ -24,6 +24,7 @@ void UY_StandOff::Enter()
 	dir.Normalize();
 	
 	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
+	LOG_SCREEN("포워드 닷: %f", forwardDot);
 
 	//TODO: 위빙스킬 사정거리로 조정
 	if (dist < 390.0f)
