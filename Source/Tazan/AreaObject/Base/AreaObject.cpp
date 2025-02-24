@@ -600,7 +600,7 @@ void AAreaObject::AddParryStack()
 {
 	++ParryStack;
 	// LOG_SCREEN("패리 스택: %d",ParryStack);
-	if (ParryStack >= ParryStackMax)
+	if (ParryStack == ParryStackMax)
 	{
 		ParryStackPenalty();
 	}
@@ -609,6 +609,23 @@ void AAreaObject::AddParryStack()
 void AAreaObject::ParryStackPenalty()
 {
 	// LOG_SCREEN("패리 패널티!");
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		if (ParryPenaltyAnimation != nullptr)
+		{
+			animInst->Montage_Play(ParryPenaltyAnimation);
+		}
+		else
+		{
+			LOG_SCREEN_ERROR(this,"패리 패널티 애니 비어있음");
+		}
+	}
+	ParryStack = 0;
+}
+
+void AAreaObject::InitParryStack()
+{
 	ParryStack = 0;
 }
 
