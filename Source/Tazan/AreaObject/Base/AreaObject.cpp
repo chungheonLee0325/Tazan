@@ -575,6 +575,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
 	{
 		attacker->m_StaminaComponent->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
+		attacker->AddParryStack();
 	}
 	// Spawn perfect guard VFX
 	if (PerfectGuardEffect)
@@ -593,6 +594,22 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	ApplyHitStop(PERFECT_GUARD_HIT_STOP_DURATION);
 
 	// TODO: Could trigger perfect guard animation through montage or notify
+}
+
+void AAreaObject::AddParryStack()
+{
+	++ParryStack;
+	// LOG_SCREEN("패리 스택: %d",ParryStack);
+	if (ParryStack >= ParryStackMax)
+	{
+		ParryStackPenalty();
+	}
+}
+
+void AAreaObject::ParryStackPenalty()
+{
+	// LOG_SCREEN("패리 패널티!");
+	ParryStack = 0;
 }
 
 void AAreaObject::HandlePerfectDodge()
