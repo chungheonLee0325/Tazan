@@ -55,6 +55,8 @@ public:
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 
 	void ChangeStateToWait();
+	void ChangeStateToChase();
+	void ChangeStateToAttack();
 
 
 private:

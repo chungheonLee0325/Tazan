@@ -100,6 +100,16 @@ void AYetuga::ChangeStateToWait()
 	m_AiFSM->ChangeState(EAiStateType::Wait);
 }
 
+void AYetuga::ChangeStateToChase()
+{
+	m_AiFSM->ChangeState(EAiStateType::Chase);
+}
+
+void AYetuga::ChangeStateToAttack()
+{
+	m_AiFSM->ChangeState(EAiStateType::Attack);
+}
+
 void AYetuga::InitializeHUD()
 {
 	if (!StatusWidgetClass) return;
