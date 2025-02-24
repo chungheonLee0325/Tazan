@@ -9,23 +9,23 @@
 class ABaseMonster;
 class UBaseSkill;
 
-USTRUCT(BlueprintType)
-struct FSkillRouletteEntry
-{
-	GENERATED_BODY()
-
-	UPROPERTY(VisibleAnywhere, Category = "SkillRoulette")
-	int32 SkillID;
-
-	//스킬 확률 가중치
-	UPROPERTY(VisibleAnywhere, Category = "SkillRoulette")
-	float Weight;
-
-	FSkillRouletteEntry()
-		: SkillID(0)
-		, Weight(1.0f)
-	{}
-};
+// USTRUCT(BlueprintType)
+// struct FSkillRouletteEntry
+// {
+// 	GENERATED_BODY()
+//
+// 	UPROPERTY(VisibleAnywhere, Category = "SkillRoulette")
+// 	int32 SkillID;
+//
+// 	//스킬 확률 가중치
+// 	UPROPERTY(VisibleAnywhere, Category = "SkillRoulette")
+// 	float Weight;
+//
+// 	FSkillRouletteEntry()
+// 		: SkillID(0)
+// 		, Weight(1.0f)
+// 	{}
+// };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TAZAN_API UY_SkillRoulette : public UActorComponent
