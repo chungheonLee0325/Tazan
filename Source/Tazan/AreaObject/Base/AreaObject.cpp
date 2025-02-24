@@ -220,7 +220,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 			else
 			{
 				// 기본적으로 타격 방향으로 넉백
-				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal2D();
 			}
 
 			ApplyKnockBack(knockBackDir * attackData.KnockBackForce);
@@ -649,7 +649,7 @@ void AAreaObject::ResetTimeScale() const
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 }
 
-void AAreaObject::ApplyKnockBack(const FVector& KnockbackForce)
+void AAreaObject::ApplyKnockBack(const FVector& KnockBackForce)
 {
 	// 이미 넉백 중이면 무시
 	if (bIsBeingKnockedBack)
@@ -657,24 +657,28 @@ void AAreaObject::ApplyKnockBack(const FVector& KnockbackForce)
 
 	bIsBeingKnockedBack = true;
 
-	// 캐릭터 무브먼트 컴포넌트를 통한 넉백
-	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
-	if (MovementComp)
-	{
-		MovementComp->AddImpulse(KnockbackForce, true);
+	TWeakObjectPtr<AAreaObject> weakThis = this;
+	KnockBackCurrentTime = 0.0f;
+	AdjustKnockBackForce = KnockBackForce;
 
-		// 넉백 종료 처리
-		FTimerHandle KnockBackTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(
-			KnockBackTimerHandle,
-			[this]()
+	// 넉백 종료 처리
+	GetWorld()->GetTimerManager().SetTimer(
+		KnockBackTimerHandle,
+		[weakThis]()
+		{
+			AAreaObject* strongThis = weakThis.Get();
+			if (strongThis != nullptr)
 			{
-				bIsBeingKnockedBack = false;
-			},
-			0.5f, // 넉백 상태 지속 시간
-			false
-		);
-	}
+				strongThis->KnockBackCurrentTime += 0.05f;
+				if (strongThis->KnockBackCurrentTime >= strongThis->KnockBackDuration)
+				{
+					strongThis->bIsBeingKnockedBack = false;
+					strongThis->GetWorld()->GetTimerManager().ClearTimer(strongThis->KnockBackTimerHandle);
+					return;
+				}
+				strongThis->AddActorWorldOffset(strongThis->AdjustKnockBackForce * 0.01f,true);
+			}
+		}, 0.01f, true);
 }
 
 void AAreaObject::SetGuardState(bool bIsGuarding)

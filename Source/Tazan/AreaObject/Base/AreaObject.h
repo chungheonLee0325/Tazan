@@ -38,6 +38,7 @@ public:
 	int m_AreaObjectID;
 	UPROPERTY(EditDefaultsOnly, Category = "TakeDamage")
 	EFloatingDamageType m_DefaultDamageType = EFloatingDamageType::Normal;
+	FVector AdjustKnockBackForce;
 
 protected:
 	// Called when the game starts or when spawned
@@ -209,8 +210,11 @@ public:
 
 	// 넉백 관련
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void ApplyKnockBack(const FVector& KnockbackForce);
+	void ApplyKnockBack(const FVector& KnockBackForce);
 	bool bIsBeingKnockedBack = false;
+	float KnockBackDuration = 0.5f;
+	float KnockBackCurrentTime = 0.0f;
+	FTimerHandle KnockBackTimerHandle;
 #pragma endregion DamageSystem
 	// 가드 상태 변경 시 호출
 	virtual void SetGuardState(bool bIsGuarding);
