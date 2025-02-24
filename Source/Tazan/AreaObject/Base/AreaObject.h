@@ -44,7 +44,7 @@ public:
 	FVector AdjustKnockBackForce;
 
 	//퍼펙트 가드시 누적될 데미지
-	UPROPERTY(EditDefaultsOnly, Category = "Parry")
+	UPROPERTY(VisibleDefaultsOnly, Category = "Parry")
 	int ParryStack = 0;
 	UPROPERTY(EditDefaultsOnly, Category = "Parry")
 	int ParryStackMax = 5;
