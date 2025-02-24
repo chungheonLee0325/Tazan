@@ -103,16 +103,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsRotating() const;
 
-	// Control Interface
-	UFUNCTION(BlueprintCallable, Category = "Control")
-	void StopMoving();
-
-	UFUNCTION(BlueprintCallable, Category = "Control")
-	void StopRotating();
-
-	UFUNCTION(BlueprintCallable, Category = "Control")
-	void StopAll();
-
 	// Combat System
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void SetAggroTarget(AAreaObject* NewTarget) { m_AggroTarget = NewTarget; }

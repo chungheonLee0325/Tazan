@@ -122,20 +122,7 @@ UBaseAiFSM* ABaseMonster::CreateFSM()
 	return nullptr;
 }
 
-void ABaseMonster::StopRotating()
-{
-}
-
-void ABaseMonster::StopMoving()
-{
-}
-
 AAreaObject* ABaseMonster::GetAggroTarget() const
 {
 	return m_AggroTarget;
-}
-
-
-void ABaseMonster::StopAll()
-{
 }

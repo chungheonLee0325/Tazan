@@ -7,11 +7,12 @@
 #include "Tazan/AreaObject/Attribute/ConditionComponent.h"
 #include "Tazan/AreaObject/Attribute/HealthComponent.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
-#include "Tazan/AreaObject/Utility/RotationComponent.h"
+#include "Tazan/AreaObject/Utility/RotateUtilComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
 #include "Tazan/UI/Widget/FloatingDamageWidget.h"
 #include "AreaObject.generated.h"
 
+class UMoveUtilComponent;
 class ATazanGameMode;
 
 UCLASS()
@@ -32,7 +33,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	UPoiseComponent* m_PoiseComponent;
 	UPROPERTY(BlueprintReadWrite)
-	URotationComponent* m_RotationComponent;
+	URotateUtilComponent* m_RotateUtilComponent;
+	UPROPERTY(BlueprintReadWrite)
+	UMoveUtilComponent* m_MoveUtilComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AreaObject Data Setting")
 	int m_AreaObjectID;
@@ -84,7 +87,7 @@ protected:
 	int GuardSFXID;
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|SFX")
 	int PerfectDodgeSFXID;
-	
+
 	// Death Setting
 	// 죽음 후 destroy 지연 시간
 	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
@@ -95,6 +98,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
 	FTimerHandle DeathTimerHandle;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -142,6 +146,21 @@ public:
 	bool HasCondition(EConditionBitsType HasConditionType) const;
 	UFUNCTION(BlueprintCallable, Category = "Condition")
 	bool ExchangeDead() const;
+
+	// Move Rotate Interface
+	void StopRotate() const;
+	void StopMove() const;
+	void StopAll() const;
+	
+	// Move 기능 퍼사드 제공
+	void MoveActorTo(const FVector& TargetPosition, float Duration,
+					 EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
+					 bool bStickToGround = false);
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
+							  EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
+							  bool bStickToGround = false);
 
 	// Rotate 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
@@ -202,7 +221,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	bool bCanNextSkill = false;
-	
+
 	// HitStop 관련
 	void ApplyHitStop(float Duration);
 	void ResetTimeScale() const;
@@ -211,10 +230,7 @@ public:
 	// 넉백 관련
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyKnockBack(const FVector& KnockBackForce);
-	bool bIsBeingKnockedBack = false;
-	float KnockBackDuration = 0.5f;
-	float KnockBackCurrentTime = 0.0f;
-	FTimerHandle KnockBackTimerHandle;
+	float KnockBackDuration = 0.1f;
 #pragma endregion DamageSystem
 	// 가드 상태 변경 시 호출
 	virtual void SetGuardState(bool bIsGuarding);

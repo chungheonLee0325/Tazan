@@ -152,6 +152,20 @@ enum class ECharacterState : uint8
 	Dead UMETA(DisplayName = "Dead")
 };
 
+UENUM(BlueprintType)
+enum class EMovementInterpolationType : uint8
+{
+	// 선형
+	Linear UMETA(DisplayName = "Linear"),
+	// 시작에는 느리게 갈수록 빠르게
+	EaseIn UMETA(DisplayName = "Ease In"),
+	// 시작은 빠르게 갈수록 느리게
+	EaseOut UMETA(DisplayName = "Ease Out"),
+	EaseInOut UMETA(DisplayName = "Ease In Out"),
+	EaseOutBounce UMETA(DisplayName = "Ease Out Bounce"),
+	EaseOutElastic UMETA(DisplayName = "Ease Out Elastic"),
+};
+
 // Struct
 // AreaObject 데이터 테이블용 구조체
 USTRUCT(BlueprintType)

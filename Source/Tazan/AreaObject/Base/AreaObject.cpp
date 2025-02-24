@@ -11,7 +11,8 @@
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
-#include "Tazan/AreaObject/Utility/RotationComponent.h"
+#include "Tazan/AreaObject/Utility/MoveUtilComponent.h"
+#include "Tazan/AreaObject/Utility/RotateUtilComponent.h"
 #include "Tazan/Contents/TazanGameMode.h"
 #include "Tazan/UI/FloatingDamageActor.h"
 
@@ -34,7 +35,10 @@ AAreaObject::AAreaObject()
 	m_ConditionComponent = CreateDefaultSubobject<UConditionComponent>(TEXT("ConditionComponent"));
 
 	// Rotation Component 생성
-	m_RotationComponent = CreateDefaultSubobject<URotationComponent>(TEXT("RotationComponent"));
+	m_RotateUtilComponent = CreateDefaultSubobject<URotateUtilComponent>(TEXT("RotateUtilComponent"));
+
+	// Rotation Component 생성
+	m_MoveUtilComponent = CreateDefaultSubobject<UMoveUtilComponent>(TEXT("MoveUtilComponent"));
 
 	//GetCapsuleComponent()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
@@ -221,9 +225,10 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 			{
 				// 기본적으로 타격 방향으로 넉백
 				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal2D();
+				//knockBackDir = (GetActorLocation() - hitResult.Location).GetSafeNormal2D();
 			}
 
-			ApplyKnockBack(knockBackDir * attackData.KnockBackForce);
+			ApplyKnockBack(GetActorLocation() + knockBackDir * attackData.KnockBackForce);
 		}
 
 		m_PoiseComponent->PoiseProcess(attackData);
@@ -281,8 +286,25 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 	return ActualDamage;
 }
 
+void AAreaObject::StopRotate() const
+{
+	m_RotateUtilComponent->StopRotation();
+}
+
+void AAreaObject::StopMove() const
+{
+	m_MoveUtilComponent->StopMovement();
+}
+
+void AAreaObject::StopAll() const
+{
+	m_MoveUtilComponent->StopMovement();
+	m_RotateUtilComponent->StopRotation();
+}
+
 void AAreaObject::OnDie()
 {
+	StopAll();
 	if (UAnimMontage* montage = dt_AreaObject->Die_AnimMontage)
 	{
 		GetMesh()->GetAnimInstance()->Montage_Play(montage);
@@ -437,16 +459,28 @@ bool AAreaObject::ExchangeDead() const
 	return m_ConditionComponent->ExchangeDead();
 }
 
+void AAreaObject::MoveActorTo(const FVector& TargetPosition, float Duration, EMovementInterpolationType InterpType,
+	bool bStickToGround)
+{
+	m_MoveUtilComponent->MoveActorTo(TargetPosition, Duration, InterpType, bStickToGround);
+}
+
+void AAreaObject::MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
+	EMovementInterpolationType InterpType, bool bStickToGround)
+{
+	m_MoveUtilComponent->MoveActorToWithSpeed(TargetPosition, Speed, InterpType, bStickToGround);
+}
+
 void AAreaObject::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed,
                                  float Ratio,
                                  EMovementInterpolationType InterpType)
 {
-	m_RotationComponent->LookAtLocation(TargetLocation, Mode, DurationOrSpeed, Ratio, InterpType);
+	m_RotateUtilComponent->LookAtLocation(TargetLocation, Mode, DurationOrSpeed, Ratio, InterpType);
 }
 
 void AAreaObject::LookAtLocationDirect(const FVector& TargetLocation) const
 {
-	m_RotationComponent->LookAtLocationDirect(TargetLocation);
+	m_RotateUtilComponent->LookAtLocationDirect(TargetLocation);
 }
 
 void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
@@ -651,34 +685,7 @@ void AAreaObject::ResetTimeScale() const
 
 void AAreaObject::ApplyKnockBack(const FVector& KnockBackForce)
 {
-	// 이미 넉백 중이면 무시
-	if (bIsBeingKnockedBack)
-		return;
-
-	bIsBeingKnockedBack = true;
-
-	TWeakObjectPtr<AAreaObject> weakThis = this;
-	KnockBackCurrentTime = 0.0f;
-	AdjustKnockBackForce = KnockBackForce;
-
-	// 넉백 종료 처리
-	GetWorld()->GetTimerManager().SetTimer(
-		KnockBackTimerHandle,
-		[weakThis]()
-		{
-			AAreaObject* strongThis = weakThis.Get();
-			if (strongThis != nullptr)
-			{
-				strongThis->KnockBackCurrentTime += 0.05f;
-				if (strongThis->KnockBackCurrentTime >= strongThis->KnockBackDuration)
-				{
-					strongThis->bIsBeingKnockedBack = false;
-					strongThis->GetWorld()->GetTimerManager().ClearTimer(strongThis->KnockBackTimerHandle);
-					return;
-				}
-				strongThis->AddActorWorldOffset(strongThis->AdjustKnockBackForce * 0.01f,true);
-			}
-		}, 0.01f, true);
+	MoveActorTo(KnockBackForce, KnockBackDuration, EMovementInterpolationType::EaseOut);
 }
 
 void AAreaObject::SetGuardState(bool bIsGuarding)

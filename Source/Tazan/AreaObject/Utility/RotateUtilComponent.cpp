@@ -1,23 +1,23 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RotationComponent.h"
+#include "RotateUtilComponent.h"
 
 #include "Kismet/KismetMathLibrary.h"
 
 // Fill out your copyright notice in the Description page of Project Settings.
 
-URotationComponent::URotationComponent()
+URotateUtilComponent::URotateUtilComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void URotationComponent::BeginPlay()
+void URotateUtilComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void URotationComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+void URotateUtilComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                        FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -52,7 +52,7 @@ void URotationComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 }
 
-void URotationComponent::RotateActorByRotator(const FRotator& TargetRotation, EPMRotationMode Mode, float Duration,
+void URotateUtilComponent::RotateActorByRotator(const FRotator& TargetRotation, EPMRotationMode Mode, float Duration,
                                               float Ratio,
                                               EMovementInterpolationType InterpType)
 {
@@ -60,7 +60,7 @@ void URotationComponent::RotateActorByRotator(const FRotator& TargetRotation, EP
 	StartNewRotation(TargetRotation, Mode, Duration, Ratio, InterpType);
 }
 
-void URotationComponent::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed, float Ratio,
+void URotateUtilComponent::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed, float Ratio,
                                         EMovementInterpolationType InterpType)
 {
 	if (!GetOwner() || DurationOrSpeed <= 0.0f) return;
@@ -74,7 +74,7 @@ void URotationComponent::LookAtLocation(const FVector& TargetLocation, EPMRotati
 	RotateActorByRotator(rotator, Mode, DurationOrSpeed, Ratio, InterpType);
 }
 
-void URotationComponent::LookAtLocationDirect(const FVector& TargetLocation) const
+void URotateUtilComponent::LookAtLocationDirect(const FVector& TargetLocation) const
 {
 	if (!GetOwner()) return;
 	FVector actorLocation = GetOwner()->GetActorLocation();
@@ -85,7 +85,7 @@ void URotationComponent::LookAtLocationDirect(const FVector& TargetLocation) con
 	GetOwner()->SetActorRotation(rotator);
 }
 
-void URotationComponent::StopRotation()
+void URotateUtilComponent::StopRotation()
 {
 	if (!RotationState.IsActive()) return;
 
@@ -98,7 +98,7 @@ void URotationComponent::StopRotation()
 	RotationState = FRotationState();
 }
 
-void URotationComponent::StartNewRotation(const FRotator& TargetRot, EPMRotationMode Mode, float SpeedOrDuration,
+void URotateUtilComponent::StartNewRotation(const FRotator& TargetRot, EPMRotationMode Mode, float SpeedOrDuration,
                                           float Ratio,
                                           EMovementInterpolationType InterpType)
 {
@@ -130,7 +130,7 @@ void URotationComponent::StartNewRotation(const FRotator& TargetRot, EPMRotation
 	RotationState.bIsActive = true;
 }
 
-float URotationComponent::CalculateInterpolationAlpha(float RawAlpha, EMovementInterpolationType InterpType)
+float URotateUtilComponent::CalculateInterpolationAlpha(float RawAlpha, EMovementInterpolationType InterpType)
 {
 	const float n1 = 7.5625;
 	const float d1 = 2.75;

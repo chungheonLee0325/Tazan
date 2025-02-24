@@ -5,20 +5,9 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
-#include "RotationComponent.generated.h"
+#include "RotateUtilComponent.generated.h"
 
 // Enums
-UENUM(BlueprintType)
-enum class EMovementInterpolationType : uint8
-{
-	Linear UMETA(DisplayName = "Linear"),
-	EaseIn UMETA(DisplayName = "Ease In"),
-	EaseOut UMETA(DisplayName = "Ease Out"),
-	EaseInOut UMETA(DisplayName = "Ease In Out"),
-	EaseOutBounce UMETA(DisplayName = "Ease Out Bounce"),
-	EaseOutElastic UMETA(DisplayName = "Ease Out Elastic"),
-};
-
 class FRotationState
 {
 public:
@@ -41,13 +30,13 @@ public:
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class TAZAN_API URotationComponent : public UActorComponent
+class TAZAN_API URotateUtilComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
-	URotationComponent();
+	URotateUtilComponent();
 
 protected:
 	// Called when the game starts
@@ -57,23 +46,17 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
-	UFUNCTION(BlueprintCallable, Category = "Rotation")
 	void RotateActorByRotator(const FRotator& TargetRotation, EPMRotationMode Mode, float Duration, float Ratio,
 	                          EMovementInterpolationType InterpType = EMovementInterpolationType::Linear);
 	
-	UFUNCTION(BlueprintCallable, Category = "Rotation")
 	void LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed, float Ratio = 1.0f,
 	                    EMovementInterpolationType InterpType = EMovementInterpolationType::Linear);
 
-	
-	UFUNCTION(BlueprintCallable, Category = "Rotation")
 	void LookAtLocationDirect(const FVector& TargetLocation) const;
 
 
-	UFUNCTION(BlueprintCallable, Category = "Control")
 	void StopRotation();
 
-	UFUNCTION(BlueprintCallable, Category = "State")
 	bool IsRotating() const { return RotationState.IsActive(); }
 
 	// Configuration
