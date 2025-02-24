@@ -14,10 +14,10 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
-	//TODO: 테스트
-	// m_NextState = EAiStateType::Attack;
 	bHasFailed = false;
 	bIsYSkill = false;
+	m_Owner->InitParryStack();
+	
 	if (m_Owner->CanCastSkill(m_Owner->NextSkill,m_Owner->GetAggroTarget()))
 	{
 		m_Owner->NextSkill->OnSkillComplete.BindUObject(this,&UY_Attack::OnSkillCompleted);
