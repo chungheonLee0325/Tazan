@@ -16,14 +16,14 @@ void UY_SelectSkill::InitState()
 void UY_SelectSkill::Enter()
 {
 	LOG_PRINT(TEXT(""));
-	float dist = m_Owner->GetDistanceTo(m_Owner->GetAggroTarget());
-	FVector dir = m_Owner->GetAggroTarget()->GetActorLocation()-m_Owner->GetActorLocation();
-	dir.Normalize();
+	// float dist = m_Owner->GetDistanceTo(m_Owner->GetAggroTarget());
+	// FVector dir = m_Owner->GetAggroTarget()->GetActorLocation()-m_Owner->GetActorLocation();
+	// dir.Normalize();
+	// float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
 
 	int id = SkillRoulette->GetRandomSkillID();
 	m_Owner->NextSkill = m_Owner->GetSkillByID(id);
 	
-	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
 	
 	// // 플레이어가 예투가 뒤에 있으면 백어택
 	// if (forwardDot > -1.0f && forwardDot < -0.75f) 

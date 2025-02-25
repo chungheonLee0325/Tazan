@@ -48,7 +48,7 @@ void UYetugaFSM::InitStatePool()
 	// Attack
 	auto Attack = CreateState<UY_Attack>(this, m_Owner, EAiStateType::Attack);
 	AddState(EAiStateType::Attack, Attack);
-	Attack->SetNextState(EAiStateType::Wait);
+	Attack->SetNextState(EAiStateType::SelectSkill);
 
 	//SelectSkill
 	auto SelectSkill = CreateState<UY_SelectSkill>(this, m_Owner, EAiStateType::SelectSkill);

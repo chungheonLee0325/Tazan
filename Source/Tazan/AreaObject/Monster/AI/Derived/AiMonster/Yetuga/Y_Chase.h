@@ -19,6 +19,7 @@ public:
 	virtual void Exit() override;
 
 private:
-	float SkillRange = 400.0f;
+	float SkillRange = 0.0f;
+	float RangeMargin = 5.0f;
 	float Speed = 500.f;
 };
