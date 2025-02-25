@@ -39,10 +39,12 @@ BaseMonster System
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Containers/Queue.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/SkillRoulette.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "BaseMonster.generated.h"
 
+class USkillBag;
 class UBaseAiFSM;
 class UBaseSkill;
 class UPathMover;
@@ -73,6 +75,34 @@ class TAZAN_API ABaseMonster : public AAreaObject
 public:
 	ABaseMonster();
 
+	// Monster Data
+	UPROPERTY(EditAnywhere, Category = "Monster Settings")
+	FMonsterData MonsterData;
+
+	// Skill
+	FSkillBagData* dt_SkillBag;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
+	USkillRoulette* SkillRoulette = nullptr;
+	UPROPERTY()
+	UBaseSkill* NextSkill;
+	
+	UPROPERTY()
+	FTimerHandle OnDieHandle;
+
+protected:
+	// Combat System
+	UPROPERTY()
+	AAreaObject* m_AggroTarget;
+	UPROPERTY()
+	FVector m_SpawnLocation;
+	UPROPERTY(VisibleAnywhere)
+	UBaseAiFSM* m_AiFSM;
+
+private:
+	UPROPERTY()
+	AActor* m_CurrentTarget;
+
+public:
 	// Core Functions
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -110,37 +140,15 @@ public:
 	// Data Access
 	const FMonsterData& GetMonsterData() const { return MonsterData; }
 
-	// Monster Data
-	UPROPERTY(EditAnywhere, Category = "Monster Settings")
-	FMonsterData MonsterData;
-
-	UPROPERTY()
-	FTimerHandle OnDieHandle;
-	
-	FSkillBagData* dt_SkillBag;
-
 	UBaseAiFSM* GetFSM() const {return m_AiFSM;}
-	
-	UBaseSkill* NextSkill;
+
+	// Skill
+	void RemoveSkillEntryByID(const int id);
+	void AddSkillEntryByID(const int id);
 
 protected:
 	virtual void OnDie() override;
 
 	UFUNCTION(BlueprintCallable)
-
 	virtual UBaseAiFSM* CreateFSM();
-	
-	// Combat System
-	UPROPERTY()
-	AAreaObject* m_AggroTarget;
-
-	UPROPERTY()
-	FVector m_SpawnLocation;
-
-	UPROPERTY(VisibleAnywhere)
-	UBaseAiFSM* m_AiFSM;
-
-private:
-	UPROPERTY()
-	AActor* m_CurrentTarget;
 };

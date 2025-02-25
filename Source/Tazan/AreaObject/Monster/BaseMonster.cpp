@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/SkillRoulette.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 
 
@@ -19,6 +20,8 @@ ABaseMonster::ABaseMonster()
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	SkillRoulette = CreateDefaultSubobject<USkillRoulette>(TEXT("SkillRoulette"));
+	
 	// Death Effect Load
 	//static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(
 	//	TEXT("/Script/Engine.ParticleSystem'/Game/_Resource/FX/Realistic_Starter_VFX_Pack_Vol2/Particles/Destruction/P_Destruction_Electric.P_Destruction_Electric'"));
@@ -38,6 +41,14 @@ void ABaseMonster::BeginPlay()
 	if (skillbagID != 0)
 	{
 		dt_SkillBag = gameInstance->GetDataSkillBag(skillbagID);
+		if (SkillRoulette != nullptr)
+		{
+			SkillRoulette->InitFromSkillBag(dt_SkillBag);
+		}
+		else
+		{
+			LOG_PRINT(TEXT("스킬룰렛 없음"));
+		}
 	}
 	else
 	{
@@ -103,6 +114,18 @@ FVector ABaseMonster::GetDirToTarget()
 		return FVector::ZeroVector;
 	}
 	return m_AggroTarget->GetActorLocation()-GetActorLocation();
+}
+
+void ABaseMonster::RemoveSkillEntryByID(const int id)
+{
+	LOG_PRINT(TEXT("스킬 엔트리에서 제거"));
+	SkillRoulette->RemoveSkillEntryByID(id);
+}
+
+void ABaseMonster::AddSkillEntryByID(const int id)
+{
+	LOG_PRINT(TEXT("스킬 엔트리에 다시 추가"));
+	SkillRoulette->AddSkillEntryByID(id);
 }
 
 void ABaseMonster::OnDie()
