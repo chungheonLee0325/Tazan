@@ -9,8 +9,6 @@
 void UYSkillNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                            const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComp, Animation, EventReference);
-
 	if (MeshComp && MeshComp->GetOwner())
 	{
 		AYetuga* y = Cast<AYetuga>(MeshComp->GetOwner());
@@ -19,7 +17,6 @@ void UYSkillNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* 
 			ySkill = Cast<UY_BaseSkill>(y->NextSkill);
 			if (ySkill != nullptr)
 			{
-				ySkill->NotifyTrigger();
 			}
 		}
 	}

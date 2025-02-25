@@ -19,13 +19,6 @@ public:
 	float tracePower = 5.0f;
 	FVector TargetLoc = FVector::ZeroVector;
 
-public:
-	virtual void NotifyBegin() override;
-	virtual void NotifyTick(float dt) override;
-	virtual void NotifyEnd() override;
-
-	virtual void NotifyTrigger() override;
-
 private:
 	FVector GetFlyingLocation();
 	FVector GetLandingLocation();

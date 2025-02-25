@@ -8,8 +8,6 @@
 void UYSkillNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                      float TotalDuration)
 {
-	Super::NotifyBegin(MeshComp, Animation, TotalDuration);
-
 	if (MeshComp && MeshComp->GetOwner())
 	{
 		AYetuga* y = Cast<AYetuga>(MeshComp->GetOwner());
@@ -18,7 +16,6 @@ void UYSkillNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequ
 			ySkill = Cast<UY_BaseSkill>(y->NextSkill);
 			if (ySkill != nullptr)
 			{
-				ySkill->NotifyBegin();
 			}
 		}
 	}
@@ -27,21 +24,8 @@ void UYSkillNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequ
 void UYSkillNotifyState::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	float FrameDeltaTime)
 {
-	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime);
-	
-	if(ySkill)
-	{
-		ySkill->NotifyTick(FrameDeltaTime);
-	}
-	
 }
 
 void UYSkillNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	Super::NotifyEnd(MeshComp, Animation);
-	
-	if(ySkill)
-	{
-		ySkill->NotifyEnd();
-	}
 }

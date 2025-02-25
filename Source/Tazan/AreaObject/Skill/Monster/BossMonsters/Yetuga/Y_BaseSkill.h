@@ -15,13 +15,7 @@ UCLASS()
 class TAZAN_API UY_BaseSkill : public UCollisionSkill
 {
 	GENERATED_BODY()
-
+	
 public:
-	virtual void NotifyBegin();
-	virtual void NotifyTick(float dt);
-	virtual void NotifyEnd();
-
-	virtual void NotifyTrigger();
-
-	virtual void AttackTick(float dt);
+	UY_BaseSkill();
 };
