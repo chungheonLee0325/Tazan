@@ -53,7 +53,6 @@ void UYetugaFSM::InitStatePool()
 	//SelectSkill
 	auto SelectSkill = CreateState<UY_SelectSkill>(this, m_Owner, EAiStateType::SelectSkill);
 	SelectSkill->SetSkillRoulette(yetuga->SkillRoulette);
-	SelectSkill->SetYSkillRoulette(yetuga->YSkillRoulette);
 	AddState(EAiStateType::SelectSkill, SelectSkill);
 
 	// Chase

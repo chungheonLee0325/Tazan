@@ -28,14 +28,11 @@ private:
 	UPROPERTY()
 	class USkillRoulette* SkillRoulette = nullptr;
 	UPROPERTY()
-	class UY_SkillRoulette* YSkillRoulette = nullptr;
-	UPROPERTY()
 	UBaseSkill* Skill = nullptr;
 
 	bool bIsWeaving = false;
 
 public:
 	void SetSkillRoulette(USkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
-	void SetYSkillRoulette(UY_SkillRoulette* skillRoulette) { YSkillRoulette = skillRoulette; }
 	bool CheckRange(float dist, float range);
 };

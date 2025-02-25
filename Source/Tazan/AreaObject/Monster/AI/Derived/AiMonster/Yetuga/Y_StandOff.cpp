@@ -6,8 +6,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
-#include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
-#include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 
 void UY_StandOff::InitState()
 {
