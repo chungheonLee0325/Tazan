@@ -6,10 +6,6 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
 #include "Y_SelectSkill.generated.h"
 
-class UY_SkillRoulette;
-/**
- * 
- */
 UCLASS()
 class TAZAN_API UY_SelectSkill : public UBaseAiState
 {
@@ -20,11 +16,26 @@ public:
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
 
+	UPROPERTY(EditAnywhere)
+	float WeavingMinRange = 400.0f;
+	UPROPERTY(EditAnywhere)
+	float WeavingMaxRange = 600.0f;
+	UPROPERTY(EditAnywhere)
+	float LongRange = 1000.0f;
+
+
 private:
-	UY_SkillRoulette* SkillRoulette;
+	UPROPERTY()
+	class USkillRoulette* SkillRoulette = nullptr;
+	UPROPERTY()
+	class UY_SkillRoulette* YSkillRoulette = nullptr;
+	UPROPERTY()
 	UBaseSkill* Skill = nullptr;
 
+	bool bIsWeaving = false;
+
 public:
-	void SetSkillRoulette(UY_SkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
+	void SetSkillRoulette(USkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
+	void SetYSkillRoulette(UY_SkillRoulette* skillRoulette) { YSkillRoulette = skillRoulette; }
 	bool CheckRange(float dist, float range);
 };

@@ -25,7 +25,7 @@ public:
 	void OnSkillCompleted();
 
 private:
+	int SkillID = 0;
 	bool bHasFailed = false;
 	bool bIsYSkill;
-	UY_BaseSkill* ySkill;
 };
