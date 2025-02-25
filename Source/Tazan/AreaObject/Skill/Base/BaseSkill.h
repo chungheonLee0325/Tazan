@@ -81,6 +81,7 @@ public:
 
 	const FSkillData* GetSkillData() const { return m_SkillData; }
 	float GetSkillRange() const { return m_SkillData->CastRange; }
+	int GetSkillID() const { return m_SkillData->SkillID; }
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	bool IsInRange(const AAreaObject* Caster, const AAreaObject* Target) const;
