@@ -21,6 +21,7 @@ void UY_Attack::Enter()
 
 	LOG_PRINT(TEXT("넥스트스킬: %s"),*m_Owner->NextSkill->GetName());
 	UBaseSkill* skill = m_Owner->NextSkill;
+	
 	if (m_Owner->CanCastSkill(skill,m_Owner->GetAggroTarget()))
 	{
 		skill->OnSkillComplete.BindUObject(this,&UY_Attack::OnSkillCompleted);

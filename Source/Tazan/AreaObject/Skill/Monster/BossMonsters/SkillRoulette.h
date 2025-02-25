@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Tazan/ResourceManager/KazanGameType.h"
 #include "SkillRoulette.generated.h"
 
+class ABaseMonster;
 struct FSkillBagData;
 
 USTRUCT(BlueprintType)
@@ -14,10 +16,21 @@ struct FSkillRouletteEntry
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillRoulette")
+	EAiSkillType SkillType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillRoulette")
 	int SkillID;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillRoulette")
 	float Weight;
+
+	FSkillRouletteEntry()
+		: SkillType(EAiSkillType::None), SkillID(0), Weight(1.0f)
+	{}
+
+	FSkillRouletteEntry(EAiSkillType InType, int InSkillID, float InWeight)
+		: SkillType(InType), SkillID(InSkillID), Weight(InWeight)
+	{}
 
 	FORCEINLINE bool operator==(const FSkillRouletteEntry& Other) const
 	{
@@ -37,21 +50,47 @@ public:
 	TArray<FSkillRouletteEntry> SkillEntries;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TArray<FSkillRouletteEntry> AvailableSkillEntries;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
+	float ShortRange = 400.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
+	float MiddleRange = 600.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
+	float LongRange = 1000.0f;
+
+private:
+	UPROPERTY()
+	ABaseMonster* Owner;
+	
+	UPROPERTY()
+	mutable EAiSkillType PrevSkillType = EAiSkillType::None;
+	
+	int PrevSkill_ID = 0;
 	
 protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
 	
 	void InitFromSkillBag(const FSkillBagData* dt_SkillBag);
 	
 	UFUNCTION()
 	int GetRandomSkillID() const;
 
+	// 쿨타임 관련 함수
 	UFUNCTION()
 	void RemoveSkillEntryByID(const int skillID);
 	UFUNCTION()
 	void AddSkillEntryByID(const int skillID);
+
+	// 스킬 확률 조정
+	/** 기존 스킬 확률에 곱해줍니다. */
+	UFUNCTION()
+	void ApplySkillWeight(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType, const float ratio) const;
+	/** 기존 스킬 확률을 덮어 씌웁니다. */
+	UFUNCTION()
+	void SetSkillWeight(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType, const float weight) const;
+	/** 기존 스킬 확률을 덮어 씌웁니다. */
+	UFUNCTION()
+	void SetSkillWeightByID(const int skillID, const float weight);
 };
