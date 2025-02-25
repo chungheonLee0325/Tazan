@@ -426,7 +426,7 @@ struct FSkillBag
 
 	// <SkillID, Weight>
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<int, int> SkillID_Weight;
+	TMap<int, float> SkillID_Weight;
 };
 
 USTRUCT(BlueprintType)
