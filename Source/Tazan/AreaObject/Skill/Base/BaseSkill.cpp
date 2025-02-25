@@ -44,8 +44,7 @@ bool UBaseSkill::CanCast(AAreaObject* Caster, const AAreaObject* Target) const
 	}
 
 	// 사거리 체크
-	// return IsInRange(Caster, Target);
-	return true;
+	return IsInRange(Caster, Target);
 }
 
 void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
