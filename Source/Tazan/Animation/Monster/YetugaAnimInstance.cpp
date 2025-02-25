@@ -2,10 +2,8 @@
 
 
 #include "YetugaAnimInstance.h"
-
-#include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
-#include "Tazan/Utilities/LogMacro.h"
+
 
 void UYetugaAnimInstance::NativeUpdateAnimation(float dt)
 {

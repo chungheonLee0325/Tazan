@@ -9,7 +9,6 @@
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
-#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_SkillRoulette.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 
@@ -17,13 +16,11 @@ AYetuga::AYetuga()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	m_AiFSM = AYetuga::CreateFSM();
-
-	SkillRoulette = CreateDefaultSubobject<UY_SkillRoulette>(TEXT("SkillRoulette"));
 	
 	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
 
 	m_AreaObjectID = 100;
-
+	
 	// 예투가 넉백 거리 배율 설정
 	KnockBackForceMultiplier = 0.0f;
 
@@ -47,8 +44,7 @@ void AYetuga::BeginPlay()
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
 	YetugaABP = Cast<UYetugaAnimInstance>(GetMesh()->GetAnimInstance());
 	InitializeHUD();
-	SkillRoulette->InitSkill();
-
+	
 	//시작시 어퍼컷 콤보공격 확정 실행
 	NextSkill = GetSkillByID(11000);
 	m_AiFSM->ChangeState(EAiStateType::Chase);

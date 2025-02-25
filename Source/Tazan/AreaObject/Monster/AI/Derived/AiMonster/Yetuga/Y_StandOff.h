@@ -6,7 +6,6 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
 #include "Y_StandOff.generated.h"
 
-class UY_SkillRoulette;
 class AYetuga;
 
 UCLASS()
@@ -20,11 +19,7 @@ public:
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
 
-	void SetSkillRoulette(UY_SkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; };
-
 private:
-	bool bIsWeaving = false; 
 	float CurTime;
 	
-	UY_SkillRoulette* SkillRoulette;
 };

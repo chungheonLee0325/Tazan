@@ -8,7 +8,6 @@
 
 class UYetugaAnimInstance;
 class UY_BaseSkill;
-class UY_SkillRoulette;
 class UY_SelectSkill;
 class APlayer_Kazan;
 
@@ -22,9 +21,6 @@ public:
 
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
-
-	UPROPERTY()
-	UY_SkillRoulette* SkillRoulette;
 
 	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
