@@ -48,6 +48,6 @@ void UYetugaAnimInstance::ParryEntering(float dt)
 
 void UYetugaAnimInstance::GroggyEnd()
 {
-	Yetuga->ChangeStateToWait();
+	Yetuga->ChangeStateToSelectSkill();
 	CurrentAnimState = EYAnimState::None;
 }
