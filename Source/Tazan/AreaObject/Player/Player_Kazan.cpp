@@ -254,6 +254,14 @@ void APlayer_Kazan::RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpe
 	//SetControlRotation(Rotator);
 }
 
+void APlayer_Kazan::HandleCameraRotation(FRotator TargetRotate, float InterpSpeed)
+{
+	if (LockOnComponent->GetCurrentTarget())
+	{
+		RotateCameraWithSpeed(TargetRotate, InterpSpeed);
+	}
+}
+
 // Called every frame
 void APlayer_Kazan::Tick(float DeltaTime)
 {

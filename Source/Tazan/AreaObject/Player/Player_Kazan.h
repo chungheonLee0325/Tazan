@@ -127,6 +127,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpeed = 10.f);
+
+	void HandleCameraRotation(FRotator TargetRotate, float InterpSpeed);
 	
 	ULockOnComponent* GetLockOnComponent() const { return LockOnComponent; }
 	
