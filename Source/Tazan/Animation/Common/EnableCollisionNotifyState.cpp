@@ -40,7 +40,7 @@ void UEnableCollisionNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 			UCollisionSkill* collisionSkill = Cast<UCollisionSkill>(m_Owner->GetCurrentSkill());
 			if (collisionSkill != nullptr)
 			{
-				collisionSkill->SetCasterMesh(AttackDataIndex);
+				collisionSkill->SetCasterMesh(AttackDataIndex, this);
 			}
 		}
 	}
@@ -67,7 +67,7 @@ void UEnableCollisionNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UA
 			UCollisionSkill* collisionSkill = Cast<UCollisionSkill>(m_Owner->GetCurrentSkill());
 			if (collisionSkill != nullptr)
 			{
-				collisionSkill->ResetCollisionData();
+				collisionSkill->ResetCollisionData(this);
 			}
 		}
 	}

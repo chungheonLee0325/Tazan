@@ -9,43 +9,44 @@
 void UCollisionSkill::OnCastEnd()
 {
 	Super::OnCastEnd();
-	ResetCollisionData();
+	NotifyStateMap.Empty();
 }
 
 void UCollisionSkill::CancelCast()
 {
 	Super::CancelCast();
-	ResetCollisionData();
+	NotifyStateMap.Empty();
 }
 
 void UCollisionSkill::OnCastTick(float DeltaTime)
 {
 	Super::OnCastTick(DeltaTime);
 
-	if (m_CurrentPhase != ESkillPhase::PostCasting || IsEnableHitDetection == false)
+	if (m_CurrentPhase != ESkillPhase::PostCasting)
 	{
 		return;
 	}
-	
-	ProcessHitDetection();
+	for (auto& pair : NotifyStateMap)
+	{
+		ProcessHitDetection(pair.Key);
+	}
 }
 
-void UCollisionSkill::SetCasterMesh(int AttackDataIndex)
+void UCollisionSkill::SetCasterMesh(int AttackDataIndex, UAnimNotifyState* NotifyState)
 {
 	// 초기화
-	ResetCollisionData();
-	
+	FAttackCollision AttackCollision;
 	// LOG_PRINT(TEXT("히트 업데이트"));
 	bHasHit = false;
-	
-	IndexedAttackData = GetAttackDataByIndex(AttackDataIndex);
-	if (IndexedAttackData == nullptr)
+
+	AttackCollision.IndexedAttackData = GetAttackDataByIndex(AttackDataIndex);
+	if (AttackCollision.IndexedAttackData == nullptr)
 	{
 		return;
 	}
-	if (IndexedAttackData->HitBoxData.MeshComponentTag == NAME_None)
+	if (AttackCollision.IndexedAttackData->HitBoxData.MeshComponentTag == NAME_None)
 	{
-		OwnerSourceMesh = m_Caster->GetMesh();
+		AttackCollision.OwnerSourceMesh = m_Caster->GetMesh();
 	}
 	// 태그로 지정된 메시 찾기
 	TArray<UActorComponent*> Components;
@@ -53,31 +54,36 @@ void UCollisionSkill::SetCasterMesh(int AttackDataIndex)
 
 	for (UActorComponent* Component : Components)
 	{
-		if (Component->ComponentHasTag(IndexedAttackData->HitBoxData.MeshComponentTag))
+		if (Component->ComponentHasTag(AttackCollision.IndexedAttackData->HitBoxData.MeshComponentTag))
 		{
-			OwnerSourceMesh = Cast<USkeletalMeshComponent>(Component);
+			AttackCollision.OwnerSourceMesh = Cast<USkeletalMeshComponent>(Component);
 		}
 	}
-	IsEnableHitDetection = true;
+	AttackCollision.IsEnableHitDetection = true;
+	NotifyStateMap.Add(NotifyState, AttackCollision);
 }
 
-void UCollisionSkill::ProcessHitDetection()
+void UCollisionSkill::ProcessHitDetection(UAnimNotifyState* NotifyState)
 {
-	if (!OwnerSourceMesh || !m_Caster)
+	FAttackCollision* AttackCollision = NotifyStateMap.Find(NotifyState);
+	if (!AttackCollision->OwnerSourceMesh || !m_Caster)
 		return;
 
-	FVector StartLocation = OwnerSourceMesh->GetSocketLocation(IndexedAttackData->HitBoxData.StartSocketName);
-	FVector EndLocation = IndexedAttackData->HitBoxData.EndSocketName != NAME_None
-		                      ? OwnerSourceMesh->GetSocketLocation(IndexedAttackData->HitBoxData.EndSocketName)
+	FVector StartLocation = AttackCollision->OwnerSourceMesh->GetSocketLocation(
+		AttackCollision->IndexedAttackData->HitBoxData.StartSocketName);
+	FVector EndLocation = AttackCollision->IndexedAttackData->HitBoxData.EndSocketName != NAME_None
+		                      ? AttackCollision->OwnerSourceMesh->GetSocketLocation(
+			                      AttackCollision->IndexedAttackData->HitBoxData.EndSocketName)
 		                      : StartLocation;
-	FRotator SocketRotation = OwnerSourceMesh->GetSocketRotation(IndexedAttackData->HitBoxData.StartSocketName);
+	FRotator SocketRotation = AttackCollision->OwnerSourceMesh->GetSocketRotation(
+		AttackCollision->IndexedAttackData->HitBoxData.StartSocketName);
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(m_Caster);
 
 	TArray<FHitResult> HitResults;
 	bool bHit = false;
 
-	switch (IndexedAttackData->HitBoxData.DetectionType)
+	switch (AttackCollision->IndexedAttackData->HitBoxData.DetectionType)
 	{
 	case EHitDetectionType::Line:
 		{
@@ -98,7 +104,7 @@ void UCollisionSkill::ProcessHitDetection()
 				EndLocation,
 				FQuat::Identity,
 				ECC_GameTraceChannel2,
-				FCollisionShape::MakeSphere(IndexedAttackData->HitBoxData.Radius),
+				FCollisionShape::MakeSphere(AttackCollision->IndexedAttackData->HitBoxData.Radius),
 				QueryParams
 			);
 			break;
@@ -113,8 +119,8 @@ void UCollisionSkill::ProcessHitDetection()
 				location,
 				SocketRotation.Quaternion(),
 				ECC_GameTraceChannel2,
-				FCollisionShape::MakeCapsule(IndexedAttackData->HitBoxData.Radius,
-				                             IndexedAttackData->HitBoxData.HalfHeight),
+				FCollisionShape::MakeCapsule(AttackCollision->IndexedAttackData->HitBoxData.Radius,
+				                             AttackCollision->IndexedAttackData->HitBoxData.HalfHeight),
 				QueryParams
 			);
 			break;
@@ -129,7 +135,7 @@ void UCollisionSkill::ProcessHitDetection()
 				location,
 				SocketRotation.Quaternion(),
 				ECC_GameTraceChannel2,
-				FCollisionShape::MakeBox(IndexedAttackData->HitBoxData.BoxExtent),
+				FCollisionShape::MakeBox(AttackCollision->IndexedAttackData->HitBoxData.BoxExtent),
 				QueryParams
 			);
 			break;
@@ -139,48 +145,50 @@ void UCollisionSkill::ProcessHitDetection()
 	// 디버그 드로잉
 	if (bDebugDraw)
 	{
-		DrawDebugHitDetection(StartLocation, EndLocation, HitResults, SocketRotation);
+		DrawDebugHitDetection(NotifyState, StartLocation, EndLocation, HitResults, SocketRotation);
 	}
 
 	if (!bHit)
 	{
 		return;
 	}
-	
+
 	bHasHit = true;
 	// LOG_PRINT(TEXT("트루가 됨"));
-	
+
 	for (FHitResult& Hit : HitResults)
 	{
 		AActor* hitActor = Hit.GetActor();
 		// 이미 히트한 액터는 스킵, AreaObject 말고 BreakableObject도 존재할수 있으므로 별도 처리
-		if (hitActor == nullptr || HitActors.Contains(hitActor))
+		if (hitActor == nullptr || AttackCollision->HitActors.Contains(hitActor))
 		{
 			continue;
 		}
-		HitActors.Add(hitActor);
+		AttackCollision->HitActors.Add(hitActor);
 
 		AAreaObject* hitAreaObject = Cast<AAreaObject>(Hit.GetActor());
 		if (hitAreaObject != nullptr)
 		{
-			m_Caster->CalcDamage(*IndexedAttackData, m_Caster, hitActor, Hit);
+			m_Caster->CalcDamage(*AttackCollision->IndexedAttackData, m_Caster, hitActor, Hit);
 		}
 	}
 }
 
-void UCollisionSkill::ResetCollisionData()
+void UCollisionSkill::ResetCollisionData(UAnimNotifyState* NotifyState)
 {
-
-	IsEnableHitDetection = false;
-	HitActors.Empty();
-	IndexedAttackData = nullptr;
-	OwnerSourceMesh = nullptr;
+	FAttackCollision* AttackCollision = NotifyStateMap.Find(NotifyState);
+	AttackCollision->IsEnableHitDetection = false;
+	AttackCollision->HitActors.Empty();
+	AttackCollision->IndexedAttackData = nullptr;
+	AttackCollision->OwnerSourceMesh = nullptr;
+	NotifyStateMap.Remove(NotifyState);
 }
 
-void UCollisionSkill::DrawDebugHitDetection(const FVector& Start, const FVector& End,
-                                            const TArray<FHitResult>& HitResults, const FRotator& SocketRotation) const
+void UCollisionSkill::DrawDebugHitDetection(UAnimNotifyState* NotifyState, const FVector& Start, const FVector& End,
+                                            const TArray<FHitResult>& HitResults, const FRotator& SocketRotation)
 {
-	auto& HitBoxData = IndexedAttackData->HitBoxData;
+	FAttackCollision* AttackCollision = NotifyStateMap.Find(NotifyState);
+	auto& HitBoxData = AttackCollision->IndexedAttackData->HitBoxData;
 	UWorld* World = m_Caster->GetWorld();
 	if (!World) return;
 
