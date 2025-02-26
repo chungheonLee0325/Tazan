@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Skill/CollisionSkill.h"
-#include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Y_BaseSkill.generated.h"
 
 class ABaseMonster;
