@@ -9,6 +9,22 @@
 /**
  * 
  */
+USTRUCT(BlueprintType)
+struct FAttackCollision
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* OwnerSourceMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSet<AActor*> HitActors = {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsEnableHitDetection = false;
+	
+	FAttackData* IndexedAttackData = nullptr;
+};
+
+
 UCLASS()
 class TAZAN_API UCollisionSkill : public UBaseSkill
 {
@@ -18,14 +34,13 @@ public:
 	virtual void OnCastEnd() override;
 	virtual void CancelCast() override;
 	virtual void OnCastTick(float DeltaTime) override;
-	void SetCasterMesh(int AttackDataIndex);
-	void ProcessHitDetection();
-	void ResetCollisionData();
-
+	void SetCasterMesh(int AttackDataIndex, UAnimNotifyState* NotifyState);
+	void ProcessHitDetection(UAnimNotifyState* NotifyState);
+	void ResetCollisionData(UAnimNotifyState* NotifyState);
 
 	// 디버그 드로잉 옵션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool bDebugDraw = false;
+	bool bDebugDraw = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugData = false;
@@ -45,14 +60,17 @@ protected:
 	bool bHasHit = false;
 
 private:
-	void DrawDebugHitDetection(const FVector& Start, const FVector& End, const TArray<FHitResult>& HitResults,
-	                           const FRotator& SocketRotation) const;
-	UPROPERTY()
-	USkeletalMeshComponent* OwnerSourceMesh;
-	UPROPERTY()
-	TSet<AActor*> HitActors;
+	void DrawDebugHitDetection(UAnimNotifyState* NotifyState, const FVector& Start, const FVector& End, const TArray<FHitResult>& HitResults,
+	                           const FRotator& SocketRotation);
 
-	bool IsEnableHitDetection;
-
-	FAttackData* IndexedAttackData;
+	UPROPERTY()
+	TMap<UAnimNotifyState*, FAttackCollision> NotifyStateMap;
+	//UPROPERTY()
+	//USkeletalMeshComponent* OwnerSourceMesh;
+	//UPROPERTY()
+	//TSet<AActor*> HitActors;
+	//
+	//bool IsEnableHitDetection;
+	//
+	//FAttackData* IndexedAttackData;
 };

@@ -78,7 +78,7 @@ private:
 	float LastUpdateTime = 0.0f;
 
 	// Internal Methods
-	void StartNewMovement(USceneComponent* ComponentToMove, const FVector& Target,
+	void StartNewMovement(const FVector& Target,
 						  EPMMovementMode Mode, float SpeedOrDuration,
 						  EMovementInterpolationType InterpType);
 

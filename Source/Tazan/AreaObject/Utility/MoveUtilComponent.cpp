@@ -80,7 +80,7 @@ void UMoveUtilComponent::MoveActorTo(const FVector& TargetPosition, float Durati
 		}
 	}
 
-	StartNewMovement(nullptr, AdjustedTargetPosition, EPMMovementMode::Duration, Duration, InterpType);
+	StartNewMovement(AdjustedTargetPosition, EPMMovementMode::Duration, Duration, InterpType);
 }
 
 void UMoveUtilComponent::MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
@@ -106,7 +106,7 @@ void UMoveUtilComponent::MoveActorToWithSpeed(const FVector& TargetPosition, flo
 		}
 	}
 
-	StartNewMovement(nullptr, AdjustedTargetPosition, EPMMovementMode::Speed, Speed, InterpType);
+	StartNewMovement(AdjustedTargetPosition, EPMMovementMode::Speed, Speed, InterpType);
 }
 
 void UMoveUtilComponent::StopMovement()
@@ -120,7 +120,7 @@ void UMoveUtilComponent::StopMovement()
 	MovementState = FMovementState();
 }
 
-void UMoveUtilComponent::StartNewMovement(USceneComponent* ComponentToMove, const FVector& Target, EPMMovementMode Mode,
+void UMoveUtilComponent::StartNewMovement(const FVector& Target, EPMMovementMode Mode,
                                           float SpeedOrDuration, EMovementInterpolationType InterpType)
 {
 	StopMovement();
