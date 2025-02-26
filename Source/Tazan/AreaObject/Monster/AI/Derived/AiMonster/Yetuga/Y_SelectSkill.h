@@ -19,7 +19,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	float WeavingMinRange = 400.0f;
 	UPROPERTY(EditAnywhere)
-	float WeavingMaxRange = 600.0f;
+	float WeavingMaxRange = 500.0f;
 	UPROPERTY(EditAnywhere)
 	float LongRange = 1000.0f;
 
@@ -30,6 +30,7 @@ private:
 	UPROPERTY()
 	UBaseSkill* Skill = nullptr;
 
+	float Dist = 0.0f;
 	bool bIsWeaving = false;
 
 public:
