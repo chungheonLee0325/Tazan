@@ -23,9 +23,10 @@ public:
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
 	
-	/**차지 어택 스턴시 애니메이션*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category =  "Animation | ChargeStun")
 	UAnimMontage* ChargeStunAni;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category =  "Animation | Recover")
+	UAnimMontage* RecoverAni;
 
 	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -33,10 +34,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> MissionCompleteClass;
 
-private:
-	// UI
 	UPROPERTY()
 	class UPlayerStatusWidget* StatusWidget;
+
+private:
+	// UI
+	
 	UPROPERTY()
 	class UUserWidget* CompleteWidget;
 		
@@ -47,25 +50,29 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
 	UFUNCTION()
 	void OnYetugaHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 					  UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
 	virtual void ParryStackPenalty() override;
-	
+	virtual void HandleGroggy(float Duration) override;
+	virtual void OnGroggyEnd() override;
 	virtual void OnDie() override;
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 
+	
 	UFUNCTION(BlueprintCallable)
 	void ChangeStateToSelectSkill() { m_AiFSM->ChangeState(EAiStateType::SelectSkill); }
 	UFUNCTION(BlueprintCallable)
 	void ChangeStateToAttack() { m_AiFSM->ChangeState(EAiStateType::Attack); }
-
-	//특수 스킬용
+	
+	UFUNCTION(BlueprintCallable)
 	void ChargeSkillStun();
+	UFUNCTION(BlueprintCallable)
+	void Recover();
 
 private:
 	void InitializeHUD();

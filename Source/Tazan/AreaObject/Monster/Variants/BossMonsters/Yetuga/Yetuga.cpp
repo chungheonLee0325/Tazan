@@ -65,6 +65,27 @@ void AYetuga::ParryStackPenalty()
 	YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
 }
 
+void AYetuga::HandleGroggy(float Duration)
+{
+	Super::HandleGroggy(Duration);
+	
+	m_AiFSM->ChangeState(EAiStateType::Idle);
+	
+	YetugaABP->CurrentAnimState = EYAnimState::NormalGroggyEnter;
+	
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		animInst->Montage_Stop(0.25f);
+	}
+}
+
+void AYetuga::OnGroggyEnd()
+{
+	YetugaABP->CurrentAnimState = EYAnimState::GroggyEnd;
+	Recover();
+}
+
 void AYetuga::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -125,6 +146,14 @@ void AYetuga::ChargeSkillStun()
 			LOG_SCREEN_ERROR(this,"차지 스턴 애니 비어있음");
 		}
 	}
+}
+
+void AYetuga::Recover()
+{
+	YetugaABP->CurrentAnimState = EYAnimState::None;
+	
+	NextSkill = GetSkillByID(19000);
+	m_AiFSM->ChangeState(EAiStateType::Attack);
 }
 
 void AYetuga::InitializeHUD()
