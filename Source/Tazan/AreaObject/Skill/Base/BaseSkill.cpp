@@ -5,7 +5,7 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 
-UBaseSkill::UBaseSkill(): m_TargetPos(), m_NextSkill(nullptr), m_SkillData(nullptr)
+UBaseSkill::UBaseSkill(): m_TargetPos(), m_SkillData(nullptr)
 {
 	m_CurrentPhase = ESkillPhase::Ready;
 	m_CurrentCoolTime = 0.0f;
@@ -87,8 +87,6 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 		CompleteDelegate.BindUObject(this, &UBaseSkill::OnMontageBlendOut);
 		AnimInstance->Montage_SetBlendingOutDelegate(CompleteDelegate, m_SkillData->Montage);
 	}
-
-	
 }
 
 void UBaseSkill::OnCastTick(float DeltaTime)
@@ -106,7 +104,7 @@ void UBaseSkill::OnCastEnd()
 	if (!m_Caster || !m_Target) return;
 
 	m_CurrentPhase = ESkillPhase::CoolTime;
-	
+
 	// 애니메이션 Poise Bonus 해제
 	m_Caster->SetAnimationPoiseBonus(0);
 	// 애니메이션 인스턴스 얻기
@@ -115,16 +113,27 @@ void UBaseSkill::OnCastEnd()
 		// 델리게이트 정리
 		EndDelegate.Unbind();
 		CompleteDelegate.Unbind();
-		
+
 		// 현재 재생중인 몽타주 정지
-		AnimInstance->Montage_Stop(0.1f, m_SkillData->Montage);
+		AnimInstance->Montage_Stop(MontageBlendTime, m_SkillData->Montage);
 	}
-	
+
 	m_Caster->ClearThisCurrentSkill(this);
-	if (nullptr != m_NextSkill && m_Caster->CanCastNextSkill(m_NextSkill, m_Target))
+	if (0 != m_SkillData->NextSkillID)
 	{
-		m_NextSkill->OnSkillComplete = OnSkillComplete;
-		m_Caster->CastSkill(m_NextSkill, m_Target);
+		UBaseSkill* nextSkill = m_Caster->GetSkillByID(m_SkillData->NextSkillID);
+		if (m_Caster->CastSkill(nextSkill, m_Target))
+		{
+			nextSkill->OnSkillComplete = OnSkillComplete;
+		}
+		else
+		{
+			if (OnSkillComplete.IsBound() == true)
+			{
+				OnSkillComplete.Execute();
+				OnSkillComplete.Unbind();
+			}
+		}
 	}
 	else
 	{
@@ -150,11 +159,11 @@ void UBaseSkill::CancelCast()
 		// 델리게이트 정리
 		EndDelegate.Unbind();
 		CompleteDelegate.Unbind();
-        
+
 		// 현재 재생중인 몽타주 정지
 		AnimInstance->Montage_Stop(0.1f, m_SkillData->Montage);
 	}
-	
+
 	if (OnSkillComplete.IsBound() == true)
 	{
 		OnSkillComplete.Unbind();
@@ -277,7 +286,7 @@ void UBaseSkill::AdjustCoolTime()
 				{
 					monster->AddSkillEntryByID(StrongThis->GetSkillID());
 				}
-				
+
 				// ToDo : 쿨타임 완료 이벤트 바인딩?
 			}
 		}
