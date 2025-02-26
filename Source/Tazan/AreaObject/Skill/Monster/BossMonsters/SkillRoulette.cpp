@@ -57,7 +57,7 @@ int USkillRoulette::GetRandomSkillID() const
 		ApplySkillWeight(localEntries,EAiSkillType::Long,0.3f);
 	}
 	
-	if (PrevSkillType == EAiSkillType::Left)
+	if (PrevSkillType == EAiSkillType::Left || PrevSkillType == EAiSkillType::Right)
 	{
 		// 10200 턴어택
 		SetSkillWeightByID(localEntries,10200,22.0f);
@@ -81,7 +81,7 @@ int USkillRoulette::GetRandomSkillID() const
 		if (forwardDot > 0.0f && rightDot >= 0.15f)
 		{
 			LOG_PRINT(TEXT("우측 대각선!"));
-			if ((PrevSkillType != EAiSkillType::Right) || (PrevSkillType != EAiSkillType::Left))
+			if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
 			{
 				SetSkillWeight(localEntries,EAiSkillType::Right,7.0f);
 			}
@@ -93,7 +93,7 @@ int USkillRoulette::GetRandomSkillID() const
 		if (forwardDot > 0.0f && rightDot <= 0.15f)
 		{
 			LOG_PRINT(TEXT("좌측 대각선!"));
-			if ((PrevSkillType != EAiSkillType::Right) || (PrevSkillType != EAiSkillType::Left))
+			if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
 			{
 				SetSkillWeight(localEntries,EAiSkillType::Left,7.0f);
 			}
