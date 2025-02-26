@@ -234,6 +234,14 @@ public:
 	// 퍼펙트 회피 처리 핸들
 	virtual void HandlePerfectDodge();
 
+	// 그로기 적용 핸들
+	UFUNCTION()
+	virtual void HandleGroggy(float Duration);
+	virtual void OnGroggyEnd();
+
+	bool IsGroggy = false;
+	FTimerHandle GroggyTimerHandle;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	bool bCanNextSkill = false;
 
