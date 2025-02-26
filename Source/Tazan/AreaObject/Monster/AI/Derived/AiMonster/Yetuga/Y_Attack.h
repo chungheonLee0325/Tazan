@@ -6,6 +6,7 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
 #include "Y_Attack.generated.h"
 
+class UY_BaseSkill;
 /**
  * 
  */
@@ -24,5 +25,7 @@ public:
 	void OnSkillCompleted();
 
 private:
+	int SkillID = 0;
 	bool bHasFailed = false;
+	bool bIsYSkill;
 };

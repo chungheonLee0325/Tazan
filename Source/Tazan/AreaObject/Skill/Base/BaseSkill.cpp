@@ -87,6 +87,8 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 		CompleteDelegate.BindUObject(this, &UBaseSkill::OnMontageBlendOut);
 		AnimInstance->Montage_SetBlendingOutDelegate(CompleteDelegate, m_SkillData->Montage);
 	}
+
+	
 }
 
 void UBaseSkill::OnCastTick(float DeltaTime)
@@ -269,6 +271,13 @@ void UBaseSkill::AdjustCoolTime()
 			{
 				StrongThis->GetWorld()->GetTimerManager().ClearTimer(StrongThis->CoolTimeTimerHandle);
 				StrongThis->m_CurrentPhase = ESkillPhase::Ready;
+
+				ABaseMonster* monster = Cast<ABaseMonster>(StrongThis->m_Caster);
+				if (monster != nullptr)
+				{
+					monster->AddSkillEntryByID(StrongThis->GetSkillID());
+				}
+				
 				// ToDo : 쿨타임 완료 이벤트 바인딩?
 			}
 		}

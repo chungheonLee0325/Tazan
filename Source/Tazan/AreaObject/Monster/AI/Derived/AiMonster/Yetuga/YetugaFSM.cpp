@@ -40,7 +40,6 @@ void UYetugaFSM::InitStatePool()
 	auto StandOff = CreateState<UY_StandOff>(this, m_Owner, EAiStateType::Wait);
 	AddState(EAiStateType::Wait, StandOff);
 	StandOff->SetNextState(EAiStateType::SelectSkill);
-	StandOff->SetSkillRoulette(yetuga->SkillRoulette);
 	
 	// Idle
 	auto Groggy = CreateState<UY_Groggy>(this, m_Owner, EAiStateType::Idle);
@@ -49,7 +48,7 @@ void UYetugaFSM::InitStatePool()
 	// Attack
 	auto Attack = CreateState<UY_Attack>(this, m_Owner, EAiStateType::Attack);
 	AddState(EAiStateType::Attack, Attack);
-	Attack->SetNextState(EAiStateType::Wait);
+	Attack->SetNextState(EAiStateType::SelectSkill);
 
 	//SelectSkill
 	auto SelectSkill = CreateState<UY_SelectSkill>(this, m_Owner, EAiStateType::SelectSkill);

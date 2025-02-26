@@ -99,7 +99,7 @@ TArray<int> UY_SkillRoulette::GetIDWeavingSkill() const
 	TArray<int> skillArr;
 	for (int i=0; i<Skill_IDs.Num(); ++i)
 	{
-		if (Skill_IDs[i] % 100 == 0 && Skill_IDs[i] < 11000)
+		if (Skill_IDs[i] % 100 == 0 && Skill_IDs[i] < 10900)
 		{
 			skillArr.Add(Skill_IDs[i]);
 		}

@@ -8,7 +8,6 @@
 
 class UYetugaAnimInstance;
 class UY_BaseSkill;
-class UY_SkillRoulette;
 class UY_SelectSkill;
 class APlayer_Kazan;
 
@@ -22,9 +21,6 @@ public:
 
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
-
-	UPROPERTY()
-	UY_SkillRoulette* SkillRoulette;
 
 	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -48,12 +44,15 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
-	
-	// virtual void ParryStackPenalty() override;
+	virtual void ParryStackPenalty() override;
 	
 	virtual void OnDie() override;
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
+
+	void ChangeStateToWait();
+	void ChangeStateToChase();
+	void ChangeStateToAttack();
 
 
 private:

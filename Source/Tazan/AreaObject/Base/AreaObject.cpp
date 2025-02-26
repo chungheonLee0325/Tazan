@@ -610,6 +610,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
 	{
 		attacker->m_StaminaComponent->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
+		attacker->AddParryStack();
 	}
 	// Spawn perfect guard VFX
 	if (PerfectGuardEffect)
@@ -628,6 +629,39 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	ApplyHitStop(PERFECT_GUARD_HIT_STOP_DURATION);
 
 	// TODO: Could trigger perfect guard animation through montage or notify
+}
+
+void AAreaObject::AddParryStack()
+{
+	++ParryStack;
+	// LOG_SCREEN("패리 스택: %d",ParryStack);
+	if (ParryStack == ParryStackMax)
+	{
+		ParryStackPenalty();
+	}
+}
+
+void AAreaObject::ParryStackPenalty()
+{
+	// LOG_SCREEN("패리 패널티!");
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		if (ParryPenaltyAnimation != nullptr)
+		{
+			animInst->Montage_Play(ParryPenaltyAnimation);
+		}
+		else
+		{
+			LOG_SCREEN_ERROR(this,"패리 패널티 애니 비어있음");
+		}
+	}
+	ParryStack = 0;
+}
+
+void AAreaObject::InitParryStack()
+{
+	ParryStack = 0;
 }
 
 void AAreaObject::HandlePerfectDodge()

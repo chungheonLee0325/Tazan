@@ -32,7 +32,7 @@ void UY_Chase::Execute(float dt)
 	m_Owner->AddMovementInput(dir * Speed,1.0f);
 	
 	float dist = m_Owner->GetDistToTarget();
-	if (dist < SkillRange - 50.0f)
+	if (dist < SkillRange - RangeMargin)
 	{
 		m_AiFSM->ChangeState(EAiStateType::Attack);
 	}
