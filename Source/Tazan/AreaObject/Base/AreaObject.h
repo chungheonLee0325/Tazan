@@ -32,7 +32,7 @@ public:
 	class UStaminaComponent* m_StaminaComponent;
 	UPROPERTY(BlueprintReadWrite)
 	UPoiseComponent* m_PoiseComponent;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	URotateUtilComponent* m_RotateUtilComponent;
 	UPROPERTY(BlueprintReadWrite)
 	UMoveUtilComponent* m_MoveUtilComponent;
