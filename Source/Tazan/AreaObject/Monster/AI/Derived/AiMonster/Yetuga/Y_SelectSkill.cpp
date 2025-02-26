@@ -28,7 +28,7 @@ void UY_SelectSkill::Enter()
 	// 플레이어가 예투가 뒤에 있으면 백어택
 	if (forwardDot > -1.0f && forwardDot < -0.75f) 
 	{
-		LOG_SCREEN("내 뒤");
+		//LOG_SCREEN("내 뒤");
 		if (Dist < WeavingMaxRange)
 		{
 			if (m_Owner->GetSkillByID(10900)->GetCurrentPhase() == ESkillPhase::Ready)

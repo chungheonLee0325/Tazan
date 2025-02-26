@@ -54,14 +54,14 @@ int USkillRoulette::GetRandomSkillID() const
 	if (dist > LongRange)
 	{
 		// LOG_SCREEN("원거리 공격 활성화");
-		SetSkillWeight(localEntries,EAiSkillType::Long,3.0f);
+		SetSkillWeight(localEntries,EAiSkillType::Long,18.0f);
 	}
 
-	//직전 스킬 타입이 거리벌리기이면, 원거리 공격만 사용
+	//직전 스킬 타입이 거리벌리기이면, 원거리 공격 위주로 사용
 	if (PrevSkillType == EAiSkillType::Back)
 	{
 		// LOG_SCREEN("원거리 공격!");
-		SelectSkillByType(localEntries,EAiSkillType::Long,1.0f);
+		SelectSkillByType(localEntries,EAiSkillType::Long,32.0f);
 	}
 
 	//직전 스킬 타입이 원거리 공격이면, 원거리 공격 확률 DOWN
@@ -73,7 +73,7 @@ int USkillRoulette::GetRandomSkillID() const
 	//직전 스킬 타입이 좌/우 공격이면, 턴어택 거의 확정 시전
 	else if (PrevSkillType == EAiSkillType::Left || PrevSkillType == EAiSkillType::Right)
 	{
-		SetSkillWeightByID(localEntries,10200,24.0f);
+		SetSkillWeightByID(localEntries,10200,18.0f);
 	}
 	
 	// 거리가 짧으면, 위빙 스킬 확률 UP
@@ -88,7 +88,8 @@ int USkillRoulette::GetRandomSkillID() const
 	// 플레이어가 뒤에 있다면, 뒤도는 스킬 확률 UP
 	if (forwardDot < -0.25f)
 	{
-		ApplySkillWeightByID(localEntries,10800,24.0f);
+		SetSkillWeightByID(localEntries,10800,18.0f);
+		SetSkillWeightByID(localEntries,15200,0.0f);
 		if (dist <= ShortRange)
 		{
 			ApplySkillWeightByID(localEntries,10200,12.0f);
@@ -229,7 +230,7 @@ void USkillRoulette::SelectSkillByType(TArray<FSkillRouletteEntry>& entries, con
 		}
 		else
 		{
-			entry.Weight = 0.0f;
+			entry.Weight = 1.0f;
 		}
 	}
 }
