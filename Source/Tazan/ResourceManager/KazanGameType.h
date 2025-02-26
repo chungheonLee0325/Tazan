@@ -176,7 +176,7 @@ USTRUCT(BlueprintType)
 struct FAreaObjectData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	int AreaObjectID = 0;
 
@@ -218,7 +218,7 @@ struct FAreaObjectData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	float GroggyDuration = 5.f;
-	
+
 	// ToDo : 고도화되면 Skill로 이관 예정  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	int HitSoundID = 0;
@@ -251,6 +251,12 @@ struct FHitBoxData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "DetectionType == EHitDetectionType::Box"))
 	FVector BoxExtent = FVector(15.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUseInterpolation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUseInterpolation"))
+	int32 InterpolationSteps = 4;
 
 	// 소켓이 있는 메시 컴포넌트 지정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
