@@ -63,7 +63,7 @@ public:
 	float LocationUpdateThreshold = 0.1f;
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool bShowDebugPath = true;
+	bool bShowDebugPath = false;
 
 protected:
 	virtual void BeginPlay() override;
