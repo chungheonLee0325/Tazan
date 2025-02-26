@@ -18,7 +18,7 @@ void URotateUtilComponent::BeginPlay()
 }
 
 void URotateUtilComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                       FActorComponentTickFunction* ThisTickFunction)
+                                         FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -50,18 +50,24 @@ void URotateUtilComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			RotationState.Stop();
 		}
 	}
+	// Debug Visualization
+	if (bShowRotationDebug)
+	{
+		DrawDebugVisuals();
+	}
 }
 
 void URotateUtilComponent::RotateActorByRotator(const FRotator& TargetRotation, EPMRotationMode Mode, float Duration,
-                                              float Ratio,
-                                              EMovementInterpolationType InterpType)
+                                                float Ratio,
+                                                EMovementInterpolationType InterpType)
 {
 	if (!GetOwner() || Duration <= 0.0f) return;
 	StartNewRotation(TargetRotation, Mode, Duration, Ratio, InterpType);
 }
 
-void URotateUtilComponent::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed, float Ratio,
-                                        EMovementInterpolationType InterpType)
+void URotateUtilComponent::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed,
+                                          float Ratio,
+                                          EMovementInterpolationType InterpType)
 {
 	if (!GetOwner() || DurationOrSpeed <= 0.0f) return;
 
@@ -99,8 +105,8 @@ void URotateUtilComponent::StopRotation()
 }
 
 void URotateUtilComponent::StartNewRotation(const FRotator& TargetRot, EPMRotationMode Mode, float SpeedOrDuration,
-                                          float Ratio,
-                                          EMovementInterpolationType InterpType)
+                                            float Ratio,
+                                            EMovementInterpolationType InterpType)
 {
 	StopRotation();
 
@@ -108,6 +114,7 @@ void URotateUtilComponent::StartNewRotation(const FRotator& TargetRot, EPMRotati
 	RotationState.TargetRotation = TargetRot;
 	RotationState.InterpType = InterpType;
 	RotationState.TargetRatio = Ratio;
+	RotationState.RotationMode = Mode;
 	if (Mode == EPMRotationMode::Duration)
 	{
 		RotationState.Duration = SpeedOrDuration;
@@ -116,13 +123,8 @@ void URotateUtilComponent::StartNewRotation(const FRotator& TargetRot, EPMRotati
 	else
 	{
 		RotationState.Speed = SpeedOrDuration;
-		const float MaxRotationDelta = FMath::Max(
-			FMath::Abs(FMath::FindDeltaAngleDegrees(RotationState.StartRotation.Yaw, TargetRot.Yaw)),
-			FMath::Max(
-				FMath::Abs(FMath::FindDeltaAngleDegrees(RotationState.StartRotation.Pitch, TargetRot.Pitch)),
-				FMath::Abs(FMath::FindDeltaAngleDegrees(RotationState.StartRotation.Roll, TargetRot.Roll))
-			)
-		);
+		const float MaxRotationDelta = FMath::Abs(
+			FMath::FindDeltaAngleDegrees(RotationState.StartRotation.Yaw, TargetRot.Yaw));
 		RotationState.Duration = MaxRotationDelta / SpeedOrDuration;
 	}
 
@@ -138,11 +140,11 @@ float URotateUtilComponent::CalculateInterpolationAlpha(float RawAlpha, EMovemen
 	switch (InterpType)
 	{
 	case EMovementInterpolationType::Linear:
-		return RawAlpha;
+		return FMath::Clamp(RawAlpha, 0.f, 1.f);
 	case EMovementInterpolationType::EaseIn:
-		return RawAlpha * RawAlpha;
+		return FMath::Clamp(RawAlpha * RawAlpha, 0.f, 1.f);
 	case EMovementInterpolationType::EaseOut:
-		return 1.0f - FMath::Square(1.0f - RawAlpha);
+		return FMath::Clamp(1.0f - FMath::Square(1.0f - RawAlpha), 0.f, 1.f);
 	case EMovementInterpolationType::EaseInOut:
 		return RawAlpha < 0.5f ? 2.0f * RawAlpha * RawAlpha : 1.0f - FMath::Pow(-2.0f * RawAlpha + 2.0f, 2.0f) / 2.0f;
 	case EMovementInterpolationType::EaseOutBounce:
@@ -179,13 +181,7 @@ void FRotationState::Update(float DeltaTime)
 	CurrentTime += DeltaTime;
 	if (RotationMode == EPMRotationMode::Speed)
 	{
-		const float MaxRotationDelta = FMath::Max(
-			FMath::Abs(FMath::FindDeltaAngleDegrees(StartRotation.Yaw, TargetRotation.Yaw)),
-			FMath::Max(
-				FMath::Abs(FMath::FindDeltaAngleDegrees(StartRotation.Pitch, TargetRotation.Pitch)),
-				FMath::Abs(FMath::FindDeltaAngleDegrees(StartRotation.Roll, TargetRotation.Roll))
-			)
-		);
+		const float MaxRotationDelta = FMath::Abs(FMath::FindDeltaAngleDegrees(StartRotation.Yaw, TargetRotation.Yaw));
 		Duration = MaxRotationDelta / Speed;
 	}
 }
@@ -201,4 +197,18 @@ void FRotationState::Stop()
 	TargetRotation = FRotator::ZeroRotator;
 	RotationMode = EPMRotationMode::Duration;
 	InterpType = EMovementInterpolationType::Linear;
+}
+
+void URotateUtilComponent::DrawDebugVisuals() const
+{
+	if (!GetWorld()) return;
+
+	if (bShowRotationDebug && RotationState.IsActive())
+	{
+		const FVector CurrentLocation = GetOwner()->GetActorLocation();
+		DrawDebugLine(GetWorld(), CurrentLocation, RotationState.StartRotation.Vector() * 100.0f + CurrentLocation,
+					  FColor::Green, false, 2.0f, 0, 4.0f);
+		DrawDebugLine(GetWorld(), CurrentLocation, RotationState.TargetRotation.Vector() * 100.0f + CurrentLocation,
+					  FColor::Red, false, 2.0f, 0, 4.0f);
+	}
 }

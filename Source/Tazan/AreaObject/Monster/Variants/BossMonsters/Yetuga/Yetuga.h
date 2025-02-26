@@ -51,7 +51,9 @@ public:
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 
+	UFUNCTION(BlueprintCallable)
 	void ChangeStateToSelectSkill() { m_AiFSM->ChangeState(EAiStateType::SelectSkill); }
+	UFUNCTION(BlueprintCallable)
 	void ChangeStateToAttack() { m_AiFSM->ChangeState(EAiStateType::Attack); }
 
 
