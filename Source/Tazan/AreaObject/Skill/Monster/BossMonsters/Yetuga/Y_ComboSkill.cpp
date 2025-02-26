@@ -20,11 +20,9 @@ void UY_ComboSkill::OnCastFire()
 {
 	if (bHasHit)
 	{
-		LOG_SCREEN("다음 스킬로");
 		m_SkillData->NextSkillID = 11001;
 		OnCastEnd();
 		return;
 	}
-	LOG_SCREEN("다음 없음");
 	m_SkillData->NextSkillID = 0;
 }

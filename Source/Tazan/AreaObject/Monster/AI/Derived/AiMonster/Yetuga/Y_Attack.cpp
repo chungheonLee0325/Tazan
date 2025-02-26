@@ -15,11 +15,13 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
+	LOG_PRINT(TEXT(""));
+	
 	bHasFailed = false;
 	bIsYSkill = false;
 	m_Owner->InitParryStack();
 
-	LOG_PRINT(TEXT("넥스트스킬: %s"),*m_Owner->NextSkill->GetName());
+	// LOG_PRINT(TEXT("넥스트스킬: %s"),*m_Owner->NextSkill->GetName());
 	UBaseSkill* skill = m_Owner->NextSkill;
 	
 	if (m_Owner->CanCastSkill(skill,m_Owner->GetAggroTarget()))
@@ -50,6 +52,6 @@ void UY_Attack::Exit()
 
 void UY_Attack::OnSkillCompleted()
 {
-	if (m_AiFSM) m_AiFSM->ChangeState(m_NextState);
+	if (m_AiFSM) m_AiFSM->ChangeState(EAiStateType::SelectSkill);
 }
 
