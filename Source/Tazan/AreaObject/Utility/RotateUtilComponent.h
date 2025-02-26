@@ -66,6 +66,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Performance")
 	float RotationUpdateThreshold = 0.1f;
 
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool bShowRotationDebug = false;
+
+	void DrawDebugVisuals() const;
+
 private:
 	// State
 	FRotationState RotationState;
