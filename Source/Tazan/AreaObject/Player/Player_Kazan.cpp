@@ -259,20 +259,24 @@ void APlayer_Kazan::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Rotate Only - While Action
+	if (LockOnComponent->IsLockOnMode() && CanPerformAction(CurrentPlayerState, "OnlyRotate"))
+	{
+		FVector targetLocation = LockOnComponent->GetCurrentTarget()->GetActorLocation();
+		LookAtLocation(targetLocation, EPMRotationMode::Speed, 800.f);
+		//LookAtLocationDirect(targetLocation);
+	}
+
+	// ToDo: 로직 변경 예정
+	if (IsRotateCameraWithSpeed) return;
+	
 	// 락온 상태일 때
 	if (LockOnComponent->IsLockOnMode())
 	{
 		// 회전 업데이트
 		UpdateLockedRotation(DeltaTime);
 	}
-	// Rotate Only - While Action
-	if (LockOnComponent->IsLockOnMode() && CanPerformAction(CurrentPlayerState, "OnlyRotate"))
-	{
-		FVector targetLocation = LockOnComponent->GetCurrentTarget()->GetActorLocation();
-		LookAtLocation(targetLocation, EPMRotationMode::Speed, 800.f);
 
-		//LookAtLocationDirect(targetLocation);
-	}
 }
 
 void APlayer_Kazan::InitializeStateRestrictions()
@@ -429,7 +433,7 @@ void APlayer_Kazan::Look(const FVector2D LookAxisVector)
 		float newPitchAngle = CurrentPitchAngle + (LookAxisVector.Y * LookSensitivityY);
 		LOG_PRINT(TEXT("CurrentPitchAngle :  %f"),CurrentPitchAngle)
 		LOG_PRINT(TEXT("newPitchAngle :  %f"),newPitchAngle)
-		newPitchAngle = FMath::ClampAngle(newPitchAngle, MinPitchAngle, MaxPitchAngle);
+		//newPitchAngle = FMath::ClampAngle(newPitchAngle, MinPitchAngle, MaxPitchAngle);
 		LOG_PRINT(TEXT("ClampNewPitchAngle :  %f"),newPitchAngle)
 		float pitchInput = newPitchAngle - CurrentPitchAngle;
 
