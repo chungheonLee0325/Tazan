@@ -52,15 +52,16 @@ public:
 
 	virtual bool CanCast(class AAreaObject* Caster, const AAreaObject* Target) const;
 	virtual void OnCastStart(class AAreaObject* Caster, AAreaObject* Target);
-
 	virtual void OnCastTick(float DeltaTime);
-
-	// Notify를 이용한 Cast Fire(투사체, 장판 등)
-	virtual void OnCastFire();
-	// Notify를 이용한 Cast End
+	// 몽타주 종료나 Notify로 호출되는 Skill 시전 종료 메서드
 	virtual void OnCastEnd();
 	// 외부에서 호출을 이용한 스킬 cancel
 	virtual void CancelCast();
+	
+	// Notify를 이용한 Cast Fire(투사체, 장판 등)
+	virtual void OnCastFire();
+
+
 
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -113,12 +114,12 @@ protected:
 	UPROPERTY()
 	TSubclassOf<UBaseSkill> m_NextSkillClass;
 
-	UPROPERTY()
-	UBaseSkill* m_NextSkill;
-
 	FSkillData* m_SkillData;
-private:
 
+	//OnCastEnd에서 사용할 몽타주 종료시 블렌드
+	float MontageBlendTime = 0.1f;
+	
+private:
 	float m_CurrentCoolTime;
 
 	FOnMontageEnded EndDelegate;

@@ -56,6 +56,7 @@ int USkillRoulette::GetRandomSkillID() const
 		// LOG_SCREEN("직전 스킬이 원거리 스킬입니다.");
 		ApplySkillWeight(localEntries,EAiSkillType::Long,0.3f);
 	}
+	
 	// 거리가 멀면, 원거리 공격 확률 UP
 	if (dist > LongRange)
 	{
@@ -70,16 +71,19 @@ int USkillRoulette::GetRandomSkillID() const
 
 		float forwardDot = FVector::DotProduct(dir,Owner->GetActorForwardVector());
 		float rightDot = FVector::DotProduct(dir,Owner->GetActorRightVector());
-		
-		if (forwardDot > 0.0f && rightDot >= 0.15f)
+
+		if ((PrevSkillType != EAiSkillType::Right) & (PrevSkillType != EAiSkillType::Left))
 		{
-			// LOG_SCREEN("우측 대각선!");
-			SetSkillWeight(localEntries,EAiSkillType::Right,7.0f);
-		}
-		if (forwardDot > 0.0f && rightDot <= 0.15f)
-		{
-			// LOG_SCREEN("좌측 대각선!");
-			SetSkillWeight(localEntries,EAiSkillType::Left,7.0f);
+			if (forwardDot > 0.0f && rightDot >= 0.15f)
+			{
+				// LOG_SCREEN("우측 대각선!");
+				SetSkillWeight(localEntries,EAiSkillType::Right,7.0f);
+			}
+			if (forwardDot > 0.0f && rightDot <= 0.15f)
+			{
+				// LOG_SCREEN("좌측 대각선!");
+				SetSkillWeight(localEntries,EAiSkillType::Left,7.0f);
+			}
 		}
 	}
 	
@@ -102,7 +106,7 @@ int USkillRoulette::GetRandomSkillID() const
 		AccumulatedWeight += Entry.Weight;
 		if (RandomValue <= AccumulatedWeight)
 		{
-			LOG_PRINT(TEXT("스킬 ID: %d"),Entry.SkillID);
+			// LOG_PRINT(TEXT("스킬 ID: %d"),Entry.SkillID);
 
 			PrevSkillType = Entry.SkillType;
 			

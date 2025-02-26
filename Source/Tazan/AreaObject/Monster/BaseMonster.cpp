@@ -118,13 +118,13 @@ FVector ABaseMonster::GetDirToTarget()
 
 void ABaseMonster::RemoveSkillEntryByID(const int id)
 {
-	LOG_PRINT(TEXT("스킬 엔트리에서 제거"));
+	// LOG_PRINT(TEXT("스킬 엔트리에서 제거"));
 	SkillRoulette->RemoveSkillEntryByID(id);
 }
 
 void ABaseMonster::AddSkillEntryByID(const int id)
 {
-	LOG_PRINT(TEXT("스킬 엔트리에 다시 추가"));
+	// LOG_PRINT(TEXT("스킬 엔트리에 다시 추가"));
 	SkillRoulette->AddSkillEntryByID(id);
 }
 

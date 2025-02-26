@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
+#include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Yetuga.generated.h"
 
 class UYetugaAnimInstance;
@@ -50,9 +51,10 @@ public:
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 
-	void ChangeStateToWait();
-	void ChangeStateToChase();
-	void ChangeStateToAttack();
+	UFUNCTION(BlueprintCallable)
+	void ChangeStateToSelectSkill() { m_AiFSM->ChangeState(EAiStateType::SelectSkill); }
+	UFUNCTION(BlueprintCallable)
+	void ChangeStateToAttack() { m_AiFSM->ChangeState(EAiStateType::Attack); }
 
 
 private:
