@@ -161,7 +161,7 @@ void UBaseSkill::CancelCast()
 		CompleteDelegate.Unbind();
 
 		// 현재 재생중인 몽타주 정지
-		AnimInstance->Montage_Stop(0.1f, m_SkillData->Montage);
+		AnimInstance->Montage_Stop(MontageBlendTime, m_SkillData->Montage);
 	}
 
 	if (OnSkillComplete.IsBound() == true)
