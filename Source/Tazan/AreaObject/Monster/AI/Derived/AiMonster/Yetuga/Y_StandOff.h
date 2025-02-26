@@ -21,5 +21,5 @@ public:
 
 private:
 	float CurTime;
-	
+	bool bIsRotate = true;
 };
