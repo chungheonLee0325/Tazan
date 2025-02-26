@@ -41,6 +41,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug", meta = (EditCondition = "bDebugDraw"))
 	bool bPersistentLines = false;
 
+protected:
+	bool bHasHit = false;
+
 private:
 	void DrawDebugHitDetection(const FVector& Start, const FVector& End, const TArray<FHitResult>& HitResults,
 	                           const FRotator& SocketRotation) const;

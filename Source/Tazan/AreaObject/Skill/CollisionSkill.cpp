@@ -4,6 +4,7 @@
 #include "CollisionSkill.h"
 
 #include "Tazan/AreaObject/Base/AreaObject.h"
+#include "Tazan/Utilities/LogMacro.h"
 
 void UCollisionSkill::OnCastEnd()
 {
@@ -33,6 +34,9 @@ void UCollisionSkill::SetCasterMesh(int AttackDataIndex)
 {
 	// 초기화
 	ResetCollisionData();
+	
+	// LOG_PRINT(TEXT("히트 업데이트"));
+	bHasHit = false;
 	
 	IndexedAttackData = GetAttackDataByIndex(AttackDataIndex);
 	if (IndexedAttackData == nullptr)
@@ -142,7 +146,10 @@ void UCollisionSkill::ProcessHitDetection()
 	{
 		return;
 	}
-
+	
+	bHasHit = true;
+	// LOG_PRINT(TEXT("트루가 됨"));
+	
 	for (FHitResult& Hit : HitResults)
 	{
 		AActor* hitActor = Hit.GetActor();
@@ -163,6 +170,7 @@ void UCollisionSkill::ProcessHitDetection()
 
 void UCollisionSkill::ResetCollisionData()
 {
+
 	IsEnableHitDetection = false;
 	HitActors.Empty();
 	IndexedAttackData = nullptr;
