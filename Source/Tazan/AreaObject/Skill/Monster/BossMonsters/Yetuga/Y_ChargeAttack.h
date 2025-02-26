@@ -13,4 +13,13 @@ UCLASS()
 class TAZAN_API UY_ChargeAttack : public UY_BaseSkill
 {
 	GENERATED_BODY()
+
+public:
+	UY_ChargeAttack();
+
+	virtual void OnCastStart(class AAreaObject* Caster, AAreaObject* Target) override;
+	virtual void CancelCast() override;
+	
+	UFUNCTION()
+	void Stun();
 };

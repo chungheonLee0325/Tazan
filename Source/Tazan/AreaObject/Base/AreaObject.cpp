@@ -619,7 +619,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	// Apply stamina damage to attacker
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
 	{
-		DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
+		attacker->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
 		attacker->AddParryStack();
 	}
 	// Spawn perfect guard VFX

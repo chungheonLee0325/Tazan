@@ -5,4 +5,5 @@
 
 UY_BaseSkill::UY_BaseSkill()
 {
+	bDebugDraw = true;
 }

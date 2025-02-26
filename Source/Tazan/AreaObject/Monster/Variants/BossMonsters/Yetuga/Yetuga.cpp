@@ -3,12 +3,14 @@
 
 #include "Yetuga.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tazan/Animation/Monster/YetugaAnimInstance.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_ChargeAttack.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 
@@ -40,9 +42,11 @@ AYetuga::AYetuga()
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this,&AYetuga::OnYetugaHit);
 	
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
 	YetugaABP = Cast<UYetugaAnimInstance>(GetMesh()->GetAnimInstance());
+	
 	InitializeHUD();
 	
 	//시작시 어퍼컷 콤보공격 확정 실행
@@ -61,6 +65,27 @@ void AYetuga::ParryStackPenalty()
 	YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
 }
 
+void AYetuga::HandleGroggy(float Duration)
+{
+	Super::HandleGroggy(Duration);
+	
+	m_AiFSM->ChangeState(EAiStateType::Idle);
+	
+	YetugaABP->CurrentAnimState = EYAnimState::NormalGroggyEnter;
+	
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		animInst->Montage_Stop(0.25f);
+	}
+}
+
+void AYetuga::OnGroggyEnd()
+{
+	YetugaABP->CurrentAnimState = EYAnimState::GroggyEnd;
+	Recover();
+}
+
 void AYetuga::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -69,6 +94,18 @@ void AYetuga::Tick(float DeltaTime)
 void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AYetuga::OnYetugaHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+					  UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherComp->GetCollisionObjectType() == ECC_WorldStatic)
+	{
+		if (m_CurrentSkill.IsA(UY_ChargeAttack::StaticClass()))
+		{
+			m_CurrentSkill->CancelCast();
+		}
+	}
 }
 
 bool AYetuga::IsWeakPointHit(const FVector& HitLoc)
@@ -89,6 +126,34 @@ void AYetuga::OnDie()
 {
 	Super::OnDie();
 	CompleteWidget->AddToViewport();
+}
+
+void AYetuga::ChargeSkillStun()
+{
+	// LOG_SCREEN("차지 스턴 콜");
+	//YetugaABP->CurrentAnimState = EYAnimState::ChargeGroggy;
+	
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		if (ChargeStunAni != nullptr)
+		{
+			animInst->Montage_Play(ChargeStunAni);
+			YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
+		}
+		else
+		{
+			LOG_SCREEN_ERROR(this,"차지 스턴 애니 비어있음");
+		}
+	}
+}
+
+void AYetuga::Recover()
+{
+	YetugaABP->CurrentAnimState = EYAnimState::None;
+	
+	NextSkill = GetSkillByID(19000);
+	m_AiFSM->ChangeState(EAiStateType::Attack);
 }
 
 void AYetuga::InitializeHUD()

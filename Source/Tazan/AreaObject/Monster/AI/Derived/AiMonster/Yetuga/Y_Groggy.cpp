@@ -9,8 +9,6 @@ void UY_Groggy::InitState()
 
 void UY_Groggy::Enter()
 {
-
-	UE_LOG(LogTemp, Display, TEXT("그로기 시작"));
 }
 
 void UY_Groggy::Execute(float DeltaTime)
