@@ -136,6 +136,7 @@ enum class EAnimationPriority : uint8
 	Skill = 3,
 	Guard = 4,
 	Dodge = 4,
+	Groggy = 6,
 	Stagger = 7,
 	Death = 10
 };
@@ -214,6 +215,9 @@ struct FAreaObjectData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	float StaminaRecoveryRate = 20.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
+	float GroggyDuration = 5.f;
+	
 	// ToDo : 고도화되면 Skill로 이관 예정  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Data")
 	int HitSoundID = 0;

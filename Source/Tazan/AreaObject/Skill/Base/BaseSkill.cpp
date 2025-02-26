@@ -33,7 +33,7 @@ bool UBaseSkill::CanCast(AAreaObject* Caster, const AAreaObject* Target) const
 		return false;
 	}
 
-	// 스태미나 체크
+	// ToDo : 고민중... 스태미나 체크
 	if (m_SkillData->Cost > 0)
 	{
 		if (!Caster->CanUseStamina(m_SkillData->Cost))
@@ -57,7 +57,7 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 	// 스태미나 소모
 	if (m_SkillData->Cost > 0)
 	{
-		m_Caster->DecreaseStamina(m_SkillData->Cost);
+		m_Caster->DecreaseStamina(m_SkillData->Cost, false);
 	}
 
 	m_CurrentPhase = ESkillPhase::Casting;
