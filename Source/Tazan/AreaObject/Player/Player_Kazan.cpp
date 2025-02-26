@@ -439,10 +439,12 @@ void APlayer_Kazan::Look(const FVector2D LookAxisVector)
 		//float pitchInput = newPitchAngle - oldPitchAngle;
 		
 		float newPitchAngle = CurrentPitchAngle + (LookAxisVector.Y * LookSensitivityY);
-		LOG_PRINT(TEXT("CurrentPitchAngle :  %f"),CurrentPitchAngle)
-		LOG_PRINT(TEXT("newPitchAngle :  %f"),newPitchAngle)
+
+		//LOG_PRINT(TEXT("CurrentPitchAngle :  %f"),CurrentPitchAngle)
+		//LOG_PRINT(TEXT("newPitchAngle :  %f"),newPitchAngle)
+		//LOG_PRINT(TEXT("ClampNewPitchAngle :  %f"),newPitchAngle)
+
 		//newPitchAngle = FMath::ClampAngle(newPitchAngle, MinPitchAngle, MaxPitchAngle);
-		LOG_PRINT(TEXT("ClampNewPitchAngle :  %f"),newPitchAngle)
 		float pitchInput = newPitchAngle - CurrentPitchAngle;
 
 		// 좌우 회전

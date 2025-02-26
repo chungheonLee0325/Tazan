@@ -66,6 +66,7 @@ void AAreaObject::BeginPlay()
 	int basePoise = 0;
 	float maxStamina = 100.0f; // Assuming a default value, actual implementation needed
 	float staminaRecoveryRate = 20.f;
+	float groggyDuration = 5.f;
 
 	if (dt_AreaObject != nullptr)
 	{
@@ -74,11 +75,12 @@ void AAreaObject::BeginPlay()
 		m_OwnSkillIDSet = dt_AreaObject->SkillList;
 		maxStamina = dt_AreaObject->StaminaMax;
 		staminaRecoveryRate = dt_AreaObject->StaminaRecoveryRate;
+		groggyDuration = dt_AreaObject->GroggyDuration;
 	}
 
 	m_HealthComponent->InitHealth(hpMax);
 	m_PoiseComponent->InitPoise(basePoise);
-	m_StaminaComponent->InitStamina(maxStamina, staminaRecoveryRate);
+	m_StaminaComponent->InitStamina(maxStamina, staminaRecoveryRate,groggyDuration);
 
 	// 스킬 인스턴스 생성
 	for (auto& skill : m_OwnSkillIDSet)
@@ -103,6 +105,9 @@ void AAreaObject::BeginPlay()
 
 	// GameMode Setting
 	m_GameMode = Cast<ATazanGameMode>(GetWorld()->GetAuthGameMode());
+
+	// Delegate bind
+	m_StaminaComponent->OnApplyGroggyDelegate.AddDynamic(this, &AAreaObject::HandleGroggy);
 }
 
 void AAreaObject::PostInitializeComponents()
@@ -562,7 +567,12 @@ float AAreaObject::IncreaseStamina(float Delta) const
 float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged) const
 {
 	// ToDo : 탈진상태 추가 및 브루탈 어택 변수 셋팅, 탈진 델리게이트 호출 - bIsDamaged == true일때만
-	return m_StaminaComponent->DecreaseStamina(Delta);
+	if (IsGroggy)
+	{
+		return 0.f;
+	}
+	
+	return m_StaminaComponent->DecreaseStamina(Delta, bIsDamaged);
 }
 
 float AAreaObject::GetStamina() const
@@ -578,7 +588,7 @@ bool AAreaObject::CanUseStamina(float Cost) const
 void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 {
 	// Regular guard stamina cost
-	m_StaminaComponent->DecreaseStamina(Data.StaminaDamageAmount * GUARD_STAMINA_MULTIPLY_RATE);
+	DecreaseStamina(Data.StaminaDamageAmount * GUARD_STAMINA_MULTIPLY_RATE);
 
 	// Rotate AreaObject to Damage Causer
 	RotateToGuardTarget(DamageCauser->GetActorLocation());
@@ -601,7 +611,7 @@ void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data)
 {
 	// Perfect guard stamina cost
-	m_StaminaComponent->DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);
+	DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);
 
 	// Rotate AreaObject to Damage Causer
 	RotateToGuardTarget(DamageCauser->GetActorLocation());
@@ -609,7 +619,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	// Apply stamina damage to attacker
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
 	{
-		attacker->m_StaminaComponent->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
+		DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
 		attacker->AddParryStack();
 	}
 	// Spawn perfect guard VFX
@@ -696,6 +706,25 @@ void AAreaObject::HandlePerfectDodge()
 	);
 
 	ApplyHitStop(PERFECT_DODGE_HIT_STOP_DURATION);
+}
+
+void AAreaObject::HandleGroggy(float Duration)
+{
+	LOG_PRINT(TEXT("AreaObject Groggy"));
+	// Component에 의한 이동, 회전 중지
+	StopAll();
+	IsGroggy = true;
+	
+	GetWorld()->GetTimerManager().SetTimer(GroggyTimerHandle, [this]()
+	{
+		OnGroggyEnd();
+	}, Duration, false);
+}
+
+void AAreaObject::OnGroggyEnd()
+{
+	LOG_PRINT(TEXT("AreaObject Groggy End"));
+	IsGroggy = false;
 }
 
 void AAreaObject::ApplyHitStop(float Duration)
