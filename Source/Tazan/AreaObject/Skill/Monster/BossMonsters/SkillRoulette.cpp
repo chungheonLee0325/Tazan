@@ -49,61 +49,68 @@ int USkillRoulette::GetRandomSkillID() const
 	float dist = Owner->GetDistToTarget();
 	FVector dir = Owner->GetDirToTarget();
 	dir.Normalize();
-
-	//직전 스킬 타입이 원거리 공격이면, 원거리 공격 확률 DOWN
-	if (PrevSkillType == EAiSkillType::Long)
-	{
-		// LOG_SCREEN("직전 스킬이 원거리 스킬입니다.");
-		ApplySkillWeight(localEntries,EAiSkillType::Long,0.3f);
-	}
 	
-	if (PrevSkillType == EAiSkillType::Left || PrevSkillType == EAiSkillType::Right)
-	{
-		// 10200 턴어택
-		SetSkillWeightByID(localEntries,10200,22.0f);
-	}
-	
-	// 거리가 멀면, 원거리 공격 확률 UP
+	// 거리가 멀면, 원거리 공격 활성화.
 	if (dist > LongRange)
 	{
-		// LOG_SCREEN("원거리 공격 확률 UP");
-		ApplySkillWeight(localEntries,EAiSkillType::Long,3.0f);
+		// LOG_SCREEN("원거리 공격 활성화");
+		SetSkillWeight(localEntries,EAiSkillType::Long,3.0f);
 	}
-	// 거리가 짧으면, 위빙 스킬 확률 UP
-	else if (dist < ShortRange)
-	{
-		// LOG_SCREEN("위빙 확률 UP");
-		ApplySkillWeight(localEntries,EAiSkillType::Weaving,1.5f);
 
-		float forwardDot = FVector::DotProduct(dir,Owner->GetActorForwardVector());
-		float rightDot = FVector::DotProduct(dir,Owner->GetActorRightVector());
-		
-		if (forwardDot > 0.0f && rightDot >= 0.15f)
-		{
-			LOG_PRINT(TEXT("우측 대각선!"));
-			if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
-			{
-				SetSkillWeight(localEntries,EAiSkillType::Right,7.0f);
-			}
-			else
-			{
-				LOG_PRINT(TEXT("이전 스킬이 좌우스킬"));
-			}
-		}
-		if (forwardDot > 0.0f && rightDot <= 0.15f)
-		{
-			LOG_PRINT(TEXT("좌측 대각선!"));
-			if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
-			{
-				SetSkillWeight(localEntries,EAiSkillType::Left,7.0f);
-			}
-			else
-			{
-				LOG_PRINT(TEXT("이전 스킬이 좌우스킬"));
-			}
-		}
+	//직전 스킬 타입이 거리벌리기이면, 원거리 공격만 사용
+	if (PrevSkillType == EAiSkillType::Back)
+	{
+		// LOG_SCREEN("원거리 공격!");
+		SelectSkillByType(localEntries,EAiSkillType::Long,1.0f);
+	}
+
+	//직전 스킬 타입이 원거리 공격이면, 원거리 공격 확률 DOWN
+	else if (PrevSkillType == EAiSkillType::Long)
+	{
+		ApplySkillWeight(localEntries,EAiSkillType::Long,0.25f);
+	}
+
+	//직전 스킬 타입이 좌/우 공격이면, 턴어택 거의 확정 시전
+	else if (PrevSkillType == EAiSkillType::Left || PrevSkillType == EAiSkillType::Right)
+	{
+		SetSkillWeightByID(localEntries,10200,24.0f);
 	}
 	
+	// 거리가 짧으면, 위빙 스킬 확률 UP
+	else if (dist <= ShortRange)
+	{
+		ApplySkillWeight(localEntries,EAiSkillType::Weaving,2.0f);
+	}
+
+	float forwardDot = FVector::DotProduct(dir,Owner->GetActorForwardVector());
+	float rightDot = FVector::DotProduct(dir,Owner->GetActorRightVector());
+
+	// 플레이어가 뒤에 있다면, 뒤도는 스킬 확률 UP
+	if (forwardDot < -0.25f)
+	{
+		ApplySkillWeightByID(localEntries,10800,24.0f);
+		if (dist <= ShortRange)
+		{
+			ApplySkillWeightByID(localEntries,10200,12.0f);
+		}
+	}
+		
+	if (forwardDot > 0.0f && rightDot >= 0.15f)
+	{
+		// LOG_PRINT(TEXT("우측 대각선!"));
+		if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
+		{
+			SetSkillWeight(localEntries,EAiSkillType::Right,3.0f);
+		}
+	}
+	if (forwardDot > 0.0f && rightDot <= 0.15f)
+	{
+		// LOG_PRINT(TEXT("좌측 대각선!"));
+		if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
+		{
+			SetSkillWeight(localEntries,EAiSkillType::Left,3.0f);
+		}
+	}
 	
 	float totalWeight = 0.0f;
 	for (const FSkillRouletteEntry& Entry : localEntries)
@@ -129,6 +136,7 @@ int USkillRoulette::GetRandomSkillID() const
 			return Entry.SkillID;
 		}
 	}
+	
 	return 0;
 }
 
@@ -164,8 +172,20 @@ void USkillRoulette::ApplySkillWeight(TArray<FSkillRouletteEntry>& entries, cons
 	}
 }
 
+void USkillRoulette::ApplySkillWeightByID(TArray<FSkillRouletteEntry>& entries, const int skillID,
+	const float ratio) const
+{
+	for (FSkillRouletteEntry& entry : entries)
+	{
+		if (entry.SkillID == skillID)
+		{
+			entry.Weight *= ratio;
+		}
+	}
+}
+
 void USkillRoulette::SetSkillWeight(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType,
-	const float weight) const
+                                    const float weight) const
 {
 	for (FSkillRouletteEntry& entry : entries)
 	{
@@ -183,6 +203,33 @@ void USkillRoulette::SetSkillWeightByID(TArray<FSkillRouletteEntry>& entries, co
 		if (entry.SkillID == skillID)
 		{
 			entry.Weight = weight;
+		}
+	}
+}
+
+void USkillRoulette::SelectSkillByType(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType) const
+{
+	for (FSkillRouletteEntry& entry : entries)
+	{
+		if (entry.SkillType != skillType)
+		{
+			entry.Weight = 0.0f;
+		}
+	}
+}
+
+void USkillRoulette::SelectSkillByType(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType,
+	const float weight) const
+{
+	for (FSkillRouletteEntry& entry : entries)
+	{
+		if (entry.SkillType == skillType)
+		{
+			entry.Weight = weight;
+		}
+		else
+		{
+			entry.Weight = 0.0f;
 		}
 	}
 }

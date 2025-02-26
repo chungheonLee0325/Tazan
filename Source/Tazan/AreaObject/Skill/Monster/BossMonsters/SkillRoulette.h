@@ -87,10 +87,19 @@ public:
 	/** 기존 스킬 확률에 곱해줍니다. */
 	UFUNCTION()
 	void ApplySkillWeight(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType, const float ratio) const;
+	/** 기존 스킬 확률에 곱해줍니다. */
+	UFUNCTION()
+	void ApplySkillWeightByID(TArray<FSkillRouletteEntry>& entries, const int skillID, const float ratio) const;
+	
 	/** 기존 스킬 확률을 덮어 씌웁니다. */
 	UFUNCTION()
 	void SetSkillWeight(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType, const float weight) const;
 	/** 기존 스킬 확률을 덮어 씌웁니다. */
 	UFUNCTION()
 	void SetSkillWeightByID(TArray<FSkillRouletteEntry>& entries, const int skillID, const float weight) const;
+
+	/** 특정 타입 스킬만 활성화합니다. */
+	void SelectSkillByType(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType) const;
+	/** 특정 타입 스킬만 활성화합니다. */
+	void SelectSkillByType(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType, const float weight) const;
 };
