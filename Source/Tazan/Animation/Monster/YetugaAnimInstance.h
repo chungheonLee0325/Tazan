@@ -12,6 +12,7 @@ enum class EYAnimState : uint8
 	None,
 	ParryGroggyEnter,
 	NormalGroggyEnter,
+	ChargeGroggy,
 	GroggyProcess,
 	GroggyEnd
 };
@@ -42,8 +43,6 @@ public:
 	AYetuga* Yetuga;
 
 private:
-	
-	
 	float curTime = 0.0f;
 	
 protected:
