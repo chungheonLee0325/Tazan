@@ -92,5 +92,5 @@ public:
 	void SetSkillWeight(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType, const float weight) const;
 	/** 기존 스킬 확률을 덮어 씌웁니다. */
 	UFUNCTION()
-	void SetSkillWeightByID(const int skillID, const float weight);
+	void SetSkillWeightByID(TArray<FSkillRouletteEntry>& entries, const int skillID, const float weight) const;
 };

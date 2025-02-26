@@ -57,6 +57,12 @@ int USkillRoulette::GetRandomSkillID() const
 		ApplySkillWeight(localEntries,EAiSkillType::Long,0.3f);
 	}
 	
+	if (PrevSkillType == EAiSkillType::Left)
+	{
+		// 10200 턴어택
+		SetSkillWeightByID(localEntries,10200,22.0f);
+	}
+	
 	// 거리가 멀면, 원거리 공격 확률 UP
 	if (dist > LongRange)
 	{
@@ -67,22 +73,33 @@ int USkillRoulette::GetRandomSkillID() const
 	else if (dist < ShortRange)
 	{
 		// LOG_SCREEN("위빙 확률 UP");
-		ApplySkillWeight(localEntries,EAiSkillType::Weaving,3.0f);
+		ApplySkillWeight(localEntries,EAiSkillType::Weaving,1.5f);
 
 		float forwardDot = FVector::DotProduct(dir,Owner->GetActorForwardVector());
 		float rightDot = FVector::DotProduct(dir,Owner->GetActorRightVector());
-
-		if ((PrevSkillType != EAiSkillType::Right) & (PrevSkillType != EAiSkillType::Left))
+		
+		if (forwardDot > 0.0f && rightDot >= 0.15f)
 		{
-			if (forwardDot > 0.0f && rightDot >= 0.15f)
+			LOG_PRINT(TEXT("우측 대각선!"));
+			if ((PrevSkillType != EAiSkillType::Right) || (PrevSkillType != EAiSkillType::Left))
 			{
-				// LOG_SCREEN("우측 대각선!");
 				SetSkillWeight(localEntries,EAiSkillType::Right,7.0f);
 			}
-			if (forwardDot > 0.0f && rightDot <= 0.15f)
+			else
 			{
-				// LOG_SCREEN("좌측 대각선!");
+				LOG_PRINT(TEXT("이전 스킬이 좌우스킬"));
+			}
+		}
+		if (forwardDot > 0.0f && rightDot <= 0.15f)
+		{
+			LOG_PRINT(TEXT("좌측 대각선!"));
+			if ((PrevSkillType != EAiSkillType::Right) || (PrevSkillType != EAiSkillType::Left))
+			{
 				SetSkillWeight(localEntries,EAiSkillType::Left,7.0f);
+			}
+			else
+			{
+				LOG_PRINT(TEXT("이전 스킬이 좌우스킬"));
 			}
 		}
 	}
@@ -107,7 +124,6 @@ int USkillRoulette::GetRandomSkillID() const
 		if (RandomValue <= AccumulatedWeight)
 		{
 			// LOG_PRINT(TEXT("스킬 ID: %d"),Entry.SkillID);
-
 			PrevSkillType = Entry.SkillType;
 			
 			return Entry.SkillID;
@@ -160,9 +176,9 @@ void USkillRoulette::SetSkillWeight(TArray<FSkillRouletteEntry>& entries, const 
 	}
 }
 
-void USkillRoulette::SetSkillWeightByID(const int skillID, const float weight)
+void USkillRoulette::SetSkillWeightByID(TArray<FSkillRouletteEntry>& entries, const int skillID, const float weight) const
 {
-	for (FSkillRouletteEntry& entry : AvailableSkillEntries)
+	for (FSkillRouletteEntry& entry : entries)
 	{
 		if (entry.SkillID == skillID)
 		{
