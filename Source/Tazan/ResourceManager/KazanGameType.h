@@ -60,6 +60,7 @@ enum class EAiSkillType : uint8
 	Weaving UMETA(DisplayName = "Weaving"),
 	Left UMETA(DisplayName = "Left"),
 	Right UMETA(DisplayName = "Right"),
+	Back UMETA(DisplayName = "Back"),
 	Short UMETA(DisplayName = "Short"),
 	Middle UMETA(DisplayName = "Middle"),
 	Long UMETA(DisplayName = "Long"),
