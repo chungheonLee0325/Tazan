@@ -7,6 +7,7 @@
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Player_Kazan.generated.h"
 
+class ULockOnComponent;
 class AKazanPlayerController;
 class ABaseItem;
 class USpringArmComponent;
@@ -30,7 +31,7 @@ enum class EPlayerState : uint8
 	// Action 사용 가능한 상태
 	CANACTION,
 	// 경직 상태
-	STAGER,
+	STAGGER,
 	// 사망 상태
 	DIE,
 };
@@ -92,8 +93,6 @@ protected:
 	virtual void OnDie() override;
 
 public:
-	virtual void HandleStaggerEnd() override;
-
 	// Movement
 	/** Called for movement input */
 	void Move(FVector2D MovementVector);
@@ -103,7 +102,7 @@ public:
 	void Look(FVector2D LookAxisVector);
 
 	// Guard / Parry
-	/** Called for parry input */
+	/** Called for guard input */
 	void Guard_Pressed();
 	void Guard_Released();
 	void TryEndGuard();
@@ -122,9 +121,17 @@ public:
 	void On_Run_Released();
 
 	virtual void HandlePerfectDodge() override;
+	virtual void HandleStaggerEnd() override;
 
 	void Reward(FItemData* ItemData, int ItemValue) const;
 
+	UFUNCTION(BlueprintCallable)
+	void RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpeed = 10.f);
+
+	void HandleCameraRotation(FRotator TargetRotate, float InterpSpeed);
+	
+	ULockOnComponent* GetLockOnComponent() const { return LockOnComponent; }
+	
 private:
 	// Weapon Setting
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -186,6 +193,7 @@ private:
 	//TMap<EActionAbility, bool> ActionAbilityMap;
 
 	FTimerHandle DodgeTimerHandle;
+	FTimerHandle RotateCameraTimerHandle;
 
 	// Data
 	const float MAX_WALK_SPEED = 500.f;
@@ -205,4 +213,14 @@ private:
 	float CurrentChargeTime = 0.0f;
 	bool bIsCharging = false;
 	FTimerHandle ChargeTimerHandle;
+
+	bool IsRotateCameraWithSpeed;
+	FRotator RotateCameraTarget;
+	float CameraInterpSpeed = 10.f;
+
+	// 락온 관련 이동/회전
+	void UpdateLockedRotation(float DeltaTime);
+	
+	UPROPERTY()
+	ULockOnComponent* LockOnComponent;
 };
