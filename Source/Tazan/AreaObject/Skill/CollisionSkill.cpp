@@ -177,6 +177,7 @@ void UCollisionSkill::ProcessHitDetection(UAnimNotifyState* NotifyState)
 void UCollisionSkill::ResetCollisionData(UAnimNotifyState* NotifyState)
 {
 	FAttackCollision* AttackCollision = NotifyStateMap.Find(NotifyState);
+	if (AttackCollision == nullptr) return;
 	AttackCollision->IsEnableHitDetection = false;
 	AttackCollision->HitActors.Empty();
 	AttackCollision->IndexedAttackData = nullptr;
