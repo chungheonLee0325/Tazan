@@ -54,6 +54,10 @@ private:
 	/** Called for run input */
 	void On_Run_Pressed(const FInputActionValue& InputActionValue);
 	void On_Run_Released(const FInputActionValue& InputActionValue);
+	/** Called for LockOn input */
+	void On_LockOn_Pressed();
+	/** Called for SwitchTarget input */
+	void On_SwitchTarget_Triggered(const FInputActionValue& Value);
 
 	// Owner
 	UPROPERTY(VisibleAnywhere)
@@ -97,4 +101,12 @@ private:
 	/** Evade Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EvadeAction;
+
+	/** LockOn Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* LockOnAction;
+	
+	/** SwitchTarget Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SwitchTargetAction;
 };

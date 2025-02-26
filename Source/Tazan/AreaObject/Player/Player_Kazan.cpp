@@ -7,10 +7,12 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Tazan/Animation/Player/KazanAnimInstance.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/AreaObject/Utility/GhostTrail.h"
 #include "Tazan/Utilities/LogMacro.h"
+#include "Tazan/AreaObject/Player/LockOnComponent.h"
 
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -73,20 +75,6 @@ APlayer_Kazan::APlayer_Kazan()
 		GetMesh()->SetAnimInstanceClass(TempABP.Class);
 	}
 
-	// Set Anim Montage
-	//static ConstructorHelpers::FObjectFinder<UAnimMontage> tempDodgeAnimMontage(TEXT(
-	//	"/Script/Engine.AnimMontage'/Game/_Resource/Kazan/Animation/GSword/CA_P_Kazan_GSword_Dodge_F_Montage.CA_P_Kazan_GSword_Dodge_F_Montage'"));
-	//if (tempDodgeAnimMontage.Succeeded())
-	//{
-	//	DodgeAnimMontage = tempDodgeAnimMontage.Object;
-	//}
-	//static ConstructorHelpers::FObjectFinder<UAnimMontage> tempBackDodgeAnimMontage(TEXT(
-	//	"/Script/Engine.AnimMontage'/Game/_Resource/Kazan/Animation/GSword/CA_P_Kazan_GSword_Dodge_B_Montage.CA_P_Kazan_GSword_Dodge_B_Montage'"));
-	//if (tempBackDodgeAnimMontage.Succeeded())
-	//{
-	//	BackDodgeAnimMontage = tempBackDodgeAnimMontage.Object;
-	//}
-
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -120,6 +108,9 @@ APlayer_Kazan::APlayer_Kazan()
 	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 	FollowCamera->FieldOfView = 100;
+
+	// LockOnComponent 초기화
+	LockOnComponent = CreateDefaultSubobject<ULockOnComponent>(TEXT("LockOnComponent"));
 }
 
 void APlayer_Kazan::SpecialFUNCTION()
@@ -230,10 +221,58 @@ void APlayer_Kazan::Reward(FItemData* ItemData, int ItemValue) const
 	}
 }
 
+void APlayer_Kazan::RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpeed)
+{
+	if (IsRotateCameraWithSpeed)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RotateCameraTimerHandle);
+	}
+
+	IsRotateCameraWithSpeed = true;
+	RotateCameraTarget = TargetRotate;
+	CameraInterpSpeed = InterpSpeed;
+
+	TWeakObjectPtr<APlayer_Kazan> weakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(RotateCameraTimerHandle, [weakThis]()
+	{
+		if (APlayer_Kazan* StrongThis = weakThis.Get())
+		{
+			FRotator NewRotation = StrongThis->GetControlRotation();
+			if (StrongThis->GetControlRotation().Equals(StrongThis->RotateCameraTarget, 5.f))
+			{
+				StrongThis->GetWorld()->GetTimerManager().ClearTimer(StrongThis->RotateCameraTimerHandle);
+				StrongThis->IsRotateCameraWithSpeed = false;
+			}
+			FRotator LerpRotation = FMath::RInterpTo(NewRotation, StrongThis->RotateCameraTarget, 0.01f,
+			                                         StrongThis->CameraInterpSpeed);
+			NewRotation.Yaw = LerpRotation.Yaw;
+			NewRotation.Pitch = LerpRotation.Pitch;
+			StrongThis->KazanPlayerController->SetControlRotation(LerpRotation);
+		}
+	}, 0.01f, true);
+
+	//SetControlRotation(Rotator);
+}
+
 // Called every frame
 void APlayer_Kazan::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// 락온 상태일 때
+	if (LockOnComponent->IsLockOnMode())
+	{
+		// 회전 업데이트
+		UpdateLockedRotation(DeltaTime);
+	}
+	// Rotate Only - While Action
+	if (LockOnComponent->IsLockOnMode() && CanPerformAction(CurrentPlayerState, "OnlyRotate"))
+	{
+		FVector targetLocation = LockOnComponent->GetCurrentTarget()->GetActorLocation();
+		LookAtLocation(targetLocation, EPMRotationMode::Speed, 800.f);
+
+		//LookAtLocationDirect(targetLocation);
+	}
 }
 
 void APlayer_Kazan::InitializeStateRestrictions()
@@ -269,7 +308,7 @@ void APlayer_Kazan::InitializeStateRestrictions()
 	FActionRestrictions StaggerRestrictions;
 	StaggerRestrictions.bCanMove = false;
 	StaggerRestrictions.bCanAction = false;
-	StateRestrictions.Add(EPlayerState::STAGER, StaggerRestrictions);
+	StateRestrictions.Add(EPlayerState::STAGGER, StaggerRestrictions);
 
 	// Die - 삭제할수도?
 	FActionRestrictions DieRestrictions;
@@ -351,34 +390,52 @@ void APlayer_Kazan::Move(const FVector2D MovementVector)
 			AddMovementInput(ForwardDirection, MovementVector.Y);
 			AddMovementInput(RightDirection, MovementVector.X);
 		}
-
 		// Rotate Only
 		if (CanPerformAction(CurrentPlayerState, "OnlyRotate"))
 		{
-			//FRotator NewRotation = FRotationMatrix::MakeFromX(
-			//	RightDirection * MovementVector.X + ForwardDirection * MovementVector.Y).Rotator();
-			//SetActorRotation(NewRotation);
-			FVector targetLocation = GetActorLocation() + RightDirection * MovementVector.X + ForwardDirection *
-				MovementVector.Y;
-			LookAtLocation(targetLocation, EPMRotationMode::Speed, 1200.f);
+			FVector targetLocation;
+			if (LockOnComponent->IsLockOnMode())
+			{
+				targetLocation = LockOnComponent->GetCurrentTarget()->GetActorLocation();
+			}
+			else
+			{
+				targetLocation = GetActorLocation() + RightDirection * MovementVector.X + ForwardDirection *
+					MovementVector.Y;
+			}
+			LookAtLocation(targetLocation, EPMRotationMode::Speed, 1000.f);
 		}
 	}
 }
 
 void APlayer_Kazan::Look(const FVector2D LookAxisVector)
 {
+	// 록온상태이면 회전 입력 적용 X
+	if (LockOnComponent->IsLockOnMode())
+	{
+		return;
+	}
 	// input is a Vector2D
 	if (Controller != nullptr && CanPerformAction(CurrentPlayerState, "Look"))
 	{
 		// add yaw and pitch input to controller
-		// 좌우 회전
-		AddControllerYawInput(LookAxisVector.X * LookSensitivityX);
 		// 상하 회전 제한 적용
+		
+		//float oldPitchAngle = GetControlRotation().Pitch;
+		//float newPitchAngle = oldPitchAngle + (LookAxisVector.Y * LookSensitivityY);
+		//newPitchAngle = FMath::ClampAngle(newPitchAngle, MinPitchAngle, MaxPitchAngle);
+		//float pitchInput = newPitchAngle - oldPitchAngle;
+		
 		float newPitchAngle = CurrentPitchAngle + (LookAxisVector.Y * LookSensitivityY);
+		LOG_PRINT(TEXT("CurrentPitchAngle :  %f"),CurrentPitchAngle)
+		LOG_PRINT(TEXT("newPitchAngle :  %f"),newPitchAngle)
 		newPitchAngle = FMath::ClampAngle(newPitchAngle, MinPitchAngle, MaxPitchAngle);
-
+		LOG_PRINT(TEXT("ClampNewPitchAngle :  %f"),newPitchAngle)
 		float pitchInput = newPitchAngle - CurrentPitchAngle;
 
+		// 좌우 회전
+		AddControllerYawInput(LookAxisVector.X * LookSensitivityX);
+		// 상하 회전
 		AddControllerPitchInput(pitchInput);
 
 		CurrentPitchAngle = newPitchAngle;
@@ -459,7 +516,6 @@ void APlayer_Kazan::Attack_Strong_Released()
 		{
 			SetPlayerState(EPlayerState::NORMAL);
 		}
-
 
 		// Calculate charge power (0.0 to 1.0)
 		//float ChargePower = FMath::Clamp(CurrentChargeTime / MaxChargeTime, 0.0f, 1.0f);
@@ -617,4 +673,44 @@ void APlayer_Kazan::SetGuardState(bool bIsGuarding)
 		// Rotation Setting
 		//GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
+}
+
+void APlayer_Kazan::UpdateLockedRotation(float DeltaTime)
+{
+	// Early return if no target is currently locked on
+	AActor* Target = LockOnComponent->GetCurrentTarget();
+	if (!Target)
+		return;
+
+	const float Distance = FVector::Dist(Target->GetActorLocation(), GetActorLocation());
+	//const float PitchValue = (Distance * PitchDistanceRatio + PitchDistanceOffset) * -1.f;
+	float Alpha = Distance / 600.0f; // 0~1 사이 비율
+	const float PitchOffset = FMath::Clamp(FMath::Lerp(-30.f, -20.0f, Alpha), -30.f, -20.f);
+	//LOG_PRINT(TEXT("PitchOffset: %f"), PitchOffset);
+
+	//const float PitchOffset = FMath::Clamp(-(Distance, -40.f, -25.f);
+
+	// Calculate direction to target
+	FRotator ToTargetRotator = UKismetMathLibrary::FindLookAtRotation(
+		GetActorLocation(),
+		Target->GetActorLocation()
+	);
+	ToTargetRotator.Pitch = PitchOffset;
+
+	// Get current control rotation
+	FRotator CurrentRotation = GetController()->GetControlRotation();
+
+	// Smoothly interpolate only the Yaw (horizontal rotation)
+	// Keep original Roll values
+	const float InterpSpeed = Distance > 600.f ? 2.0f : FMath::Clamp(Distance / 600.f * 2.0f, 0.5f, 2.0f);
+	FRotator NewRotation = CurrentRotation;
+	FRotator LerpRotation = FMath::RInterpTo(CurrentRotation, ToTargetRotator, DeltaTime, InterpSpeed);
+	NewRotation.Yaw = LerpRotation.Yaw;
+	if (IsRotateCameraWithSpeed)
+	{
+		NewRotation.Pitch = LerpRotation.Pitch;
+	}
+
+	// Apply the updated rotation
+	GetController()->SetControlRotation(NewRotation);
 }

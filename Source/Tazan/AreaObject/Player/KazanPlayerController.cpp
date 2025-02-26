@@ -5,6 +5,7 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "LockOnComponent.h"
 #include "Player_Kazan.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
@@ -54,6 +55,19 @@ AKazanPlayerController::AKazanPlayerController()
 	if (tempEvadeAction.Succeeded())
 	{
 		EvadeAction = tempEvadeAction.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempLockOnAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_LockOn.IA_LockOn'"));
+	if (tempLockOnAction.Succeeded())
+	{
+		LockOnAction = tempLockOnAction.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempSwitchTargetAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_SwitchTarget.IA_SwitchTarget'"));
+	if (tempSwitchTargetAction.Succeeded())
+	{
+		SwitchTargetAction = tempSwitchTargetAction.Object;
 	}
 
 	Kazan = nullptr;
@@ -141,6 +155,10 @@ void AKazanPlayerController::SetupInputComponent()
 		// Evade
 		EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Started, this,
 		                                   &AKazanPlayerController::On_Dodge_Pressed);
+
+		// 락온 관련 입력 바인딩
+		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Started, this, &AKazanPlayerController::On_LockOn_Pressed);
+		EnhancedInputComponent->BindAction(SwitchTargetAction, ETriggerEvent::Triggered, this, &AKazanPlayerController::On_SwitchTarget_Triggered);
 	}
 	else
 	{
@@ -225,4 +243,51 @@ void AKazanPlayerController::RemoveCurrency(ECurrencyType CurrencyType, int Curr
 int AKazanPlayerController::GetCurrencyValue(ECurrencyType CurrencyType)
 {
 	return CurrencyValues[CurrencyType];
+}
+
+void AKazanPlayerController::On_LockOn_Pressed()
+{
+	if (!Kazan) return;
+
+	LOG_PRINT(TEXT("OnLockOnPressed()"));
+	if (ULockOnComponent* LockOnComp = Kazan->GetLockOnComponent())
+	{
+		// 록온 On / Off
+		if (!LockOnComp->ToggleLockOn())
+		{
+			// 록온 On 상태에서 타겟이 없다면 플레이어 시선 방향으로 카메라 정렬 
+			FRotator Rotator = Kazan->GetActorForwardVector().Rotation();
+			Rotator.Pitch = -20.f;
+			Kazan->RotateCameraWithSpeed(Rotator, 1.0f);
+		}
+	}
+}
+
+void AKazanPlayerController::On_SwitchTarget_Triggered(const FInputActionValue& Value)
+{
+	if (!Kazan) return;
+
+	LOG_PRINT(TEXT("OnSwitchTarget()"));
+	if (ULockOnComponent* LockOnComp = Kazan->GetLockOnComponent())
+	{
+		// 마우스 휠 값을 받아서 방향 결정
+		float WheelDelta = Value.Get<float>();
+		LOG_PRINT(TEXT("OnSwitchTarget() %f"),WheelDelta);
+		
+		// 휠 업/다운에 따라 좌우 전환
+		FVector2D SwitchDirection;
+		if (WheelDelta > 0)
+		{
+			SwitchDirection = FVector2D(1.0f, 0.0f);  // 오른쪽으로 전환
+		}
+		else if (WheelDelta < 0)
+		{
+			SwitchDirection = FVector2D(-1.0f, 0.0f);  // 왼쪽으로 전환
+		}
+		
+		if (!SwitchDirection.IsZero())
+		{
+			LockOnComp->SwitchTarget(SwitchDirection);
+		}
+	}
 }
