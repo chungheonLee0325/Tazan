@@ -53,7 +53,7 @@ public:
 
 	// 디버그 드로잉 옵션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool bDebugDraw = true;
+	bool bDebugDraw = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugData = false;

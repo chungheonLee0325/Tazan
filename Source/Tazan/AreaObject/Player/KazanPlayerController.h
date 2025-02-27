@@ -32,6 +32,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnCurrencyChangeDelegate OnCurrencyChange;
 
+	UPROPERTY()
+	class UUserWidget* FailWidget;
 private:
 	// UI 초기화 및 바인딩
 	void InitializeHUD();
@@ -72,6 +74,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UPlayerStatusWidget> StatusWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> MissionFailClass;
 
 	// Input Setting
 	/** MappingContext */

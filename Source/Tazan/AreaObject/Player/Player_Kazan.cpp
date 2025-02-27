@@ -170,6 +170,7 @@ void APlayer_Kazan::OnDie()
 {
 	Super::OnDie();
 	SetPlayerState(EPlayerState::DIE);
+	KazanPlayerController->FailWidget->AddToViewport();
 	// ToDo : TimerHandle 정리?
 
 	//GetCharacterMovement()->SetMovementMode(MOVE_None);
