@@ -215,7 +215,7 @@ public:
 #pragma region DamageSystem
 	// Stagger 처리 핸들
 	UFUNCTION()
-	void HandleStaggerBegin(EStaggerType Type, float Duration);
+	virtual void HandleStaggerBegin(EStaggerType Type, float Duration);
 	UFUNCTION()
 	virtual void HandleStaggerEnd();
 	// ToDo : 종료 Bind 인자 추가?

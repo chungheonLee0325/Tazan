@@ -80,7 +80,7 @@ void AAreaObject::BeginPlay()
 
 	m_HealthComponent->InitHealth(hpMax);
 	m_PoiseComponent->InitPoise(basePoise);
-	m_StaminaComponent->InitStamina(maxStamina, staminaRecoveryRate,groggyDuration);
+	m_StaminaComponent->InitStamina(maxStamina, staminaRecoveryRate, groggyDuration);
 
 	// 스킬 인스턴스 생성
 	for (auto& skill : m_OwnSkillIDSet)
@@ -224,7 +224,8 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 			FVector knockBackDir;
 			if (attackData.bUseCustomKnockBackDirection)
 			{
-				knockBackDir = attackData.KnockBackDirection;
+				knockBackDir = GetActorLocation() + attackData.KnockBackDirection.GetSafeNormal() * attackData.
+					KnockBackForce * KnockBackForceMultiplier;
 			}
 			else
 			{
@@ -232,8 +233,9 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal2D();
 				//knockBackDir = (GetActorLocation() - hitResult.Location).GetSafeNormal2D();
 			}
-			FVector targetLocation = GetActorLocation() + knockBackDir * attackData.KnockBackForce * KnockBackForceMultiplier;
-			
+			FVector targetLocation = GetActorLocation() + knockBackDir * attackData.KnockBackForce *
+				KnockBackForceMultiplier;
+
 			ApplyKnockBack(targetLocation);
 		}
 
@@ -495,14 +497,14 @@ void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
 	PlayStaggerAnimation(Type);
 
 	// 이동 불가
-	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	//GetCharacterMovement()->SetMovementMode(MOVE_None);
 	// ToDo : 스킬 사용 불가
 }
 
 void AAreaObject::HandleStaggerEnd()
 {
 	// 이동 불가 해제
-	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	//GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	// ToDo : 스킬 사용 불가 해제
 }
 
@@ -571,7 +573,7 @@ float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged) const
 	{
 		return 0.f;
 	}
-	
+
 	return m_StaminaComponent->DecreaseStamina(Delta, bIsDamaged);
 }
 
@@ -663,7 +665,7 @@ void AAreaObject::ParryStackPenalty()
 		}
 		else
 		{
-			LOG_SCREEN_ERROR(this,"패리 패널티 애니 비어있음");
+			LOG_SCREEN_ERROR(this, "패리 패널티 애니 비어있음");
 		}
 	}
 	ParryStack = 0;
@@ -714,7 +716,7 @@ void AAreaObject::HandleGroggy(float Duration)
 	// Component에 의한 이동, 회전 중지
 	StopAll();
 	IsGroggy = true;
-	
+
 	GetWorld()->GetTimerManager().SetTimer(GroggyTimerHandle, [this]()
 	{
 		OnGroggyEnd();

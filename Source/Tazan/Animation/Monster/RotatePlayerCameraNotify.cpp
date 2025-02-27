@@ -18,7 +18,7 @@ void URotatePlayerCameraNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 			{
 				FRotator targetRotator = player->GetControlRotation();
 				targetRotator.Pitch = Pitch;
-				player->HandleCameraRotation(targetRotator, InterpSpeed);
+				player->HandleCameraRotation(targetRotator, InterpSpeed, owner);
 			}
 		}
 	}

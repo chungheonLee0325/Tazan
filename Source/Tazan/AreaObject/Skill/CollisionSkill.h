@@ -20,8 +20,13 @@ struct FAttackCollision
 	TSet<AActor*> HitActors = {};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsEnableHitDetection = false;
-	
 	FAttackData* IndexedAttackData = nullptr;
+
+	// 이전 프레임의 시작/끝 위치 저장
+	FVector PreviousStartLocation = FVector::ZeroVector;
+	FVector PreviousEndLocation = FVector::ZeroVector;
+	FRotator PreviousSocketRotation = FRotator::ZeroRotator;
+	bool bHasPreviousPositions = false;
 };
 
 
@@ -37,6 +42,14 @@ public:
 	void SetCasterMesh(int AttackDataIndex, UAnimNotifyState* NotifyState);
 	void ProcessHitDetection(UAnimNotifyState* NotifyState);
 	void ResetCollisionData(UAnimNotifyState* NotifyState);
+	bool PerformCollisionCheck(
+		EHitDetectionType DetectionType,
+		const FVector& StartLocation,
+		const FVector& EndLocation,
+		const FRotator& SocketRotation,
+		const FHitBoxData& HitBoxData,
+		const FCollisionQueryParams& QueryParams,
+		TArray<FHitResult>& OutHitResults);
 
 	// 디버그 드로잉 옵션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
@@ -60,7 +73,8 @@ protected:
 	bool bHasHit = false;
 
 private:
-	void DrawDebugHitDetection(UAnimNotifyState* NotifyState, const FVector& Start, const FVector& End, const TArray<FHitResult>& HitResults,
+	void DrawDebugHitDetection(UAnimNotifyState* NotifyState, const FVector& Start, const FVector& End,
+	                           const TArray<FHitResult>& HitResults,
 	                           const FRotator& SocketRotation);
 
 	UPROPERTY()

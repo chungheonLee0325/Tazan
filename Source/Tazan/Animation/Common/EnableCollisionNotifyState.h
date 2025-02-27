@@ -27,7 +27,7 @@ public:
 
 	// 사용되는 AttackData의 Index값
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AttackData)
-	int AttackDataIndex;
+	int AttackDataIndex = 0;
 
 	// 사용하는 AttackData
 	FAttackData* AttackData;

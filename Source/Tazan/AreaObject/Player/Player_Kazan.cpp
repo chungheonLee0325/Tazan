@@ -169,8 +169,21 @@ void APlayer_Kazan::BeginPlay()
 void APlayer_Kazan::OnDie()
 {
 	Super::OnDie();
+	SetPlayerState(EPlayerState::DIE);
+	// ToDo : TimerHandle 정리?
 
 	//GetCharacterMovement()->SetMovementMode(MOVE_None);
+}
+
+void APlayer_Kazan::HandleGroggy(float Duration)
+{
+	Super::HandleGroggy(Duration);
+}
+
+void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type, float Duration)
+{
+	Super::HandleStaggerBegin(Type, Duration);
+	SetPlayerState(EPlayerState::STAGGER);
 }
 
 void APlayer_Kazan::HandleStaggerEnd()
@@ -254,9 +267,9 @@ void APlayer_Kazan::RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpe
 	//SetControlRotation(Rotator);
 }
 
-void APlayer_Kazan::HandleCameraRotation(FRotator TargetRotate, float InterpSpeed)
+void APlayer_Kazan::HandleCameraRotation(FRotator TargetRotate, float InterpSpeed, AAreaObject* TargetAreaObject)
 {
-	if (LockOnComponent->GetCurrentTarget())
+	if (LockOnComponent->GetCurrentTarget() == TargetAreaObject)
 	{
 		RotateCameraWithSpeed(TargetRotate, InterpSpeed);
 	}

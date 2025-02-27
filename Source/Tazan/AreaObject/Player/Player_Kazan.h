@@ -121,6 +121,8 @@ public:
 	void On_Run_Released();
 
 	virtual void HandlePerfectDodge() override;
+	virtual void HandleGroggy(float Duration) override;
+	virtual void HandleStaggerBegin(EStaggerType Type, float Duration) override;
 	virtual void HandleStaggerEnd() override;
 
 	void Reward(FItemData* ItemData, int ItemValue) const;
@@ -128,7 +130,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpeed = 10.f);
 
-	void HandleCameraRotation(FRotator TargetRotate, float InterpSpeed);
+	void HandleCameraRotation(FRotator TargetRotate, float InterpSpeed, AAreaObject* TargetAreaObject);
 	
 	ULockOnComponent* GetLockOnComponent() const { return LockOnComponent; }
 	
