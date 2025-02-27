@@ -10,8 +10,10 @@
 #include "MovieSceneTracksComponentTypes.h"
 #include "Tazan/UI/Widget/LockOnWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
+#include "Tazan/Utilities/LogMacro.h"
 
 
 // Sets default values for this component's properties
@@ -76,7 +78,10 @@ void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	if (CurrentTarget != nullptr)
 	{
 		// ToDo : UI 완성시 삭제
-		DrawDebugSphere(GetWorld(), CurrentTarget->GetActorLocation(), 10, 40, FColor::Red, false, 0.01f);
+		FVector location = CurrentTarget->GetActorLocation();
+		location.Z += CurrentTarget->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 1.2f;
+		location += CurrentTarget->GetActorForwardVector()*CurrentTarget->GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.7f;
+		DrawDebugSphere(GetWorld(), location, 10, 40, FColor::Yellow, false, 0.01f);
 	}
 }
 

@@ -258,7 +258,7 @@ void AKazanPlayerController::On_LockOn_Pressed()
 			// 록온 On 상태에서 타겟이 없다면 플레이어 시선 방향으로 카메라 정렬 
 			FRotator Rotator = Kazan->GetActorForwardVector().Rotation();
 			Rotator.Pitch = -20.f;
-			Kazan->RotateCameraWithSpeed(Rotator, 1.0f);
+			Kazan->RotateCameraWithSpeed(Rotator, 8.0f);
 		}
 	}
 }
