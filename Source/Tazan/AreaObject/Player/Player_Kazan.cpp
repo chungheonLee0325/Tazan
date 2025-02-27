@@ -756,7 +756,7 @@ void APlayer_Kazan::UpdateLockedRotation(float DeltaTime)
 
 	// Smoothly interpolate only the Yaw (horizontal rotation)
 	// Keep original Roll values
-	const float InterpSpeed = Distance > 600.f ? 2.0f : FMath::Clamp(Distance / 600.f * 2.0f, 0.5f, 2.0f);
+	const float InterpSpeed = Distance > 600.f ? 2.0f : FMath::Clamp(Distance / 600.f * 2.0f, 0.9f, 2.0f);
 	FRotator NewRotation = CurrentRotation;
 	FRotator LerpRotation = FMath::RInterpTo(CurrentRotation, ToTargetRotator, DeltaTime, InterpSpeed);
 	NewRotation.Yaw = LerpRotation.Yaw;
