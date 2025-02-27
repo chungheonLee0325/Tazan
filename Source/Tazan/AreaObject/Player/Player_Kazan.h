@@ -129,8 +129,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpeed = 10.f);
+	void ZoomCameraWithSpeed(float TargetSize, float ZoomSpeed);
 
-	void HandleCameraRotation(FRotator TargetRotate, float InterpSpeed, AAreaObject* TargetAreaObject);
+	void HandlePlayerCamera(AAreaObject* TargetAreaObject, FRotator TargetRotate, float RotateSpeed, float TargetSize, float ZoomSpeed);
 	
 	ULockOnComponent* GetLockOnComponent() const { return LockOnComponent; }
 	
@@ -195,7 +196,6 @@ private:
 	//TMap<EActionAbility, bool> ActionAbilityMap;
 
 	FTimerHandle DodgeTimerHandle;
-	FTimerHandle RotateCameraTimerHandle;
 
 	// Data
 	const float MAX_WALK_SPEED = 500.f;
@@ -219,6 +219,12 @@ private:
 	bool IsRotateCameraWithSpeed;
 	FRotator RotateCameraTarget;
 	float CameraInterpSpeed = 10.f;
+	FTimerHandle RotateCameraTimerHandle;
+
+	bool IsZoomCameraWithSpeed;
+	float TargetFieldOfView;
+	float ZoomInterpSpeed;
+	FTimerHandle ZoomCameraTimerHandle;
 
 	// 락온 관련 이동/회전
 	void UpdateLockedRotation(float DeltaTime);
