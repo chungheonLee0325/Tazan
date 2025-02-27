@@ -251,7 +251,7 @@ void APlayer_Kazan::RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpe
 		if (APlayer_Kazan* StrongThis = weakThis.Get())
 		{
 			FRotator NewRotation = StrongThis->GetControlRotation();
-			if (StrongThis->GetControlRotation().Equals(StrongThis->RotateCameraTarget, 5.f))
+			if (StrongThis->GetControlRotation().Equals(StrongThis->RotateCameraTarget, 8.f))
 			{
 				StrongThis->GetWorld()->GetTimerManager().ClearTimer(StrongThis->RotateCameraTimerHandle);
 				StrongThis->IsRotateCameraWithSpeed = false;
