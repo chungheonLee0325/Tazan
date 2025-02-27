@@ -46,12 +46,6 @@ void AYetuga::BeginPlay()
 	
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
 	YetugaABP = Cast<UYetugaAnimInstance>(GetMesh()->GetAnimInstance());
-	
-	InitializeHUD();
-	
-	//시작시 어퍼컷 콤보공격 확정 실행
-	NextSkill = GetSkillByID(11000);
-	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
 UBaseAiFSM* AYetuga::CreateFSM()
@@ -126,6 +120,15 @@ void AYetuga::OnDie()
 {
 	Super::OnDie();
 	CompleteWidget->AddToViewport();
+}
+
+void AYetuga::YetugaStart()
+{
+	InitializeHUD();
+	
+	//시작시 어퍼컷 콤보공격 확정 실행
+	NextSkill = GetSkillByID(11000);
+	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
 void AYetuga::ChargeSkillStun()

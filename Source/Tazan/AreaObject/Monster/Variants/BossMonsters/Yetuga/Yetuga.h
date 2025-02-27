@@ -39,7 +39,6 @@ public:
 
 private:
 	// UI
-	
 	UPROPERTY()
 	class UUserWidget* CompleteWidget;
 		
@@ -54,16 +53,23 @@ public:
 	UFUNCTION()
 	void OnYetugaHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 					  UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	
+
+	// 오버라이드 함수
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;
+	
 	virtual void ParryStackPenalty() override;
+	
 	virtual void HandleGroggy(float Duration) override;
 	virtual void OnGroggyEnd() override;
+	
 	virtual void OnDie() override;
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 
-	
+	// 블루프린트용
+	UFUNCTION(BlueprintCallable)
+	void YetugaStart();
+
 	UFUNCTION(BlueprintCallable)
 	void ChangeStateToSelectSkill() { m_AiFSM->ChangeState(EAiStateType::SelectSkill); }
 	UFUNCTION(BlueprintCallable)
