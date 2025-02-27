@@ -25,10 +25,10 @@ private:
 
 	// 락온 설정
 	UPROPERTY(EditAnywhere, Category = "Lock On")
-	float LockOnRange = 1000.f;
+	float LockOnRange = 2000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Lock On")
-	float LockOnLostRange = 1200.f;
+	float LockOnLostRange = 2400.f;
 
 	UPROPERTY(EditAnywhere, Category = "Lock On")
 	float MaxTargetAngle = 45.f;

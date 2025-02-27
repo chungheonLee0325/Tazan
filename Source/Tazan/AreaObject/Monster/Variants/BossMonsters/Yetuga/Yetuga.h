@@ -7,6 +7,7 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Yetuga.generated.h"
 
+class UBoxComponent;
 class UYetugaAnimInstance;
 class UY_BaseSkill;
 class UY_SelectSkill;
@@ -22,6 +23,9 @@ public:
 
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category= "Skill | ChargeAttack")
+	UBoxComponent* ChargeStunCollision;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category =  "Animation | ChargeStun")
 	UAnimMontage* ChargeStunAni;

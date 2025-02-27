@@ -3,6 +3,7 @@
 
 #include "Yetuga.h"
 
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -26,6 +27,15 @@ AYetuga::AYetuga()
 	// 예투가 넉백 거리 배율 설정
 	m_KnockBackForceMultiplier = 0.0f;
 
+	ChargeStunCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("StunCollison"));
+	ChargeStunCollision->SetupAttachment(RootComponent);
+
+	ChargeStunCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	ChargeStunCollision->SetSimulatePhysics(true);
+	ChargeStunCollision->SetNotifyRigidBodyCollision(true);
+	ChargeStunCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	ChargeStunCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+
 	static ConstructorHelpers::FClassFinder<UPlayerStatusWidget> WidgetClassFinder(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_YetugaStatusWidget.WB_YetugaStatusWidget_C'"));
 	if (WidgetClassFinder.Succeeded())
 	{
@@ -42,6 +52,7 @@ AYetuga::AYetuga()
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this,&AYetuga::OnYetugaHit);
 	
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
