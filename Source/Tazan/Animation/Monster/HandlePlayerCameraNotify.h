@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "RotatePlayerCameraNotify.generated.h"
+#include "HandlePlayerCameraNotify.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TAZAN_API URotatePlayerCameraNotify : public UAnimNotify
+class TAZAN_API UHandlePlayerCameraNotify : public UAnimNotify
 {
 	GENERATED_BODY()
 
@@ -19,5 +19,9 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Rotate")
 	float Pitch = - 20.f;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Rotate")
-	float InterpSpeed = 2.f; 
+	float RotateSpeed = 2.f; 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Rotate")
+	float PovSize = 100.f;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Rotate")
+	float ZoomSpeed = 2.f; 
 };

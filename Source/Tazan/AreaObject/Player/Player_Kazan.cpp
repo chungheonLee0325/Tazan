@@ -263,15 +263,43 @@ void APlayer_Kazan::RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpe
 			StrongThis->KazanPlayerController->SetControlRotation(LerpRotation);
 		}
 	}, 0.01f, true);
-
-	//SetControlRotation(Rotator);
 }
 
-void APlayer_Kazan::HandleCameraRotation(FRotator TargetRotate, float InterpSpeed, AAreaObject* TargetAreaObject)
+void APlayer_Kazan::ZoomCameraWithSpeed(float TargetSize, float ZoomSpeed)
+{
+	if (IsZoomCameraWithSpeed)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ZoomCameraTimerHandle);
+	}
+
+	IsZoomCameraWithSpeed = true;
+	TargetFieldOfView = TargetSize;
+	ZoomInterpSpeed = ZoomSpeed;
+
+	TWeakObjectPtr<APlayer_Kazan> weakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(ZoomCameraTimerHandle, [weakThis]()
+	{
+		if (APlayer_Kazan* StrongThis = weakThis.Get())
+		{
+			float CurrentFieldOfView = StrongThis->FollowCamera->FieldOfView;
+			if (FMath::IsNearlyEqual(CurrentFieldOfView,StrongThis->TargetFieldOfView))
+			{
+				StrongThis->GetWorld()->GetTimerManager().ClearTimer(StrongThis->ZoomCameraTimerHandle);
+				StrongThis->IsZoomCameraWithSpeed = false;
+			}
+			float LerpFloat = FMath::FInterpTo(CurrentFieldOfView, StrongThis->TargetFieldOfView, 0.01f,
+			                                   StrongThis->ZoomInterpSpeed);
+			StrongThis->FollowCamera->FieldOfView = LerpFloat;
+		}
+	}, 0.01f, true);
+}
+
+void APlayer_Kazan::HandlePlayerCamera(AAreaObject* TargetAreaObject, FRotator TargetRotate, float RotateSpeed, float TargetSize, float ZoomSpeed)
 {
 	if (LockOnComponent->GetCurrentTarget() == TargetAreaObject)
 	{
-		RotateCameraWithSpeed(TargetRotate, InterpSpeed);
+		RotateCameraWithSpeed(TargetRotate, RotateSpeed);
+		ZoomCameraWithSpeed(TargetSize, ZoomSpeed);
 	}
 }
 
@@ -290,14 +318,13 @@ void APlayer_Kazan::Tick(float DeltaTime)
 
 	// ToDo: 로직 변경 예정
 	if (IsRotateCameraWithSpeed) return;
-	
+
 	// 락온 상태일 때
 	if (LockOnComponent->IsLockOnMode())
 	{
 		// 회전 업데이트
 		UpdateLockedRotation(DeltaTime);
 	}
-
 }
 
 void APlayer_Kazan::InitializeStateRestrictions()
@@ -445,12 +472,12 @@ void APlayer_Kazan::Look(const FVector2D LookAxisVector)
 	{
 		// add yaw and pitch input to controller
 		// 상하 회전 제한 적용
-		
+
 		//float oldPitchAngle = GetControlRotation().Pitch;
 		//float newPitchAngle = oldPitchAngle + (LookAxisVector.Y * LookSensitivityY);
 		//newPitchAngle = FMath::ClampAngle(newPitchAngle, MinPitchAngle, MaxPitchAngle);
 		//float pitchInput = newPitchAngle - oldPitchAngle;
-		
+
 		float newPitchAngle = CurrentPitchAngle + (LookAxisVector.Y * LookSensitivityY);
 
 		//LOG_PRINT(TEXT("CurrentPitchAngle :  %f"),CurrentPitchAngle)
