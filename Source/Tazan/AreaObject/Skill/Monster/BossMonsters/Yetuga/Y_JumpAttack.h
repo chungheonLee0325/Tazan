@@ -4,22 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Y_BaseSkill.h"
+#include "Tazan/AreaObject/Skill/CollisionSkill.h"
 #include "Y_JumpAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TAZAN_API UY_JumpAttack : public UY_BaseSkill
+class TAZAN_API UY_JumpAttack : public UCollisionSkill
 {
 	GENERATED_BODY()
 
 public:
-	float JumpPower = 5.0f;
-	float tracePower = 5.0f;
-	FVector TargetLoc = FVector::ZeroVector;
+	UY_JumpAttack();
 
 private:
-	FVector GetFlyingLocation();
-	FVector GetLandingLocation();
+	FVector StartLoc;
+	FVector TargetLoc;
+
+public:
+	virtual void OnCastStart(class AAreaObject* Caster, AAreaObject* Target) override;
+	virtual void OnCastTick(float DeltaTime) override;
+	
+	virtual void OnCastFire() override;
+	
 };
