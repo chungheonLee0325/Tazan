@@ -9,7 +9,6 @@
 
 UY_JumpAttack::UY_JumpAttack()
 {
-	bDebugDraw = true;
 }
 
 void UY_JumpAttack::OnCastStart(class AAreaObject* Caster, AAreaObject* Target)
