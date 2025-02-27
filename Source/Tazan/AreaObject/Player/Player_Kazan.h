@@ -121,6 +121,8 @@ public:
 	void On_Run_Released();
 
 	virtual void HandlePerfectDodge() override;
+	virtual void HandleGroggy(float Duration) override;
+	virtual void HandleStaggerBegin(EStaggerType Type, float Duration) override;
 	virtual void HandleStaggerEnd() override;
 
 	void Reward(FItemData* ItemData, int ItemValue) const;

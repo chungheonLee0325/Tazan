@@ -169,8 +169,21 @@ void APlayer_Kazan::BeginPlay()
 void APlayer_Kazan::OnDie()
 {
 	Super::OnDie();
+	SetPlayerState(EPlayerState::DIE);
+	// ToDo : TimerHandle 정리?
 
 	//GetCharacterMovement()->SetMovementMode(MOVE_None);
+}
+
+void APlayer_Kazan::HandleGroggy(float Duration)
+{
+	Super::HandleGroggy(Duration);
+}
+
+void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type, float Duration)
+{
+	Super::HandleStaggerBegin(Type, Duration);
+	SetPlayerState(EPlayerState::STAGGER);
 }
 
 void APlayer_Kazan::HandleStaggerEnd()
