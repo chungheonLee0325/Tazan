@@ -130,7 +130,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpeed = 10.f);
 
-	void HandleCameraRotation(FRotator TargetRotate, float InterpSpeed);
+	void HandleCameraRotation(FRotator TargetRotate, float InterpSpeed, AAreaObject* TargetAreaObject);
 	
 	ULockOnComponent* GetLockOnComponent() const { return LockOnComponent; }
 	
