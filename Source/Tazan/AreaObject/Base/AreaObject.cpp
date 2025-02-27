@@ -199,14 +199,18 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 		{
 			ActualDamage = 0.0f;
 
+			float KnockBackCoefficient = 1.0f;
 			if (HasCondition(EConditionBitsType::PerfectGuardWindow))
 			{
+				KnockBackCoefficient = 0.3f;
 				HandlePerfectGuard(DamageCauser, attackData);
 			}
 			else
 			{
+				KnockBackCoefficient = 0.8f;
 				HandleGuard(DamageCauser, attackData);
 			}
+			HandleKnockBack(DamageCauser->GetActorLocation(), attackData, KnockBackCoefficient);
 			return ActualDamage;
 		}
 
@@ -219,25 +223,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 		}
 
 		// 넉백 처리
-		if (attackData.KnockBackForce > 0.0f && KnockBackForceMultiplier > 0.0f)
-		{
-			FVector knockBackDir;
-			if (attackData.bUseCustomKnockBackDirection)
-			{
-				knockBackDir = GetActorLocation() + attackData.KnockBackDirection.GetSafeNormal() * attackData.
-					KnockBackForce * KnockBackForceMultiplier;
-			}
-			else
-			{
-				// 기본적으로 타격 방향으로 넉백
-				knockBackDir = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal2D();
-				//knockBackDir = (GetActorLocation() - hitResult.Location).GetSafeNormal2D();
-			}
-			FVector targetLocation = GetActorLocation() + knockBackDir * attackData.KnockBackForce *
-				KnockBackForceMultiplier;
-
-			ApplyKnockBack(targetLocation);
-		}
+		HandleKnockBack(DamageCauser->GetActorLocation(), attackData, m_KnockBackForceMultiplier);
 
 		m_PoiseComponent->PoiseProcess(attackData);
 	}
@@ -747,6 +733,29 @@ void AAreaObject::ApplyHitStop(float Duration)
 void AAreaObject::ResetTimeScale() const
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+}
+
+void AAreaObject::HandleKnockBack(const FVector& TargetPos, const FAttackData& AttackData, float ForceCoefficient)
+{
+	if (AttackData.KnockBackForce > 0.0f && m_KnockBackForceMultiplier > 0.0f)
+	{
+		FVector knockBackDir;
+		if (AttackData.bUseCustomKnockBackDirection)
+		{
+			knockBackDir = GetActorLocation() + AttackData.KnockBackDirection.GetSafeNormal() * AttackData.
+				KnockBackForce * m_KnockBackForceMultiplier * ForceCoefficient;
+		}
+		else
+		{
+			// 기본적으로 타격 방향으로 넉백
+			knockBackDir = (GetActorLocation() - TargetPos).GetSafeNormal2D();
+			//knockBackDir = (GetActorLocation() - hitResult.Location).GetSafeNormal2D();
+		}
+		FVector knockBackLocation = GetActorLocation() + knockBackDir * AttackData.KnockBackForce *
+			m_KnockBackForceMultiplier * ForceCoefficient;
+
+		ApplyKnockBack(knockBackLocation);
+	}
 }
 
 void AAreaObject::ApplyKnockBack(const FVector& KnockBackForce)

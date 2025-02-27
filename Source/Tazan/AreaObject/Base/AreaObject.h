@@ -252,10 +252,13 @@ public:
 
 	// 넉백 관련
 	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void HandleKnockBack(const FVector& TargetPos, const FAttackData& AttackData, float KnockBackForceMultiplier = 1.0f);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyKnockBack(const FVector& KnockBackForce);
 	float KnockBackDuration = 0.1f;
 	// 넉백 거리 배율
-	float KnockBackForceMultiplier = 1.0f;
+	float m_KnockBackForceMultiplier = 1.0f;
+	
 #pragma endregion DamageSystem
 	// 가드 상태 변경 시 호출
 	virtual void SetGuardState(bool bIsGuarding);
