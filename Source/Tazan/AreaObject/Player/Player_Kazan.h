@@ -131,10 +131,11 @@ public:
 	void RotateCameraWithSpeed(FRotator TargetRotate, float InterpSpeed = 10.f);
 	void ZoomCameraWithSpeed(float TargetSize, float ZoomSpeed);
 
-	void HandlePlayerCamera(AAreaObject* TargetAreaObject, FRotator TargetRotate, float RotateSpeed, float TargetSize, float ZoomSpeed);
-	
+	void HandlePlayerCamera(AAreaObject* TargetAreaObject, FRotator TargetRotate, float RotateSpeed, float TargetSize,
+	                        float ZoomSpeed);
+
 	ULockOnComponent* GetLockOnComponent() const { return LockOnComponent; }
-	
+
 private:
 	// Weapon Setting
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -203,14 +204,14 @@ private:
 
 	// 가드 관련 변수들    
 	UPROPERTY(EditDefaultsOnly, Category = "Guard")
-	float MinGuardDuration = 0.2f;  // 최소 가드 지속 시간
-    
-	bool bIsGuardRequested = false;  // 가드 해제 요청 상태
+	float MinGuardDuration = 0.2f; // 최소 가드 지속 시간
+
+	bool bIsGuardRequested = false; // 가드 해제 요청 상태
 	FTimerHandle GuardMinDurationTimer;
 
 	bool CanCombo;
 	int NextComboSkillID = 0;
-	
+
 	float MaxChargeTime = 1.2f;
 	float CurrentChargeTime = 0.0f;
 	bool bIsCharging = false;
@@ -228,7 +229,7 @@ private:
 
 	// 락온 관련 이동/회전
 	void UpdateLockedRotation(float DeltaTime);
-	
+
 	UPROPERTY()
 	ULockOnComponent* LockOnComponent;
 };

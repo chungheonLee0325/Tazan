@@ -80,6 +80,12 @@ AKazanPlayerController::AKazanPlayerController()
 	{
 		StatusWidgetClass = WidgetClassFinder.Class;
 	}
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> missionFailWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_KazanHasFallen.WB_KazanHasFallen_C'"));
+	if (missionFailWidget.Succeeded())
+	{
+		MissionFailClass = missionFailWidget.Class;
+	}
 }
 
 void AKazanPlayerController::BeginPlay()
@@ -122,6 +128,8 @@ void AKazanPlayerController::InitializeHUD()
 			StatusWidget->UpdateStamina(Kazan->GetStamina(), 0.0f, Kazan->m_StaminaComponent->GetMaxStamina());
 		}
 	}
+
+	FailWidget = CreateWidget<UUserWidget>(this, MissionFailClass);
 }
 
 void AKazanPlayerController::SetupInputComponent()
@@ -157,8 +165,10 @@ void AKazanPlayerController::SetupInputComponent()
 		                                   &AKazanPlayerController::On_Dodge_Pressed);
 
 		// 락온 관련 입력 바인딩
-		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Started, this, &AKazanPlayerController::On_LockOn_Pressed);
-		EnhancedInputComponent->BindAction(SwitchTargetAction, ETriggerEvent::Triggered, this, &AKazanPlayerController::On_SwitchTarget_Triggered);
+		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Started, this,
+		                                   &AKazanPlayerController::On_LockOn_Pressed);
+		EnhancedInputComponent->BindAction(SwitchTargetAction, ETriggerEvent::Triggered, this,
+		                                   &AKazanPlayerController::On_SwitchTarget_Triggered);
 	}
 	else
 	{
@@ -228,7 +238,7 @@ void AKazanPlayerController::AddCurrency(ECurrencyType CurrencyType, int Currenc
 {
 	if (CurrencyValue < 0) return;
 	CurrencyValues[CurrencyType] += CurrencyValue;
-	this->OnCurrencyChange.Broadcast(CurrencyType,CurrencyValues[CurrencyType],CurrencyValue);
+	this->OnCurrencyChange.Broadcast(CurrencyType, CurrencyValues[CurrencyType], CurrencyValue);
 }
 
 void AKazanPlayerController::RemoveCurrency(ECurrencyType CurrencyType, int CurrencyValue)
@@ -237,7 +247,8 @@ void AKazanPlayerController::RemoveCurrency(ECurrencyType CurrencyType, int Curr
 	// 스태미나 감소
 	float oldCurrency = CurrencyValues[CurrencyType];
 	CurrencyValues[CurrencyType] = FMath::Max(CurrencyValues[CurrencyType] - CurrencyValue, 0);
-	this->OnCurrencyChange.Broadcast(CurrencyType,CurrencyValues[CurrencyType],-(oldCurrency - CurrencyValues[CurrencyType]));
+	this->OnCurrencyChange.Broadcast(CurrencyType, CurrencyValues[CurrencyType],
+	                                 -(oldCurrency - CurrencyValues[CurrencyType]));
 }
 
 int AKazanPlayerController::GetCurrencyValue(ECurrencyType CurrencyType)
@@ -272,19 +283,19 @@ void AKazanPlayerController::On_SwitchTarget_Triggered(const FInputActionValue& 
 	{
 		// 마우스 휠 값을 받아서 방향 결정
 		float WheelDelta = Value.Get<float>();
-		LOG_PRINT(TEXT("OnSwitchTarget() %f"),WheelDelta);
-		
+		LOG_PRINT(TEXT("OnSwitchTarget() %f"), WheelDelta);
+
 		// 휠 업/다운에 따라 좌우 전환
 		FVector2D SwitchDirection;
 		if (WheelDelta > 0)
 		{
-			SwitchDirection = FVector2D(1.0f, 0.0f);  // 오른쪽으로 전환
+			SwitchDirection = FVector2D(1.0f, 0.0f); // 오른쪽으로 전환
 		}
 		else if (WheelDelta < 0)
 		{
-			SwitchDirection = FVector2D(-1.0f, 0.0f);  // 왼쪽으로 전환
+			SwitchDirection = FVector2D(-1.0f, 0.0f); // 왼쪽으로 전환
 		}
-		
+
 		if (!SwitchDirection.IsZero())
 		{
 			LockOnComp->SwitchTarget(SwitchDirection);

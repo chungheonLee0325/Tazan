@@ -410,7 +410,7 @@ bool AAreaObject::CastSkill(UBaseSkill* Skill, AAreaObject* Target)
 	{
 		FString fail = UEnum::GetValueAsString(Skill->SkillFailCase);
 		LOG_PRINT(TEXT("CastSkill Failed: %s"), *fail);
-		LOG_SCREEN_ERROR(this, "CastSkill Failed");
+		//LOG_SCREEN_ERROR(this, "CastSkill Failed");
 		return false;
 	}
 }
@@ -479,6 +479,8 @@ void AAreaObject::LookAtLocationDirect(const FVector& TargetLocation) const
 
 void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
 {
+	if (IsDie())
+		return;
 	// 애니메이션 재생
 	PlayStaggerAnimation(Type);
 
