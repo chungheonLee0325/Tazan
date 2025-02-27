@@ -54,7 +54,7 @@ int USkillRoulette::GetRandomSkillID() const
 	if (dist > LongRange)
 	{
 		// LOG_SCREEN("원거리 공격 활성화");
-		SetSkillWeight(localEntries,EAiSkillType::Long,18.0f);
+		//SetSkillWeight(localEntries,EAiSkillType::Long,18.0f);
 	}
 
 	//직전 스킬 타입이 거리벌리기이면, 원거리 공격 위주로 사용
@@ -79,20 +79,20 @@ int USkillRoulette::GetRandomSkillID() const
 	// 거리가 짧으면, 위빙 스킬 확률 UP
 	else if (dist <= ShortRange)
 	{
-		ApplySkillWeight(localEntries,EAiSkillType::Weaving,2.0f);
+		ApplySkillWeight(localEntries,EAiSkillType::Weaving,1.5f);
 	}
 
 	float forwardDot = FVector::DotProduct(dir,Owner->GetActorForwardVector());
 	float rightDot = FVector::DotProduct(dir,Owner->GetActorRightVector());
 
 	// 플레이어가 뒤에 있다면, 뒤도는 스킬 확률 UP
-	if (forwardDot < -0.25f)
+	if (forwardDot < -0.2f)
 	{
-		SetSkillWeightByID(localEntries,10800,18.0f);
+		SetSkillWeightByID(localEntries,10800,21.0f);
 		SetSkillWeightByID(localEntries,15200,0.0f);
 		if (dist <= ShortRange)
 		{
-			ApplySkillWeightByID(localEntries,10200,12.0f);
+			ApplySkillWeightByID(localEntries,10200,21.0f);
 		}
 	}
 		
