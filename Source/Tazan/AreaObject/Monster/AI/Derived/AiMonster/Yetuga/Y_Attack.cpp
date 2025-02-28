@@ -15,7 +15,7 @@ void UY_Attack::InitState()
 
 void UY_Attack::Enter()
 {
-	LOG_PRINT(TEXT(""));
+	//LOG_PRINT(TEXT(""));
 	
 	bHasFailed = false;
 	bIsYSkill = false;

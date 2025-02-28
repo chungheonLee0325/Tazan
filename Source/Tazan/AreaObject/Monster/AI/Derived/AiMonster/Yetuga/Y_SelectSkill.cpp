@@ -14,14 +14,14 @@ void UY_SelectSkill::InitState()
 
 void UY_SelectSkill::Enter()
 {
-	LOG_PRINT(TEXT(""));
+	//LOG_PRINT(TEXT(""));
 	
 	Dist = m_Owner->GetDistanceTo(m_Owner->GetAggroTarget());
 	FVector dir = m_Owner->GetAggroTarget()->GetActorLocation()-m_Owner->GetActorLocation();
 	dir.Normalize();
 	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
 	
-	LOG_PRINT(TEXT("포워드 닷: %f"),forwardDot);
+	// LOG_PRINT(TEXT("포워드 닷: %f"),forwardDot);
 
 	m_NextState = EAiStateType::Chase;
 	

@@ -15,7 +15,7 @@ void UY_Chase::InitState()
 
 void UY_Chase::Enter()
 {
-	LOG_PRINT(TEXT(""));
+	//LOG_PRINT(TEXT(""));
 	SkillRange = m_Owner->NextSkill->GetSkillRange();
 }
 
