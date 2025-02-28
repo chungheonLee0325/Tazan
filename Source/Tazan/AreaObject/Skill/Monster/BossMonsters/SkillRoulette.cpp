@@ -54,14 +54,14 @@ int USkillRoulette::GetRandomSkillID() const
 	if (dist > LongRange)
 	{
 		// LOG_SCREEN("원거리 공격 활성화");
-		SetSkillWeight(localEntries,EAiSkillType::Long,18.0f);
+		ApplySkillWeight(localEntries,EAiSkillType::Long,400.0f);
 	}
 
 	//직전 스킬 타입이 거리벌리기이면, 원거리 공격 위주로 사용
 	if (PrevSkillType == EAiSkillType::Back)
 	{
 		// LOG_SCREEN("원거리 공격!");
-		SelectSkillByType(localEntries,EAiSkillType::Long,32.0f);
+		ApplySkillWeight(localEntries,EAiSkillType::Long,1000.0f);
 	}
 
 	//직전 스킬 타입이 원거리 공격이면, 원거리 공격 확률 DOWN

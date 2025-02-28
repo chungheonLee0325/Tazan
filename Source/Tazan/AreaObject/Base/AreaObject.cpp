@@ -11,7 +11,6 @@
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
-#include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Utility/MoveUtilComponent.h"
 #include "Tazan/AreaObject/Utility/RotateUtilComponent.h"
 #include "Tazan/Contents/TazanGameMode.h"
@@ -673,6 +672,8 @@ void AAreaObject::HandlePerfectDodge()
 
 void AAreaObject::HandleGroggy(float Duration)
 {
+	if (IsDie())
+		return;
 	LOG_PRINT(TEXT("AreaObject Groggy"));
 	// Component에 의한 이동, 회전 중지
 	StopAll();
@@ -693,14 +694,14 @@ void AAreaObject::OnGroggyEnd()
 void AAreaObject::ApplyHitStop(float Duration)
 {
 	// 월드 전체 시간 조절
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.005f);
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.008f);
 
 	// 타이머로 원래 속도로 복구
 	GetWorld()->GetTimerManager().SetTimer(
 		HitStopTimerHandle,
 		this,
 		&AAreaObject::ResetTimeScale,
-		Duration * 0.005f, // 실제 시간으로 변환
+		Duration * 0.008f, // 실제 시간으로 변환
 		false
 	);
 }
