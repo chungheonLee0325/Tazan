@@ -11,6 +11,7 @@
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
+#include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Utility/MoveUtilComponent.h"
 #include "Tazan/AreaObject/Utility/RotateUtilComponent.h"
 #include "Tazan/Contents/TazanGameMode.h"

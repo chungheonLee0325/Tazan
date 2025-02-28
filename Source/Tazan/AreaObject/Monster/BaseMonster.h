@@ -155,6 +155,7 @@ public:
 
 	// Perfect Gaurd
 	virtual void AddParryStack();
+	void InitParryStack();
 	
 protected:
 	UFUNCTION(BlueprintCallable)
@@ -164,6 +165,4 @@ protected:
 
 	// Perfect Gaurd
 	virtual void ParryStackPenalty();
-	void InitParryStack();
-	
 };
