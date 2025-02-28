@@ -85,6 +85,10 @@ public:
 	USkillRoulette* SkillRoulette = nullptr;
 	UPROPERTY()
 	UBaseSkill* NextSkill;
+
+	//퍼펙트 가드 패널티 애니메이션
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Parry")
+	UAnimMontage* ParryPenaltyAnimation;
 	
 	UPROPERTY()
 	FTimerHandle OnDieHandle;
@@ -101,6 +105,12 @@ protected:
 private:
 	UPROPERTY()
 	AActor* m_CurrentTarget;
+
+	//퍼펙트 가드시 누적될 데미지
+	UPROPERTY(VisibleDefaultsOnly, Category = "Parry")
+	int ParryStack = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Parry")
+	int ParryStackMax = 5;
 
 public:
 	// Core Functions
@@ -120,6 +130,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual AAreaObject* GetAggroTarget() const;
 	
+	// Combat System
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void SetAggroTarget(AAreaObject* NewTarget) { m_AggroTarget = NewTarget; }
+
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	float GetDistToTarget();
 	
@@ -129,26 +143,27 @@ public:
 	// State Checks
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsMoving() const;
-	
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsRotating() const;
-
-	// Combat System
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void SetAggroTarget(AAreaObject* NewTarget) { m_AggroTarget = NewTarget; }
-
+	
 	// Data Access
 	const FMonsterData& GetMonsterData() const { return MonsterData; }
-
-	UBaseAiFSM* GetFSM() const {return m_AiFSM;}
 
 	// Skill
 	void RemoveSkillEntryByID(const int id);
 	void AddSkillEntryByID(const int id);
 
+	// Perfect Gaurd
+	virtual void AddParryStack();
+	
 protected:
-	virtual void OnDie() override;
-
 	UFUNCTION(BlueprintCallable)
 	virtual UBaseAiFSM* CreateFSM();
+	
+	virtual void OnDie() override;
+
+	// Perfect Gaurd
+	virtual void ParryStackPenalty();
+	void InitParryStack();
+	
 };
