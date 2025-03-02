@@ -6,6 +6,8 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiState.h"
 #include "Y_SelectSkill.generated.h"
 
+class UBaseSkillRoulette;
+
 UCLASS()
 class TAZAN_API UY_SelectSkill : public UBaseAiState
 {
@@ -26,7 +28,7 @@ public:
 
 private:
 	UPROPERTY()
-	class USkillRoulette* SkillRoulette = nullptr;
+	class UBaseSkillRoulette* SkillRoulette = nullptr;
 	UPROPERTY()
 	UBaseSkill* Skill = nullptr;
 
@@ -34,6 +36,6 @@ private:
 	bool bIsWeaving = false;
 
 public:
-	void SetSkillRoulette(USkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
+	void SetSkillRoulette(UBaseSkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
 	bool CheckRange(float dist, float range);
 };

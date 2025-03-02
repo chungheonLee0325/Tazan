@@ -19,6 +19,7 @@ AYetuga::AYetuga()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	m_AiFSM = AYetuga::CreateFSM();
+	m_SkillRoulette = AYetuga::CreateSkillRouletteComponent();
 	
 	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
 
@@ -62,6 +63,11 @@ void AYetuga::BeginPlay()
 UBaseAiFSM* AYetuga::CreateFSM()
 {
 	return CreateDefaultSubobject<UYetugaFSM>(TEXT("FSM"));
+}
+
+UBaseSkillRoulette* AYetuga::CreateSkillRouletteComponent()
+{
+	return CreateDefaultSubobject<UY_SkillRoulette>(TEXT("SkillRouletteComponent"));
 }
 
 void AYetuga::ParryStackPenalty()

@@ -34,11 +34,12 @@ BaseMonster System
 #include "CoreMinimal.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
 #include "Containers/Queue.h"
-#include "Tazan/AreaObject/Skill/Monster/BossMonsters/SkillRoulette.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Y_SkillRoulette.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "BaseMonster.generated.h"
 
+struct FAIStimulus;
 class USkillBag;
 class UBaseAiFSM;
 class UBaseSkill;
@@ -53,19 +54,24 @@ public:
 	ABaseMonster();
 	// Skill
 	FSkillBagData* dt_SkillBag;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
-	USkillRoulette* SkillRoulette = nullptr;
+
 	UPROPERTY()
 	UBaseSkill* NextSkill;
 
 	//퍼펙트 가드 패널티 애니메이션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Parry")
 	UAnimMontage* ParryPenaltyAnimation;
-	
+
 	UPROPERTY()
 	FTimerHandle OnDieHandle;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
+	UBaseSkillRoulette* m_SkillRoulette;
 
 protected:
+	// 가상 팩토리 함수
+	virtual UBaseSkillRoulette* CreateSkillRouletteComponent();
+	
 	// Combat System
 	UPROPERTY()
 	AAreaObject* m_AggroTarget;
@@ -89,29 +95,32 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
+
 	UFUNCTION(BlueprintCallable)
 	virtual void OnBodyBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult & SweepResult);
-	
+	                                AActor* OtherActor,
+	                                UPrimitiveComponent* OtherComp,
+	                                int32 OtherBodyIndex,
+	                                bool bFromSweep,
+	                                const FHitResult& SweepResult);
+
 	// Combat Interface
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual AAreaObject* GetAggroTarget() const;
-	
+
 	// Combat System
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void SetAggroTarget(AAreaObject* NewTarget) { m_AggroTarget = NewTarget; }
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	float GetDistToTarget();
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	FVector GetDirToTarget();
-	
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	float GetNextSkillRange();
+
 	// State Checks
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsMoving() const;
@@ -122,14 +131,26 @@ public:
 	void RemoveSkillEntryByID(const int id);
 	void AddSkillEntryByID(const int id);
 
-	// Perfect Guard
+	// Perfect Guard Reaction
 	virtual void AddParryStack();
 	void InitParryStack();
-	
+
+	// AI Perception 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	class UAIPerceptionComponent* AIPerceptionComponent;
+
+	// 시야 설정
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	class UAISenseConfig_Sight* SightConfig;
+
+	// 감지 이벤트를 처리할 함수
+	UFUNCTION()
+	void OnPerceptionUpdated(AActor* Actor, struct FAIStimulus Stimulus);
+
 protected:
 	UFUNCTION(BlueprintCallable)
 	virtual UBaseAiFSM* CreateFSM();
-	
+
 	virtual void OnDie() override;
 
 	// Perfect Guard

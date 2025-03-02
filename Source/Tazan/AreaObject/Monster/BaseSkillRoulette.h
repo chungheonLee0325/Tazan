@@ -5,10 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
-#include "SkillRoulette.generated.h"
-
-class ABaseMonster;
-struct FSkillBagData;
+#include "BaseSkillRoulette.generated.h"
 
 USTRUCT(BlueprintType)
 struct FSkillRouletteEntry
@@ -38,44 +35,17 @@ struct FSkillRouletteEntry
 	}
 };
 
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class TAZAN_API USkillRoulette : public UActorComponent
+class TAZAN_API UBaseSkillRoulette : public UActorComponent
 {
 	GENERATED_BODY()
-
 public:
-	USkillRoulette();
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TArray<FSkillRouletteEntry> SkillEntries;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TArray<FSkillRouletteEntry> AvailableSkillEntries;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
-	float ShortRange = 400.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
-	float MiddleRange = 600.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
-	float LongRange = 1000.0f;
-
-private:
-	UPROPERTY()
-	ABaseMonster* Owner;
-	
-	UPROPERTY()
-	mutable EAiSkillType PrevSkillType = EAiSkillType::None;
-	
-	int PrevSkill_ID = 0;
-	
-protected:
-	virtual void BeginPlay() override;
-
-public:
+	UBaseSkillRoulette();
 	
 	void InitFromSkillBag(const FSkillBagData* dt_SkillBag);
 	
 	UFUNCTION()
-	int GetRandomSkillID() const;
+	int GetRandomSkillID();
 
 	// 쿨타임 관련 함수
 	UFUNCTION()
@@ -102,4 +72,29 @@ public:
 	void SelectSkillByType(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType) const;
 	/** 특정 타입 스킬만 활성화합니다. */
 	void SelectSkillByType(TArray<FSkillRouletteEntry>& entries, const EAiSkillType& skillType, const float weight) const;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FSkillRouletteEntry> SkillEntries;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FSkillRouletteEntry> AvailableSkillEntries;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
+	float ShortRange = 400.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
+	float MiddleRange = 600.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
+	float LongRange = 1000.0f;
+
+protected:
+	virtual void BeginPlay() override;
+
+	virtual void AdjustSkillWeightsByCombatContext(TArray<FSkillRouletteEntry>& LocalEntries); 
+
+	UPROPERTY()
+	class ABaseMonster* Owner;
+	
+	UPROPERTY()
+	mutable EAiSkillType PrevSkillType = EAiSkillType::None;
+	
+	int PrevSkill_ID = 0;
 };

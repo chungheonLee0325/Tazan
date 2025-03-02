@@ -6,7 +6,7 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
-#include "Tazan/AreaObject/Skill/Monster/BossMonsters/SkillRoulette.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Y_SkillRoulette.h"
 #include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_BaseSkill.h"
 
 void UY_Attack::InitState()
