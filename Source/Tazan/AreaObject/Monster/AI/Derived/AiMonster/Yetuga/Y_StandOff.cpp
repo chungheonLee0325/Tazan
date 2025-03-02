@@ -13,7 +13,7 @@ void UY_StandOff::InitState()
 
 void UY_StandOff::Enter()
 {
-	LOG_PRINT(TEXT(""));
+	//LOG_PRINT(TEXT(""));
 	// m_Owner->StopRotate();
 }
 

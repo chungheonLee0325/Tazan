@@ -79,11 +79,11 @@ void ABaseMonster::OnBodyBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
-	//auto player = Cast<APlayer_Kazan>(OtherActor);
-	//if (player != nullptr)
-	//{
-	//	CalcDamage(1.0f, this, player);
-	//}
+}
+
+UBaseAiFSM* ABaseMonster::CreateFSM()
+{
+	return nullptr;
 }
 
 bool ABaseMonster::IsMoving() const
@@ -94,6 +94,11 @@ bool ABaseMonster::IsMoving() const
 bool ABaseMonster::IsRotating() const
 {
 	return true;
+}
+
+AAreaObject* ABaseMonster::GetAggroTarget() const
+{
+	return m_AggroTarget;
 }
 
 float ABaseMonster::GetDistToTarget()
@@ -116,18 +121,6 @@ FVector ABaseMonster::GetDirToTarget()
 	return m_AggroTarget->GetActorLocation()-GetActorLocation();
 }
 
-void ABaseMonster::RemoveSkillEntryByID(const int id)
-{
-	// LOG_PRINT(TEXT("스킬 엔트리에서 제거"));
-	SkillRoulette->RemoveSkillEntryByID(id);
-}
-
-void ABaseMonster::AddSkillEntryByID(const int id)
-{
-	// LOG_PRINT(TEXT("스킬 엔트리에 다시 추가"));
-	SkillRoulette->AddSkillEntryByID(id);
-}
-
 void ABaseMonster::OnDie()
 {
 	Super::OnDie();
@@ -140,12 +133,45 @@ void ABaseMonster::OnDie()
 	StopAll();
 }
 
-UBaseAiFSM* ABaseMonster::CreateFSM()
+void ABaseMonster::AddParryStack()
 {
-	return nullptr;
+	++ParryStack;
+	// LOG_SCREEN("패리 스택: %d",ParryStack);
+	if (ParryStack == ParryStackMax)
+	{
+		ParryStackPenalty();
+	}
 }
 
-AAreaObject* ABaseMonster::GetAggroTarget() const
+void ABaseMonster::ParryStackPenalty()
 {
-	return m_AggroTarget;
+	// LOG_SCREEN("패리 패널티!");
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		if (ParryPenaltyAnimation != nullptr)
+		{
+			animInst->Montage_Play(ParryPenaltyAnimation);
+		}
+		else
+		{
+			LOG_SCREEN_ERROR(this, "패리 패널티 애니 비어있음");
+		}
+	}
+	ParryStack = 0;
+}
+
+void ABaseMonster::InitParryStack()
+{
+	ParryStack = 0;
+}
+
+void ABaseMonster::RemoveSkillEntryByID(const int id)
+{
+	SkillRoulette->RemoveSkillEntryByID(id);
+}
+
+void ABaseMonster::AddSkillEntryByID(const int id)
+{
+	SkillRoulette->AddSkillEntryByID(id);
 }
