@@ -46,7 +46,12 @@ ABaseMonster::ABaseMonster()
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseMonster::OnPerceptionUpdated);
 }
 
-UBaseSkillRoulette* ABaseMonster::CreateSkillRouletteComponent()
+UBaseSkillRoulette* ABaseMonster::GetSkillRoulette() const
+{
+	return m_SkillRoulette;
+}
+
+UBaseSkillRoulette* ABaseMonster::CreateSkillRoulette()
 {
 	return CreateDefaultSubobject<UBaseSkillRoulette>(TEXT("SkillRouletteComponent"));
 }

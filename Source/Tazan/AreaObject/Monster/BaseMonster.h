@@ -61,17 +61,11 @@ public:
 	//퍼펙트 가드 패널티 애니메이션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Parry")
 	UAnimMontage* ParryPenaltyAnimation;
-
-	UPROPERTY()
-	FTimerHandle OnDieHandle;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
-	UBaseSkillRoulette* m_SkillRoulette;
+	UFUNCTION()
+	UBaseSkillRoulette* GetSkillRoulette() const;
 
 protected:
-	// 가상 팩토리 함수
-	virtual UBaseSkillRoulette* CreateSkillRouletteComponent();
-	
 	// Combat System
 	UPROPERTY()
 	AAreaObject* m_AggroTarget;
@@ -79,6 +73,8 @@ protected:
 	FVector m_SpawnLocation;
 	UPROPERTY(VisibleAnywhere)
 	UBaseAiFSM* m_AiFSM;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
+	UBaseSkillRoulette* m_SkillRoulette;
 
 private:
 	UPROPERTY()
@@ -148,8 +144,11 @@ public:
 	void OnPerceptionUpdated(AActor* Actor, struct FAIStimulus Stimulus);
 
 protected:
+	// 가상 팩토리 함수
 	UFUNCTION(BlueprintCallable)
 	virtual UBaseAiFSM* CreateFSM();
+	UFUNCTION(BlueprintCallable)
+	virtual UBaseSkillRoulette* CreateSkillRoulette();
 
 	virtual void OnDie() override;
 
