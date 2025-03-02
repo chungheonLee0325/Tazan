@@ -3,58 +3,59 @@
 
 #include "CommonAttack.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
-#include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 
 void UCommonAttack::InitState()
 {
-	//m_AiStateType = EAiStateType::Attack;
+}
+
+void UCommonAttack::CheckState()
+{
+	if (m_SuccessState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_SuccessState"));
+	if (m_FailState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_FailState"));
 }
 
 void UCommonAttack::Enter()
 {
-	m_IsSkillStarted = false;
+	bHasFailed = false;
+	m_Owner->InitParryStack();
+
+	// LOG_PRINT(TEXT("넥스트스킬: %s"),*m_Owner->NextSkill->GetName());
+	UBaseSkill* skill = m_Owner->NextSkill;
+
+	if (m_Owner->CanCastSkill(skill, m_Owner->GetAggroTarget()))
+	{
+		skill->OnSkillComplete.BindUObject(this, &UCommonAttack::OnSkillCompleted);
+		skill->OnSkillCancel.BindUObject(this, &UCommonAttack::OnSkillCanceled);
+		m_Owner->CastSkill(skill, m_Owner->GetAggroTarget());
+		m_Owner->RemoveSkillEntryByID(skill->GetSkillData()->SkillID);
+	}
+	else
+	{
+		LOG_PRINT(TEXT("스킬 실행 실패"));
+		bHasFailed = true;
+	}
 }
 
-void UCommonAttack::Execute(float DeltaTime)
+void UCommonAttack::Execute(float dt)
 {
-	if (!m_Owner) return;
-
-	// 타겟 체크
-	AActor* Target = m_Owner->GetAggroTarget();
-	if (!Target)
+	if (bHasFailed)
 	{
-		m_AiFSM->ChangeState(EAiStateType::Idle);
-		return;
-	}
-	if (!m_IsSkillStarted)
-	{
-		// 공격 스킬 시작
-	//	if (UBaseSkill* AttackSkill = m_Owner->FindSkillByState(m_AiStateType))
-		{
-			//if (m_Owner->CanCastSkill(AttackSkill,Target))
-			{
-				//AttackSkill->OnSkillComplete.BindUObject(this,&UCommonAttack::OnSkillCompleted);
-				//m_Owner->CastSkill(AttackSkill,Target);
-				m_IsSkillStarted = true;
-			}
-			//else
-			{
-				m_AiFSM->ChangeState(EAiStateType::Idle);
-			}
-		}
-		//else
-		{
-			m_AiFSM->ChangeState(EAiStateType::Idle);
-		}
+		ChangeState(m_FailState);
 	}
 }
 
 void UCommonAttack::Exit()
 {
+	Super::Exit();
 }
 
 void UCommonAttack::OnSkillCompleted()
 {
-	if (m_AiFSM) m_AiFSM->ChangeState(m_NextState);
+	ChangeState(m_SuccessState);
+}
+
+void UCommonAttack::OnSkillCanceled()
+{
+	ChangeState(m_FailState);
 }
