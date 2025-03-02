@@ -1,14 +1,9 @@
 ﻿/*
 BaseMonster System
 ├── Core Features
-│   ├── Monster Data
-│   │   ├── Base Stats (TODO: DataTable)
-│   │   ├── Current Stats
-│   │   └── Combat Stats (TODO: DataTable)
 │   ├── Movement System
 │   │   ├── Movement
 │   │   ├── Rotation
-│   │   └── Component Movement
 │   └── Combat System
 │       ├── Skill Management
 │       ├── Target Management
@@ -49,24 +44,6 @@ class UBaseAiFSM;
 class UBaseSkill;
 class UPathMover;
 
-USTRUCT(BlueprintType)
-struct FMonsterData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, meta=(Comment="TODO: Move to DataTable"))
-	float MaxHealth = 1.0f;
-
-	UPROPERTY(EditAnywhere, meta=(Comment="TODO: Move to DataTable"))
-	float DetectionRange = 1000.0f;
-
-	UPROPERTY(EditAnywhere, meta=(Comment="TODO: Move to DataTable"))
-	float MovementSpeed = 300.0f;
-
-	UPROPERTY(EditAnywhere, meta=(Comment="TODO: Move to DataTable"))
-	float RotationSpeed = 360.0f;
-};
-
 UCLASS()
 class TAZAN_API ABaseMonster : public AAreaObject
 {
@@ -74,11 +51,6 @@ class TAZAN_API ABaseMonster : public AAreaObject
 
 public:
 	ABaseMonster();
-
-	// Monster Data
-	UPROPERTY(EditAnywhere, Category = "Monster Settings")
-	FMonsterData MonsterData;
-
 	// Skill
 	FSkillBagData* dt_SkillBag;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
@@ -145,15 +117,12 @@ public:
 	bool IsMoving() const;
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsRotating() const;
-	
-	// Data Access
-	const FMonsterData& GetMonsterData() const { return MonsterData; }
 
 	// Skill
 	void RemoveSkillEntryByID(const int id);
 	void AddSkillEntryByID(const int id);
 
-	// Perfect Gaurd
+	// Perfect Guard
 	virtual void AddParryStack();
 	void InitParryStack();
 	
@@ -163,6 +132,6 @@ protected:
 	
 	virtual void OnDie() override;
 
-	// Perfect Gaurd
+	// Perfect Guard
 	virtual void ParryStackPenalty();
 };
