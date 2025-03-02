@@ -13,7 +13,7 @@ class TAZAN_API UCommonAttack : public UBaseAiState
 
 public:
 	virtual void InitState() override;
-	virtual void CheckState() override;
+	virtual void CheckIsValid() override;
 	virtual void Enter() override;
 	virtual void Execute(float dt) override;
 	virtual void Exit() override;

@@ -78,6 +78,7 @@ enum class EAiStateType : uint8
 	SelectSkill UMETA(DisplayName = "SelectSkill"),
 	Chase UMETA(DisplayName = "Chase"),
 	Return UMETA(DisplayName = "Return"),
+	DoNothing UMETA(DisplayName = "DoNothing"),
 };
 
 // 공격시 Trace System에서 사용 - EnableCollisionNotifyState 참조

@@ -9,7 +9,7 @@ void UCommonAttack::InitState()
 {
 }
 
-void UCommonAttack::CheckState()
+void UCommonAttack::CheckIsValid()
 {
 	if (m_SuccessState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_SuccessState"));
 	if (m_FailState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_FailState"));
@@ -47,7 +47,6 @@ void UCommonAttack::Execute(float dt)
 
 void UCommonAttack::Exit()
 {
-	Super::Exit();
 }
 
 void UCommonAttack::OnSkillCompleted()

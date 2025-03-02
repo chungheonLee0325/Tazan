@@ -19,6 +19,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual UBaseAiFSM* CreateFSM() override;
+	virtual UBaseSkillRoulette* CreateSkillRoulette() override;
 
 public:
 	// Called every frame

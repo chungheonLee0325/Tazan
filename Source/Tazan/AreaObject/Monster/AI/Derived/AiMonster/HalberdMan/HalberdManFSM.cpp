@@ -3,6 +3,13 @@
 
 #include "HalberdManFSM.h"
 
+#include "Tazan/AreaObject/Monster/BaseMonster.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/CommonState/AggroWait.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/CommonState/ChaseTarget.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/CommonState/CommonAttack.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/CommonState/DoNothing.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/CommonState/SelectSkill.h"
+
 
 // Sets default values for this component's properties
 UHalberdManFSM::UHalberdManFSM()
@@ -21,7 +28,6 @@ void UHalberdManFSM::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
 }
 
 
@@ -35,31 +41,31 @@ void UHalberdManFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 void UHalberdManFSM::InitStatePool()
 {
-	//AYetuga* yetuga = Cast<AYetuga>(m_Owner);
-	//if (!yetuga) return;
-	//
-	//// Wait 
-	//auto StandOff = CreateState<UY_StandOff>(this, m_Owner, EAiStateType::Wait);
-	//AddState(EAiStateType::Wait, StandOff);
-	//// StandOff->SetNextState(EAiStateType::SelectSkill);
-	//
-	//// Idle
-	//auto Groggy = CreateState<UY_Groggy>(this, m_Owner, EAiStateType::Idle);
-	//AddState(EAiStateType::Idle, Groggy);
-	//
-	//// Attack
-	//auto Attack = CreateState<UY_Attack>(this, m_Owner, EAiStateType::Attack);
-	//AddState(EAiStateType::Attack, Attack);
-	//Attack->SetNextState(EAiStateType::SelectSkill);
-	//
-	////SelectSkill
-	//auto SelectSkill = CreateState<UY_SelectSkill>(this, m_Owner, EAiStateType::SelectSkill);
-	//SelectSkill->SetSkillRoulette(yetuga->SkillRoulette);
-	//AddState(EAiStateType::SelectSkill, SelectSkill);
-	//
-	//// Chase
-	//auto Chase = CreateState<UY_Chase>(this, m_Owner, EAiStateType::Chase);
-	//AddState(EAiStateType::Chase, Chase);
-	//Chase->SetNextState(EAiStateType::Attack);
-}
+	// Wait 
+	auto AggroWait = CreateState<UAggroWait>(this, m_Owner, EAiStateType::SelectSkill);
+	AddState(EAiStateType::Wait, AggroWait);
 
+	// Chase
+	auto ChaseTarget = CreateState<UChaseTarget>(this, m_Owner, EAiStateType::None, EAiStateType::Attack,
+	                                             EAiStateType::SelectSkill);
+	ChaseTarget->SetChaseAccelSpeed(500.f);
+	ChaseTarget->SetMaxChaseDistance(2000.f);
+	ChaseTarget->SetMaxChaseDistanceState(EAiStateType::Idle); // ToDo : Return 구현
+	AddState(EAiStateType::Chase, ChaseTarget);
+
+	// Attack
+	auto Attack = CreateState<UCommonAttack>(this, m_Owner, EAiStateType::None, EAiStateType::SelectSkill,
+	                                         EAiStateType::SelectSkill);
+	AddState(EAiStateType::Attack, Attack);
+
+	// SelectSkill
+	auto SelectSkill = CreateState<USelectSkill>(this, m_Owner, EAiStateType::Chase);
+	SelectSkill->SetSkillRoulette(m_Owner->GetSkillRoulette());
+	AddState(EAiStateType::SelectSkill, SelectSkill);
+
+	// Groggy
+	auto Groggy = CreateState<UDoNothing>(this, m_Owner);
+	AddState(EAiStateType::DoNothing, Groggy);
+
+	ChangeState(EAiStateType::Wait);
+}

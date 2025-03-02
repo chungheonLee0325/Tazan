@@ -16,23 +16,15 @@ class TAZAN_API USelectSkill : public UBaseAiState
 
 public:
 	virtual void InitState() override;
-	virtual void CheckState() override;
+	virtual void CheckIsValid() override;
 	virtual void Enter() override;
 	virtual void Execute(float DeltaTime) override;
 	virtual void Exit() override;
 
-	void SetSkillRoulette(class UY_SkillRoulette* skillRoulette) { SkillRoulette = skillRoulette; }
-	bool CheckRange(float dist, float range);
-
+	void SetSkillRoulette(class UBaseSkillRoulette* SkillRoulette) { m_SkillRoulette = SkillRoulette; }
 private:
 	UPROPERTY()
-	class UY_SkillRoulette* SkillRoulette = nullptr;
+	class UBaseSkillRoulette* m_SkillRoulette = nullptr;
 	UPROPERTY()
 	UBaseSkill* Skill = nullptr;
-
-	float Dist = 0.0f;
-	bool bIsWeaving = false;
-	
-	UPROPERTY(EditAnywhere)
-	float LongRange = 1000.0f;
 };

@@ -16,7 +16,7 @@ class TAZAN_API UChaseTarget : public UBaseAiState
 
 public:
 	virtual void InitState() override;
-	virtual void CheckState() override;
+	virtual void CheckIsValid() override;
 	virtual void Enter() override;
 	virtual void Execute(float dt) override;
 	virtual void Exit() override;
@@ -74,5 +74,5 @@ private:
 	// 최대 추적 거리 - 이후 m_MaxChaseDistanceState 로 전이
 	float m_MaxChaseDistance = 0.0f;
 	EAiStateType m_MaxChaseDistanceState = EAiStateType::None;
-
+	bool bDebug = true;
 };

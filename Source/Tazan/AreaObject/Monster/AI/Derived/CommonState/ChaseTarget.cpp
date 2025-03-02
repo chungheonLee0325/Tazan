@@ -8,7 +8,7 @@ void UChaseTarget::InitState()
 {
 }
 
-void UChaseTarget::CheckState()
+void UChaseTarget::CheckIsValid()
 {
 	if (m_SuccessState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_SuccessState")); 
 	if (m_FailState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_FailState")); 
@@ -52,6 +52,16 @@ void UChaseTarget::Execute(float dt)
 	if (dist < m_SelectedSkillRange - m_SkillRangeMargin)
 	{
 		ChangeState(m_SuccessState);
+	}
+
+	if (bDebug)
+	{
+		float CheckRadius =  m_SelectedSkillRange;
+		float AttackRadius = m_SelectedSkillRange - m_SkillRangeMargin;
+		// check radius debug
+		DrawDebugSphere(GetWorld(), m_Owner->GetActorLocation(), CheckRadius, 10, FColor::Green, false, 0.1f);
+		// attack radius debug
+		DrawDebugSphere(GetWorld(), m_Owner->GetActorLocation(), AttackRadius, 10, FColor::Red, false, 0.1f);
 	}
 }
 

@@ -14,7 +14,7 @@ void UAggroWait::InitState()
 {
 }
 
-void UAggroWait::CheckState()
+void UAggroWait::CheckIsValid()
 {
 	if (m_NextState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_NextState"));
 }

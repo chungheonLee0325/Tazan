@@ -4,6 +4,7 @@
 #include "HalberdMan.h"
 
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/HalberdMan/HalberdManFSM.h"
 
 
@@ -17,6 +18,8 @@ AHalberdMan::AHalberdMan()
 
 	// FSM Setting
 	m_AiFSM = AHalberdMan::CreateFSM();
+	// Skill Setting
+	m_SkillRoulette = AHalberdMan::CreateSkillRoulette();
 
 	// CapsuleComponent Setting
 	GetCapsuleComponent()->SetCapsuleHalfHeight(150.f);
@@ -58,6 +61,8 @@ AHalberdMan::AHalberdMan()
 	{
 		GetMesh()->SetAnimInstanceClass(TempABP.Class);
 	}
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 
@@ -71,6 +76,11 @@ void AHalberdMan::BeginPlay()
 UBaseAiFSM* AHalberdMan::CreateFSM()
 {
 	return CreateDefaultSubobject<UHalberdManFSM>(TEXT("FSM"));
+}
+
+UBaseSkillRoulette* AHalberdMan::CreateSkillRoulette()
+{
+	return Super::CreateSkillRoulette();
 }
 
 

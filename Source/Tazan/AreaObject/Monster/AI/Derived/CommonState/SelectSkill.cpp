@@ -10,8 +10,10 @@ void USelectSkill::InitState()
 {
 }
 
-void USelectSkill::CheckState()
+void USelectSkill::CheckIsValid()
 {
+	if (m_NextState == EAiStateType::None) LOG_PRINT(TEXT("Please Set m_NextState"));
+	if (m_SkillRoulette == nullptr) LOG_PRINT(TEXT("Please Set m_SkillRoulette"));
 }
 
 void USelectSkill::Enter()
@@ -28,7 +30,7 @@ void USelectSkill::Enter()
 	//{
 	//	//LOG_SCREEN("내 뒤");
 	//}
-	int id = SkillRoulette->GetRandomSkillID();
+	int id = m_SkillRoulette->GetRandomSkillID();
 	m_Owner->NextSkill = m_Owner->GetSkillByID(id);
 }
 
@@ -40,13 +42,4 @@ void USelectSkill::Execute(float DeltaTime)
 
 void USelectSkill::Exit()
 {
-}
-
-bool USelectSkill::CheckRange(float dist, float range)
-{
-	if (dist < range)
-	{
-		return true;
-	}
-	return false;
 }
