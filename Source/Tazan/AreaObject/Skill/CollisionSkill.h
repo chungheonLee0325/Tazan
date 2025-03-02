@@ -79,12 +79,4 @@ private:
 
 	UPROPERTY()
 	TMap<UAnimNotifyState*, FAttackCollision> NotifyStateMap;
-	//UPROPERTY()
-	//USkeletalMeshComponent* OwnerSourceMesh;
-	//UPROPERTY()
-	//TSet<AActor*> HitActors;
-	//
-	//bool IsEnableHitDetection;
-	//
-	//FAttackData* IndexedAttackData;
 };
