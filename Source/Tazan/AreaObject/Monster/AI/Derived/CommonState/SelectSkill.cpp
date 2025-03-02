@@ -16,19 +16,18 @@ void USelectSkill::CheckState()
 
 void USelectSkill::Enter()
 {
-	float distance = m_Owner->GetDistToTarget();
-	FVector dir = m_Owner->GetDirToTarget();
-	dir.Normalize();
-	float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
-
-	m_NextState = EAiStateType::Chase;
-	
-	// 플레이어가 몬스터 뒤에 있으면 백어택
-	if (forwardDot > -1.0f && forwardDot < -0.75f) 
-	{
-		//LOG_SCREEN("내 뒤");
-	}
-	
+	//float distance = m_Owner->GetDistToTarget();
+	//FVector dir = m_Owner->GetDirToTarget();
+	//dir.Normalize();
+	//float forwardDot = FVector::DotProduct(dir,m_Owner->GetActorForwardVector());
+	//
+	//m_NextState = EAiStateType::Chase;
+	//
+	//// 플레이어가 몬스터 뒤에 있으면 백어택
+	//if (forwardDot > -1.0f && forwardDot < -0.75f) 
+	//{
+	//	//LOG_SCREEN("내 뒤");
+	//}
 	int id = SkillRoulette->GetRandomSkillID();
 	m_Owner->NextSkill = m_Owner->GetSkillByID(id);
 }

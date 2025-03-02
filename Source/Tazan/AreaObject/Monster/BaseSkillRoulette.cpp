@@ -19,8 +19,57 @@ void UBaseSkillRoulette::BeginPlay()
 	Owner = Cast<ABaseMonster>(GetOwner());
 }
 
-void UBaseSkillRoulette::AdjustSkillWeightsByCombatContext(TArray<FSkillRouletteEntry>& localEntries)
+void UBaseSkillRoulette::AdjustSkillWeightsByCombatContext(TArray<FSkillRouletteEntry>& LocalEntries)
 {
+	float dist = Owner->GetDistToTarget();
+	FVector dir = Owner->GetDirToTarget();
+	dir.Normalize();
+	float forwardDot = FVector::DotProduct(dir, Owner->GetActorForwardVector());
+	float rightDot = FVector::DotProduct(dir, Owner->GetActorRightVector());
+	
+	//직전 스킬 타입이 거리벌리기이면, 원거리 공격 위주로 사용
+	if (PrevSkillType == EAiSkillType::Back)
+	{
+		// LOG_SCREEN("원거리 공격!");
+		ApplySkillWeight(LocalEntries, EAiSkillType::Long, 1000.0f);
+	}
+	//직전 스킬 타입이 원거리 공격이면, 원거리 공격 확률 DOWN
+	else if (PrevSkillType == EAiSkillType::Long)
+	{
+		ApplySkillWeight(LocalEntries, EAiSkillType::Long, 0.25f);
+	}
+	// 거리가 멀면, 원거리 공격 활성화.
+	else if (dist > LongRange)
+	{
+		// LOG_SCREEN("원거리 공격 활성화");
+		ApplySkillWeight(LocalEntries, EAiSkillType::Long, 400.0f);
+	}
+	// 거리가 짧으면, 위빙 스킬 확률 UP
+	else if (dist <= ShortRange)
+	{
+		ApplySkillWeight(LocalEntries, EAiSkillType::Weaving, 1.5f);
+	}
+	// 플레이어가 뒤에 있다면, 뒤도는 스킬 확률 UP
+	else if (forwardDot < -0.2f)
+	{
+			SetSkillWeight(LocalEntries, EAiSkillType::Back, 3.0f);
+	}
+	else if (forwardDot > 0.0f && rightDot >= 0.15f)
+	{
+		// LOG_PRINT(TEXT("우측 대각선!"));
+		if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
+		{
+			SetSkillWeight(LocalEntries, EAiSkillType::Right, 3.0f);
+		}
+	}
+	else if (forwardDot > 0.0f && rightDot <= 0.15f)
+	{
+		// LOG_PRINT(TEXT("좌측 대각선!"));
+		if ((PrevSkillType != EAiSkillType::Right) && (PrevSkillType != EAiSkillType::Left))
+		{
+			SetSkillWeight(LocalEntries, EAiSkillType::Left, 3.0f);
+		}
+	}
 }
 
 
@@ -51,7 +100,6 @@ void UBaseSkillRoulette::InitFromSkillBag(const FSkillBagData* SkillBagData)
 
 int UBaseSkillRoulette::GetRandomSkillID()
 {
-	// ToDo : 수정
 	TArray<FSkillRouletteEntry> localEntries = AvailableSkillEntries;
 
 	AdjustSkillWeightsByCombatContext(localEntries);
