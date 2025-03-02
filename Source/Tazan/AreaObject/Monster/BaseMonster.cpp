@@ -86,6 +86,7 @@ void ABaseMonster::BeginPlay()
 	if (m_AiFSM != nullptr)
 	{
 		m_AiFSM->InitStatePool();
+		m_AiFSM->CheckIsValidAiStates();
 	}
 	else
 	{

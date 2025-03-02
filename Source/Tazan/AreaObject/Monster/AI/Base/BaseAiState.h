@@ -26,7 +26,7 @@ public:
 	virtual void InitState() PURE_VIRTUAL(UBaseAiState::InitState);
 
 	// Create State - Special Initialize (Builder Pattern)
-	virtual void CheckState() /*PURE_VIRTUAL(UBaseAiState::InitState)*/;
+	virtual void CheckIsValid() /*PURE_VIRTUAL(UBaseAiState::InitState)*/;
 	virtual void SetNextState(EAiStateType NextState);
 	void SetSuccessState(EAiStateType SuccessState);
 	void SetFailState(EAiStateType FailState);

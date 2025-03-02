@@ -31,7 +31,7 @@ void UBaseAiState::SetOwner(ABaseMonster* Owner)
 	m_Owner = Owner;
 }
 
-void UBaseAiState::CheckState()
+void UBaseAiState::CheckIsValid()
 {
 }
 

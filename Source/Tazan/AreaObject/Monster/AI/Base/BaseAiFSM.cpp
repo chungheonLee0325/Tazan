@@ -92,4 +92,12 @@ void UBaseAiFSM::UpdateState(float dt)
 	m_CurrentState->Execute(dt);
 }
 
+void UBaseAiFSM::CheckIsValidAiStates() const
+{
+	for (const auto& pair : m_AiStates)
+	{
+		pair.Value->CheckIsValid();
+	}
+}
+
 

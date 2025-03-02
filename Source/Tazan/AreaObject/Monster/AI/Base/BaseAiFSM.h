@@ -10,7 +10,7 @@
 class ABaseMonster;
 class UBaseAiState;
 
-UCLASS(Abstract,ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(Abstract, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TAZAN_API UBaseAiFSM : public UActorComponent
 {
 	GENERATED_BODY()
@@ -28,8 +28,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	void AddState(EAiStateType StateType,UBaseAiState* State);
-	
+	void AddState(EAiStateType StateType, UBaseAiState* State);
+
 	void ChangeState(EAiStateType StateType);
 
 	bool IsExistState(EAiStateType StateType) const;
@@ -38,11 +38,15 @@ public:
 
 	virtual void InitStatePool() PURE_VIRTUAL(UBaseAiFSM::InitStatePool,);
 
-	void StopFSM() {m_CurrentState = nullptr;}
+	void StopFSM() { m_CurrentState = nullptr; }
 
-public:
-	template<typename T>
-	static T* CreateState(UObject* Outer, ABaseMonster* Owner, EAiStateType NextState)
+	// AiState 검증(Builder Pattern 간 누락 방지)
+	void CheckIsValidAiStates() const;
+
+	// Template 를 이용한 동적 state 생성 -> Builder Pattern을 사용하기 위해 적용
+	template <typename T>
+	static T* CreateState(UObject* Outer, ABaseMonster* Owner, EAiStateType NextState = EAiStateType::None,
+	                      EAiStateType SuccessState = EAiStateType::None, EAiStateType FailState = EAiStateType::None)
 	{
 		static_assert(std::is_base_of_v<UBaseAiState, T>, "T must derive from UAiState");
 
@@ -50,22 +54,22 @@ public:
 		State->InitState();
 		State->SetOwner(Owner);
 		State->SetNextState(NextState);
+		State->SetSuccessState(SuccessState);
+		State->SetFailState(FailState);
+		// ToDo : 논의 후 AddState도 여기에 넣기
 		return State;
 	}
 
-	
-	
 protected:
 	UPROPERTY()
 	ABaseMonster* m_Owner = nullptr;
 
 private:
-	
-UPROPERTY()
+	UPROPERTY()
 	TMap<EAiStateType, UBaseAiState*> m_AiStates;
-	
-UPROPERTY(VisibleAnywhere)
+
+	UPROPERTY(VisibleAnywhere)
 	UBaseAiState* m_CurrentState = nullptr;
-UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	UBaseAiState* m_PreviousState = nullptr;
 };
