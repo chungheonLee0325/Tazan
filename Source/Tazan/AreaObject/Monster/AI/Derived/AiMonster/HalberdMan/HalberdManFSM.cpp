@@ -8,6 +8,7 @@
 #include "Tazan/AreaObject/Monster/AI/Derived/CommonState/ChaseTarget.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/CommonState/CommonAttack.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/CommonState/DoNothing.h"
+#include "Tazan/AreaObject/Monster/AI/Derived/CommonState/ReturnSpawnPoint.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/CommonState/SelectSkill.h"
 
 
@@ -49,8 +50,8 @@ void UHalberdManFSM::InitStatePool()
 	auto ChaseTarget = CreateState<UChaseTarget>(this, m_Owner, EAiStateType::None, EAiStateType::Attack,
 	                                             EAiStateType::SelectSkill);
 	ChaseTarget->SetChaseAccelSpeed(500.f);
-	ChaseTarget->SetMaxChaseDistance(2000.f);
-	ChaseTarget->SetMaxChaseDistanceState(EAiStateType::Idle); // ToDo : Return 구현
+	//ChaseTarget->SetMaxChaseDistance(1400.f);
+	ChaseTarget->SetMaxChaseDistanceState(EAiStateType::Return); // ToDo : Return 구현
 	AddState(EAiStateType::Chase, ChaseTarget);
 
 	// Attack
@@ -66,6 +67,13 @@ void UHalberdManFSM::InitStatePool()
 	// Groggy
 	auto Groggy = CreateState<UDoNothing>(this, m_Owner);
 	AddState(EAiStateType::DoNothing, Groggy);
+	
+	// BackHome
+	auto BackHome = CreateState<UReturnSpawnPoint>(this, m_Owner, EAiStateType::None, EAiStateType::Wait,
+	                                               EAiStateType::SelectSkill);
+	BackHome->SetReturnAccelSpeed(300.f);
+	AddState(EAiStateType::Return, BackHome);
 
+	// 시작 State
 	ChangeState(EAiStateType::Wait);
 }

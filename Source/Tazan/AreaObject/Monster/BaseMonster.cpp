@@ -22,16 +22,18 @@ ABaseMonster::ABaseMonster()
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// AI Perception 컴포넌트 생성
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
 
 	// 시야 설정 생성 및 구성
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
-	SightConfig->SightRadius = 1500.0f;
-	SightConfig->LoseSightRadius = 2000.0f;
+	SightConfig->SightRadius = SightRadius;
+	SightConfig->LoseSightRadius = LoseSightRadius;
 	SightConfig->PeripheralVisionAngleDegrees = 90.0f;
-	SightConfig->SetMaxAge(5.0f);
-	SightConfig->AutoSuccessRangeFromLastSeenLocation = 900.0f;
+	SightConfig->SetMaxAge(0.5f);
+	SightConfig->AutoSuccessRangeFromLastSeenLocation = 0.0f;
     
 	// 팀 설정 - 여기서는 모든 팀을 감지
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
@@ -156,6 +158,16 @@ FVector ABaseMonster::GetDirToTarget()
 float ABaseMonster::GetNextSkillRange()
 {
 	return NextSkill == nullptr ? 0.f : NextSkill->GetSkillRange();
+}
+
+FVector ABaseMonster::GetSpawnLocation()
+{
+	return m_SpawnLocation;
+}
+
+float ABaseMonster::GetSightLength()
+{
+	return SightRadius;
 }
 
 void ABaseMonster::OnDie()

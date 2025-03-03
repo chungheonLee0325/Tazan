@@ -6,6 +6,7 @@
 
 void UChaseTarget::InitState()
 {
+	m_MaxChaseDistance = m_Owner->GetSightLength() + 100.f;
 }
 
 void UChaseTarget::CheckIsValid()
@@ -22,7 +23,7 @@ void UChaseTarget::Enter()
 
 void UChaseTarget::Execute(float dt)
 {
-	if (m_Owner->NextSkill == nullptr)
+	if (m_Owner->NextSkill == nullptr || m_Owner->GetAggroTarget() == nullptr)
 	{
 		LOG_PRINT(TEXT("NextSkill is NULL"));
 		ChangeState(m_FailState);
@@ -31,16 +32,19 @@ void UChaseTarget::Execute(float dt)
 
 	// 추적 시간 갱신
 	m_CurrentChaseTime += dt;
+	
 	// option :: 추적 거리 m_MaxChaseDistance 보다 거리가 멀다면 정해진 상태로 전이
 	if (m_MaxChaseDistanceState != EAiStateType::None && m_MaxChaseDistance < m_Owner->GetDistToTarget())
 	{
 		ChangeState(m_MaxChaseDistanceState);
+		return;
 	}
 
 	// option :: 추적 시간이 m_ChaseExtendedTime 초과 하면 정해진 상태로 전이
 	if (m_ChaseExtendedState != EAiStateType::None && m_ChaseExtendedTime < m_CurrentChaseTime)
 	{
 		ChangeState(m_ChaseExtendedState);
+		return;
 	}
 
 	// 일반 추적 로직
@@ -52,6 +56,7 @@ void UChaseTarget::Execute(float dt)
 	if (dist < m_SelectedSkillRange - m_SkillRangeMargin)
 	{
 		ChangeState(m_SuccessState);
+		return;
 	}
 
 	if (bDebug)
@@ -62,6 +67,8 @@ void UChaseTarget::Execute(float dt)
 		DrawDebugSphere(GetWorld(), m_Owner->GetActorLocation(), CheckRadius, 10, FColor::Green, false, 0.1f);
 		// attack radius debug
 		DrawDebugSphere(GetWorld(), m_Owner->GetActorLocation(), AttackRadius, 10, FColor::Red, false, 0.1f);
+		// chase radius debug
+		DrawDebugSphere(GetWorld(), m_Owner->GetActorLocation(), m_MaxChaseDistance, 10, FColor::Yellow, false, 0.1f);
 	}
 }
 

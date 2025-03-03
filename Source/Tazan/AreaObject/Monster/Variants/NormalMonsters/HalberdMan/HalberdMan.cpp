@@ -61,8 +61,6 @@ AHalberdMan::AHalberdMan()
 	{
 		GetMesh()->SetAnimInstanceClass(TempABP.Class);
 	}
-
-	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 

@@ -51,8 +51,8 @@ public:
 		static_assert(std::is_base_of_v<UBaseAiState, T>, "T must derive from UAiState");
 
 		T* State = NewObject<T>(Outer, T::StaticClass());
-		State->InitState();
 		State->SetOwner(Owner);
+		State->InitState();
 		State->SetNextState(NextState);
 		State->SetSuccessState(SuccessState);
 		State->SetFailState(FailState);

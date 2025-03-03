@@ -61,7 +61,7 @@ public:
 	//퍼펙트 가드 패널티 애니메이션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Parry")
 	UAnimMontage* ParryPenaltyAnimation;
-	
+
 	UFUNCTION()
 	UBaseSkillRoulette* GetSkillRoulette() const;
 
@@ -86,6 +86,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Parry")
 	int ParryStackMax = 5;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sight")
+	float SightRadius = 1500.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Sight")
+	float LoseSightRadius = 1500.f;
 public:
 	// Core Functions
 	virtual void BeginPlay() override;
@@ -117,6 +121,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	float GetNextSkillRange();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	FVector GetSpawnLocation();
+	
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	float GetSightLength();
+	
 	// State Checks
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsMoving() const;
