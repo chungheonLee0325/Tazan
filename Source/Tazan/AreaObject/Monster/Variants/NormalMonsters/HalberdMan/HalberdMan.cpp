@@ -24,6 +24,9 @@ AHalberdMan::AHalberdMan()
 	// CapsuleComponent Setting
 	GetCapsuleComponent()->SetCapsuleHalfHeight(150.f);
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
+
+	// 최대 걷기 속도
+	GetCharacterMovement()->MaxWalkSpeed = 450.0f;
 	
 	// SkeletalMesh Setting
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempSkeletalMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/_Resource/Halberd/Halberd.Halberd'"));

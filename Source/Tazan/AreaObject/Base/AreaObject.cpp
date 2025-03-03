@@ -159,6 +159,19 @@ void AAreaObject::CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Ta
 float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
                               AActor* DamageCauser)
 {
+	// IFF 처리
+	// ToDo : 변경 예정
+	AAreaObject* damageCauser = Cast<AAreaObject>(DamageCauser); 
+	if (damageCauser)
+	{
+		// 같은 타입의 AreaObject끼리는 데미지 x
+		if (damageCauser->dt_AreaObject->AreaObjectType == this->dt_AreaObject->AreaObjectType)
+		{
+			return 0;
+		}
+	}
+	
+	
 	// ToDo : Can Attack Logic 추가? -> 설인 만들면 추가해야할듯
 	if (IsDie() || HasCondition(EConditionBitsType::Invincible))
 		return 0.0f;
@@ -291,10 +304,15 @@ void AAreaObject::StopMove() const
 	m_MoveUtilComponent->StopMovement();
 }
 
-void AAreaObject::StopAll() const
+void AAreaObject::StopAll()
 {
 	m_MoveUtilComponent->StopMovement();
 	m_RotateUtilComponent->StopRotation();
+	if (m_CurrentSkill != nullptr)
+	{
+		m_CurrentSkill->CancelCast();
+		ClearCurrentSkill();
+	}
 }
 
 void AAreaObject::OnDie()

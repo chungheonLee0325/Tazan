@@ -151,7 +151,7 @@ public:
 	// Move Rotate Interface
 	void StopRotate() const;
 	void StopMove() const;
-	void StopAll() const;
+	void StopAll();
 	
 	// Move 기능 퍼사드 제공
 	void MoveActorTo(const FVector& TargetPosition, float Duration,

@@ -29,6 +29,10 @@ ASwordSkeleton::ASwordSkeleton()
 	// 최대 걷기 속도
 	GetCharacterMovement()->MaxWalkSpeed = 350.0f;
 
+	// 시야 설정
+	SightRadius = 1100.f;
+	LoseSightRadius = 1100.f;
+
 	// SkeletalMesh Setting
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh
 		(TEXT("'/Game/_Resource/SkeletonSword/C_M_SkeletonSword.C_M_SkeletonSword'"));

@@ -76,6 +76,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
 	UBaseSkillRoulette* m_SkillRoulette;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sight")
+	float SightRadius = 1500.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Sight")
+	float LoseSightRadius = 1500.f;
+
 private:
 	UPROPERTY()
 	AActor* m_CurrentTarget;
@@ -86,10 +91,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Parry")
 	int ParryStackMax = 5;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Sight")
-	float SightRadius = 1500.f;
-	UPROPERTY(EditDefaultsOnly, Category = "Sight")
-	float LoseSightRadius = 1500.f;
 public:
 	// Core Functions
 	virtual void BeginPlay() override;
@@ -123,10 +124,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	FVector GetSpawnLocation();
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	float GetSightLength();
-	
+
 	// State Checks
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool IsMoving() const;
