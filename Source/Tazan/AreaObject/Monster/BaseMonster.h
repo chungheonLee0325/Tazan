@@ -67,6 +67,8 @@ public:
 
 protected:
 	// Combat System
+	void HandleStaggerBegin(EStaggerType Type) override;
+	virtual void HandleStaggerEnd() override;
 	UPROPERTY()
 	AAreaObject* m_AggroTarget;
 	UPROPERTY()
@@ -81,15 +83,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sight")
 	float LoseSightRadius = 1500.f;
 
-private:
-	UPROPERTY()
-	AActor* m_CurrentTarget;
+	UPROPERTY(EditDefaultsOnly, Category = "Parry")
+	int ParryStackMax = 5;
 
 	//퍼펙트 가드시 누적될 데미지
 	UPROPERTY(VisibleDefaultsOnly, Category = "Parry")
 	int ParryStack = 0;
-	UPROPERTY(EditDefaultsOnly, Category = "Parry")
-	int ParryStackMax = 5;
+private:
+	UPROPERTY()
+	AActor* m_CurrentTarget;
+
 
 public:
 	// Core Functions

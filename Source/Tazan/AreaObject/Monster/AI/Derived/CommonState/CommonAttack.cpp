@@ -56,5 +56,5 @@ void UCommonAttack::OnSkillCompleted()
 
 void UCommonAttack::OnSkillCanceled()
 {
-	ChangeState(m_FailState);
+	//ChangeState(m_FailState);
 }

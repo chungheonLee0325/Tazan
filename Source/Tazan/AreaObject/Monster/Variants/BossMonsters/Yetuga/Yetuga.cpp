@@ -72,7 +72,21 @@ UBaseSkillRoulette* AYetuga::CreateSkillRoulette()
 
 void AYetuga::ParryStackPenalty()
 {
-	Super::ParryStackPenalty();
+	// LOG_SCREEN("패리 패널티!");
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		if (ParryPenaltyAnimation != nullptr)
+		{
+			animInst->Montage_Play(ParryPenaltyAnimation);
+		}
+		else
+		{
+			LOG_SCREEN_ERROR(this, "패리 패널티 애니 비어있음");
+		}
+	}
+	ParryStack = 0;
+	
 	YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
 }
 

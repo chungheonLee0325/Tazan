@@ -104,6 +104,10 @@ enum class EStaggerType : uint8
 	Strong UMETA(DisplayName = "Strong"),
 	// 넘어짐
 	AirBone UMETA(DisplayName = "AirBone"),
+	// Parry 반동
+	ParryReaction UMETA(DisplayName = "ParryReaction"),
+	// Groggy
+	Groggy UMETA(DisplayName = "Groggy"),
 };
 
 UENUM(BlueprintType)

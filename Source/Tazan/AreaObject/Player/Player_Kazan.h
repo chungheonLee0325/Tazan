@@ -81,6 +81,7 @@ public:
 	void SpecialFUNCTION();
 	bool IsSpecial = false;
 	FTimerHandle SpecialTimerHandle;
+	bool bIsGuard;
 
 	void SetPlayerState(EPlayerState NewState);
 	void SetPlayerNormalState() { SetPlayerState(EPlayerState::NORMAL); }
@@ -122,7 +123,7 @@ public:
 
 	virtual void HandlePerfectDodge() override;
 	virtual void HandleGroggy(float Duration) override;
-	virtual void HandleStaggerBegin(EStaggerType Type, float Duration) override;
+	virtual void HandleStaggerBegin(EStaggerType Type) override;
 	virtual void HandleStaggerEnd() override;
 
 	void Reward(FItemData* ItemData, int ItemValue) const;
@@ -204,7 +205,7 @@ private:
 
 	// 가드 관련 변수들    
 	UPROPERTY(EditDefaultsOnly, Category = "Guard")
-	float MinGuardDuration = 0.2f; // 최소 가드 지속 시간
+	float MinGuardDuration = 0.5f; // 최소 가드 지속 시간
 
 	bool bIsGuardRequested = false; // 가드 해제 요청 상태
 	FTimerHandle GuardMinDurationTimer;

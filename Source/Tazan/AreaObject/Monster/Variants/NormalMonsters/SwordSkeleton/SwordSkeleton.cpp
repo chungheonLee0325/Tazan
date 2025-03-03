@@ -33,6 +33,8 @@ ASwordSkeleton::ASwordSkeleton()
 	SightRadius = 1100.f;
 	LoseSightRadius = 1100.f;
 
+	ParryStackMax = 1;
+
 	// SkeletalMesh Setting
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh
 		(TEXT("'/Game/_Resource/SkeletonSword/C_M_SkeletonSword.C_M_SkeletonSword'"));

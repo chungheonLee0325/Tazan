@@ -49,43 +49,15 @@ void UPoiseComponent::PoiseProcess(const FAttackData& AttackData)
 	{
 		return;
 	}
-
-	float animationDuration = m_Owner->GetStaggerAnimationDuration(staggerType);
 	// 스태거 적용
-	ApplyStagger(staggerType, animationDuration);
+	CurrentStagger = staggerType;
+	m_Owner->HandleStaggerBegin(staggerType);
 }
 
-void UPoiseComponent::ApplyStagger(EStaggerType Type, float AnimationDuration)
-{
-	// 기존 스태거 정리
-	if (CurrentStagger != EStaggerType::None)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(StaggerTimerHandle);
-		OnStaggerEnd.Broadcast();
-	}
-
-	CurrentStagger = Type;
-
-	// 애니메이션 길이로 타이머 설정
-	if (AnimationDuration > 0.0f)
-	{
-		GetWorld()->GetTimerManager().SetTimer(
-			StaggerTimerHandle,
-			this,
-			&UPoiseComponent::ClearStagger,
-			AnimationDuration,
-			false
-		);
-	}
-
-	// 스태거 타입과 필요한 정보만 전달
-	OnStaggerBegin.Broadcast(Type, AnimationDuration);
-}
-
-void UPoiseComponent::ClearStagger()
+void UPoiseComponent::ClearCurrentStagger()
 {
 	CurrentStagger = EStaggerType::None;
-	OnStaggerEnd.Broadcast();
+	//OnStaggerEnd.Broadcast();
 }
 
 int32 UPoiseComponent::GetStaggerPriority(EStaggerType Type)
@@ -95,7 +67,9 @@ int32 UPoiseComponent::GetStaggerPriority(EStaggerType Type)
 		{EStaggerType::Weak, 1},
 		{EStaggerType::Normal, 2},
 		{EStaggerType::Strong, 3},
-		{EStaggerType::AirBone, 4}
+		{EStaggerType::AirBone, 4},
+		{EStaggerType::ParryReaction, 29},
+		{EStaggerType::Groggy, 30},
 	};
 	return PriorityMap.FindRef(Type);
 }
@@ -121,16 +95,4 @@ void UPoiseComponent::AddPoiseModifier(int32 Value, float Duration)
 void UPoiseComponent::SetAnimationPoiseBonus(int32 Bonus)
 {
 	AnimationPoiseBonus = FMath::Max(0, Bonus);
-	// Todo : @@LCH 없어질수도 있을듯.. Animation Montage에서 Release 함수로 직접 제거
-	//TWeakObjectPtr<UPoiseComponent> weakThis = this;
-	//FTimerHandle TimerHandle;
-	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, [weakThis]()
-	//                                       {
-	//	                                       UPoiseComponent* strongThis = weakThis.Get();
-	//	                                       if (strongThis != nullptr)
-	//	                                       {
-	//		                                       strongThis->AnimationPoiseBonus = 0;
-	//	                                       }
-	//                                       }
-	//                                       , Duration, false);
 }

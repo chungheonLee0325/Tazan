@@ -181,9 +181,9 @@ void APlayer_Kazan::HandleGroggy(float Duration)
 	Super::HandleGroggy(Duration);
 }
 
-void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type, float Duration)
+void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type)
 {
-	Super::HandleStaggerBegin(Type, Duration);
+	Super::HandleStaggerBegin(Type);
 	SetPlayerState(EPlayerState::STAGGER);
 }
 
@@ -401,6 +401,11 @@ void APlayer_Kazan::SetComboState(bool bCanCombo, int SkillID)
 
 void APlayer_Kazan::SetPlayerState(EPlayerState NewState)
 {
+	if (CurrentPlayerState == EPlayerState::GUARD )
+	{
+		SetGuardState(false);
+	}
+	
 	CurrentPlayerState = NewState;
 
 	// 상태 변경에 따른 추가 처리
@@ -549,7 +554,7 @@ void APlayer_Kazan::Attack_Strong_Pressed()
 
 void APlayer_Kazan::Attack_Strong_Released()
 {
-	if (bIsCharging)
+	if (bIsCharging && CurrentPlayerState == EPlayerState::ACTION)
 	{
 		bIsCharging = false;
 		ClearCurrentSkill();
@@ -593,11 +598,12 @@ void APlayer_Kazan::Guard_Pressed()
 	TObjectPtr<UBaseSkill> skill = GetSkillByID(guardSkillID);
 	if (CastSkill(skill, this))
 	{
-		KazanAnimInstance->bIsGuard = true;
+		//KazanAnimInstance->bIsGuard = true;
 		SetPlayerState(EPlayerState::ACTION);
 		//skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerGuardState);
 		//skill->OnSkillCancel.BindUObject(this, &APlayer_Kazan::SetPlayerGuardState);
 		bIsGuardRequested = false;
+		bIsGuard = true;
 		GetWorld()->GetTimerManager().SetTimer(
 			GuardMinDurationTimer,
 			this,
@@ -611,15 +617,19 @@ void APlayer_Kazan::Guard_Pressed()
 
 void APlayer_Kazan::Guard_Released()
 {
-	bIsGuardRequested = true;
-
-	// 최소 지속 시간이 지났는지 확인
-	if (!GetWorld()->GetTimerManager().IsTimerActive(GuardMinDurationTimer))
+	if (bIsGuard && (CurrentPlayerState == EPlayerState::ACTION || CurrentPlayerState == EPlayerState::GUARD))
 	{
-		// 플레이어 셋팅
-		SetGuardState(false);
-		SetPlayerState(EPlayerState::NORMAL);
-		KazanAnimInstance->bIsGuard = false;
+		bIsGuardRequested = true;
+		bIsGuard = false;
+
+		// 최소 지속 시간이 지났는지 확인
+		if (!GetWorld()->GetTimerManager().IsTimerActive(GuardMinDurationTimer))
+		{
+			// 플레이어 셋팅
+			//SetGuardState(false);
+			SetPlayerState(EPlayerState::NORMAL);
+			//KazanAnimInstance->bIsGuard = false;
+		}
 	}
 }
 
@@ -629,9 +639,9 @@ void APlayer_Kazan::TryEndGuard()
 	if (bIsGuardRequested)
 	{
 		// 플레이어 셋팅
-		SetGuardState(false);
+		//SetGuardState(false);
 		SetPlayerState(EPlayerState::NORMAL);
-		KazanAnimInstance->bIsGuard = false;
+		//KazanAnimInstance->bIsGuard = false;
 	}
 }
 
@@ -720,6 +730,8 @@ void APlayer_Kazan::SetGuardState(bool bIsGuarding)
 	}
 	else
 	{
+		KazanAnimInstance->bIsGuard = false;
+		
 		// 가드 Condition 제거
 		RemoveCondition(EConditionBitsType::Guard);
 

@@ -204,15 +204,17 @@ public:
 	void StopBGM();
 
 #pragma region DamageSystem
+	FOnMontageEnded StaggerEndDelegate;
+	
+	UFUNCTION()
+	void OnStaggerEnded(UAnimMontage* Montage, bool bInterrupted);
+	
 	// Stagger 처리 핸들
 	UFUNCTION()
-	virtual void HandleStaggerBegin(EStaggerType Type, float Duration);
+	virtual void HandleStaggerBegin(EStaggerType Type);
 	UFUNCTION()
 	virtual void HandleStaggerEnd();
-	// ToDo : 종료 Bind 인자 추가?
-	void PlayStaggerAnimation(EStaggerType Type) const;
-	float GetStaggerAnimationDuration(EStaggerType Type) const;
-
+	
 	// 퍼펙트 가드 처리 핸들
 	virtual void HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data);
 	
@@ -261,4 +263,5 @@ private:
 	ATazanGameMode* m_GameMode = nullptr;
 
 	void RotateToGuardTarget(const FVector& Target);
+	void PlayStaggerAnimation(EStaggerType Type);
 };

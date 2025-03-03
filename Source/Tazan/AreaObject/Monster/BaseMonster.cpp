@@ -53,6 +53,18 @@ UBaseSkillRoulette* ABaseMonster::GetSkillRoulette() const
 	return m_SkillRoulette;
 }
 
+void ABaseMonster::HandleStaggerBegin(EStaggerType Type)
+{
+	m_AiFSM->ChangeState(EAiStateType::DoNothing);
+	Super::HandleStaggerBegin(Type);
+}
+
+void ABaseMonster::HandleStaggerEnd()
+{
+	Super::HandleStaggerEnd();
+	m_AiFSM->ChangeState(EAiStateType::SelectSkill);
+}
+
 UBaseSkillRoulette* ABaseMonster::CreateSkillRoulette()
 {
 	return CreateDefaultSubobject<UBaseSkillRoulette>(TEXT("SkillRouletteComponent"));
@@ -195,6 +207,9 @@ void ABaseMonster::AddParryStack()
 void ABaseMonster::ParryStackPenalty()
 {
 	// LOG_SCREEN("패리 패널티!");
+	HandleStaggerBegin(EStaggerType::ParryReaction);
+	/*
+	// LOG_SCREEN("패리 패널티!");
 	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
 	if (animInst)
 	{
@@ -208,6 +223,7 @@ void ABaseMonster::ParryStackPenalty()
 		}
 	}
 	ParryStack = 0;
+	*/
 }
 
 void ABaseMonster::InitParryStack()
