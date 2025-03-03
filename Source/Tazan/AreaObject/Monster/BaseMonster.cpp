@@ -22,7 +22,7 @@ ABaseMonster::ABaseMonster()
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
+
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// AI Perception 컴포넌트 생성
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
@@ -34,7 +34,7 @@ ABaseMonster::ABaseMonster()
 	SightConfig->PeripheralVisionAngleDegrees = 90.0f;
 	SightConfig->SetMaxAge(0.5f);
 	SightConfig->AutoSuccessRangeFromLastSeenLocation = 0.0f;
-    
+
 	// 팀 설정 - 여기서는 모든 팀을 감지
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
@@ -43,7 +43,7 @@ ABaseMonster::ABaseMonster()
 	// AI Perception 컴포넌트에 시야 설정 추가
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
 	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
-    
+
 	// 감지 이벤트에 함수 바인딩
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseMonster::OnPerceptionUpdated);
 }
@@ -55,14 +55,14 @@ UBaseSkillRoulette* ABaseMonster::GetSkillRoulette() const
 
 void ABaseMonster::HandleStaggerBegin(EStaggerType Type)
 {
-	m_AiFSM->ChangeState(EAiStateType::DoNothing);
+	if (m_AiFSM != nullptr) m_AiFSM->ChangeState(EAiStateType::DoNothing);
 	Super::HandleStaggerBegin(Type);
 }
 
 void ABaseMonster::HandleStaggerEnd()
 {
 	Super::HandleStaggerEnd();
-	m_AiFSM->ChangeState(EAiStateType::SelectSkill);
+	if (m_AiFSM != nullptr) m_AiFSM->ChangeState(EAiStateType::SelectSkill);
 }
 
 UBaseSkillRoulette* ABaseMonster::CreateSkillRoulette()
