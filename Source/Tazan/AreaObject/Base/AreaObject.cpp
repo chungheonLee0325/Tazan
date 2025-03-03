@@ -300,9 +300,14 @@ void AAreaObject::StopAll() const
 void AAreaObject::OnDie()
 {
 	StopAll();
+	
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+	// 몽타주 정지
+	animInstance->StopAllMontages(0.1f);
 	if (UAnimMontage* montage = dt_AreaObject->Die_AnimMontage)
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(montage);
+		// 죽음 몽타주 재생
+		animInstance->Montage_Play(montage);
 	}
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 

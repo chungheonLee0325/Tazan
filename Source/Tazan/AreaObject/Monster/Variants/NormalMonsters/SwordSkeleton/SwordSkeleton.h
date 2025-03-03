@@ -1,22 +1,19 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "testEnemy.generated.h"
-
-
-class AAIController;
+#include "Tazan/AreaObject/Monster/BaseMonster.h"
+#include "SwordSkeleton.generated.h"
 
 UCLASS()
-class TAZAN_API AtestEnemy : public ACharacter
+class TAZAN_API ASwordSkeleton : public ABaseMonster
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AtestEnemy();
+	ASwordSkeleton();
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,6 +25,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UBaseAiFSM* CreateFSM();
 
-	
+	// Weapon Setting
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* WeaponComponent;
 };

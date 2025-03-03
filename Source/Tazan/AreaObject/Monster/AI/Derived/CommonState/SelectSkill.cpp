@@ -31,7 +31,10 @@ void USelectSkill::Enter()
 	//	//LOG_SCREEN("내 뒤");
 	//}
 	int id = m_SkillRoulette->GetRandomSkillID();
-	m_Owner->NextSkill = m_Owner->GetSkillByID(id);
+	if (id != 0)
+	{
+		m_Owner->NextSkill = m_Owner->GetSkillByID(id);
+	}
 }
 
 void USelectSkill::Execute(float DeltaTime)
