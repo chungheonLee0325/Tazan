@@ -96,6 +96,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void OnDie() override;
+	
+	virtual void OnRevival() override;
 
 public:
 	// Movement
@@ -127,6 +129,15 @@ public:
 
 	/** Called for HPRecover input */
 	void HPRecover_Pressed();
+
+	/** Called for Restart input */
+	void Restart_Pressed();
+
+	UFUNCTION(BlueprintCallable, Category = "Checkpoint")
+	void SaveCheckpoint(FVector Location, FRotator Rotation);
+
+	UFUNCTION(BlueprintCallable, Category = "Checkpoint")
+	void RespawnAtCheckpoint();
 	
 	virtual void HandlePerfectDodge() override;
 	virtual void HandleGroggy(float Duration) override;
@@ -243,4 +254,12 @@ private:
 
 	UPROPERTY()
 	int HPRecoverStack = 3;
+
+	// 마지막 체크포인트 위치
+	UPROPERTY(VisibleAnywhere, Category = "Checkpoint")
+	FVector LastCheckpointLocation = FVector::ZeroVector;
+
+	// 마지막 체크포인트 회전
+	UPROPERTY(VisibleAnywhere, Category = "Checkpoint")
+	FRotator LastCheckpointRotation = FRotator::ZeroRotator;
 };

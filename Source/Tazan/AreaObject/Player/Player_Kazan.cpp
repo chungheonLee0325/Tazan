@@ -165,6 +165,9 @@ void APlayer_Kazan::BeginPlay()
 	KazanPlayerController = Cast<AKazanPlayerController>(GetController());
 
 	InitializeStateRestrictions();
+
+	// 게임 시작 시 첫 위치를 체크포인트로 저장
+	SaveCheckpoint(GetActorLocation(), GetActorRotation());
 }
 
 void APlayer_Kazan::OnDie()
@@ -172,9 +175,17 @@ void APlayer_Kazan::OnDie()
 	Super::OnDie();
 	SetPlayerState(EPlayerState::DIE);
 	KazanPlayerController->FailWidget->AddToViewport();
+	KazanPlayerController->GetPlayerStatusWidget()->SetVisibility(ESlateVisibility::Hidden);
 	// ToDo : TimerHandle 정리?
 
 	//GetCharacterMovement()->SetMovementMode(MOVE_None);
+}
+
+void APlayer_Kazan::OnRevival()
+{
+	Super::OnRevival();
+	KazanPlayerController->FailWidget->RemoveFromViewport();
+	KazanPlayerController->GetPlayerStatusWidget()->SetVisibility(ESlateVisibility::Visible);
 }
 
 void APlayer_Kazan::HandleGroggy(float Duration)
@@ -731,6 +742,33 @@ void APlayer_Kazan::HPRecover_Pressed()
 		SetPlayerState(EPlayerState::ACTION);
 		skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
 	}
+}
+
+void APlayer_Kazan::Restart_Pressed()
+{
+	if (!IsDie())
+	{
+		return;
+	}
+	// 
+	RespawnAtCheckpoint();
+}
+
+void APlayer_Kazan::SaveCheckpoint(FVector Location, FRotator Rotation)
+{
+	LastCheckpointLocation = Location;
+	LastCheckpointRotation = Rotation;
+}
+
+void APlayer_Kazan::RespawnAtCheckpoint()
+{
+	OnRevival();
+	// 캐릭터 위치 및 회전 설정
+	SetActorLocation(LastCheckpointLocation);
+	SetActorRotation(LastCheckpointRotation);
+
+	// ToDo : 리스폰 초기화
+	SetPlayerState(EPlayerState::NORMAL);
 }
 
 void APlayer_Kazan::SetHPRecoverMax()

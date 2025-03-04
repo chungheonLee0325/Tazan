@@ -77,6 +77,13 @@ AKazanPlayerController::AKazanPlayerController()
 		HPRecoverAction = tempRecoverHP.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempRestart(
+	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_Restart.IA_Restart'"));
+	if (tempRestart.Succeeded())
+	{
+		RestartAction = tempRestart.Object;
+	}
+
 	Kazan = nullptr;
 
 	// UI 클래스 설정
@@ -186,6 +193,10 @@ void AKazanPlayerController::SetupInputComponent()
 		// HPRecover
 		EnhancedInputComponent->BindAction(HPRecoverAction, ETriggerEvent::Started, this,
 		                                   &AKazanPlayerController::On_RecoverHP_Pressed);
+		
+		// Restart
+		EnhancedInputComponent->BindAction(RestartAction, ETriggerEvent::Started, this,
+										   &AKazanPlayerController::On_Restart_Pressed);
 	}
 	else
 	{
@@ -301,6 +312,11 @@ void AKazanPlayerController::On_SwitchTarget_Triggered(const FInputActionValue& 
 void AKazanPlayerController::On_RecoverHP_Pressed(const FInputActionValue& Value)
 {
 	Kazan->HPRecover_Pressed();
+}
+
+void AKazanPlayerController::On_Restart_Pressed(const FInputActionValue& Value)
+{
+	Kazan->Restart_Pressed();
 }
 
 

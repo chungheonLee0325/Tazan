@@ -107,13 +107,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(Blueprintable)
+	UFUNCTION(BlueprintCallable)
 	virtual void CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Target, FHitResult& HitInfo);
-	UFUNCTION(Blueprintable)
+	UFUNCTION(BlueprintCallable)
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
+	
+	UFUNCTION(BlueprintCallable)
 	virtual void OnDie();
+	UFUNCTION(BlueprintCallable)
 	virtual void OnKill();
+	UFUNCTION(BlueprintCallable)
 	virtual void OnRevival();
 
 	bool IsDie() const { return m_ConditionComponent->IsDead(); }
