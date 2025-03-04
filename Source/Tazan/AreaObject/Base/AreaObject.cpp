@@ -100,10 +100,6 @@ void AAreaObject::BeginPlay()
 		}
 	}
 
-	// 스태거 적용 바인드
-	m_PoiseComponent->OnStaggerBegin.AddDynamic(this, &AAreaObject::HandleStaggerBegin);
-	m_PoiseComponent->OnStaggerEnd.AddDynamic(this, &AAreaObject::HandleStaggerEnd);
-
 	// GameMode Setting
 	m_GameMode = Cast<ATazanGameMode>(GetWorld()->GetAuthGameMode());
 
@@ -159,6 +155,19 @@ void AAreaObject::CalcDamage(FAttackData& AttackData, AActor* Caster, AActor* Ta
 float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
                               AActor* DamageCauser)
 {
+	// IFF 처리
+	// ToDo : 변경 예정
+	AAreaObject* damageCauser = Cast<AAreaObject>(DamageCauser); 
+	if (damageCauser)
+	{
+		// 같은 타입의 AreaObject끼리는 데미지 x
+		if (damageCauser->dt_AreaObject->AreaObjectType == this->dt_AreaObject->AreaObjectType)
+		{
+			return 0;
+		}
+	}
+	
+	
 	// ToDo : Can Attack Logic 추가? -> 설인 만들면 추가해야할듯
 	if (IsDie() || HasCondition(EConditionBitsType::Invincible))
 		return 0.0f;
@@ -291,18 +300,28 @@ void AAreaObject::StopMove() const
 	m_MoveUtilComponent->StopMovement();
 }
 
-void AAreaObject::StopAll() const
+void AAreaObject::StopAll()
 {
 	m_MoveUtilComponent->StopMovement();
 	m_RotateUtilComponent->StopRotation();
+	if (m_CurrentSkill != nullptr)
+	{
+		m_CurrentSkill->CancelCast();
+		ClearCurrentSkill();
+	}
 }
 
 void AAreaObject::OnDie()
 {
 	StopAll();
+	
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+	// 몽타주 정지
+	animInstance->StopAllMontages(0.1f);
 	if (UAnimMontage* montage = dt_AreaObject->Die_AnimMontage)
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(montage);
+		// 죽음 몽타주 재생
+		animInstance->Montage_Play(montage);
 	}
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -478,55 +497,38 @@ void AAreaObject::LookAtLocationDirect(const FVector& TargetLocation) const
 	m_RotateUtilComponent->LookAtLocationDirect(TargetLocation);
 }
 
-void AAreaObject::HandleStaggerBegin(EStaggerType Type, float Duration)
+void AAreaObject::HandleStaggerBegin(EStaggerType Type)
 {
 	if (IsDie())
 		return;
 	// 애니메이션 재생
 	PlayStaggerAnimation(Type);
-
-	// 이동 불가
-	//GetCharacterMovement()->SetMovementMode(MOVE_None);
-	// ToDo : 스킬 사용 불가
 }
 
 void AAreaObject::HandleStaggerEnd()
 {
-	// 이동 불가 해제
-	//GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	// ToDo : 스킬 사용 불가 해제
+	// 포이즈 상태 초기화 - Stagger 우선 순위 계산을 위해 Poise Component가 해당 값 가지고있음 
+	m_PoiseComponent->ClearCurrentStagger();
 }
 
-float AAreaObject::GetStaggerAnimationDuration(EStaggerType Type) const
-{
-	// 실제 애니메이션 데이터에서 길이 조회
-	if (UAnimMontage** montage = dt_AreaObject->Stagger_AnimMontages.Find(Type))
-	{
-		if (*montage) // Valid check for UAnimMontage*
-		{
-			return (*montage)->GetPlayLength();
-		}
-	}
 
-	// 애니메이션이 없거나 유효하지 않을 경우 기본값 반환
-	UE_LOG(LogTemp, Warning, TEXT("GetStaggerAnimationDuration: Montage for %d is null"), (int32)Type);
-	return 0.0f;
-}
-
-void AAreaObject::PlayStaggerAnimation(EStaggerType Type) const
+void AAreaObject::PlayStaggerAnimation(EStaggerType Type)
 {
 	if (UAnimMontage** montage = dt_AreaObject->Stagger_AnimMontages.Find(Type))
 	{
 		if (*montage) // Valid check for UAnimMontage*
 		{
-			GetMesh()->GetAnimInstance()->Montage_Play(*montage);
-			// Todo : 종료 바인드?
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			AnimInstance->Montage_Play(*montage);
+
+			StaggerEndDelegate.BindUObject(this, &AAreaObject::OnStaggerEnded);
+			AnimInstance->Montage_SetEndDelegate(StaggerEndDelegate, *montage);
 		}
 	}
 	else
 	{
 		// 애니메이션이 없거나 유효하지 않을 경우 기본값 반환
-		UE_LOG(LogTemp, Warning, TEXT("GetStaggerAnimationDuration: Montage for %d is null"), (int32)Type);
+		UE_LOG(LogTemp, Warning, TEXT("GetStaggerAnimation: Montage for %d is null"), (int32)Type);
 	}
 }
 
@@ -596,6 +598,14 @@ void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
 	if (GuardSFXID != 0)
 	{
 		PlayGlobalSound(GuardSFXID);
+	}
+}
+
+void AAreaObject::OnStaggerEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!bInterrupted)
+	{
+		HandleStaggerEnd();
 	}
 }
 

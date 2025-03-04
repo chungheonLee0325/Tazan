@@ -9,8 +9,6 @@
 #include "PoiseComponent.generated.h"
 
 class AAreaObject;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStaggerBeginSignature, EStaggerType, StaggerType, float, Duration);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaggerEndSignature);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TAZAN_API UPoiseComponent : public UActorComponent
@@ -39,16 +37,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetAnimationPoiseBonus(int32 Bonus);
 
-	// 스태거 실제 적용
-	UFUNCTION(BlueprintCallable)
-	void ApplyStagger(EStaggerType Type, float AnimationDuration);
-
-	UPROPERTY(BlueprintAssignable)
-	FOnStaggerBeginSignature OnStaggerBegin;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnStaggerEndSignature OnStaggerEnd;
-	
+	// 현재 적용중인 Current Stagger 초기화
+	void ClearCurrentStagger();
 
 protected:
 	// 기본 강인도
@@ -67,7 +57,6 @@ protected:
 	EStaggerType CurrentStagger = EStaggerType::None;
 
 private:
-	void ClearStagger();
 	static int32 GetStaggerPriority(EStaggerType Type);
 
 	UPROPERTY()

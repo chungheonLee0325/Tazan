@@ -78,6 +78,7 @@ enum class EAiStateType : uint8
 	SelectSkill UMETA(DisplayName = "SelectSkill"),
 	Chase UMETA(DisplayName = "Chase"),
 	Return UMETA(DisplayName = "Return"),
+	DoNothing UMETA(DisplayName = "DoNothing"),
 };
 
 // 공격시 Trace System에서 사용 - EnableCollisionNotifyState 참조
@@ -103,6 +104,10 @@ enum class EStaggerType : uint8
 	Strong UMETA(DisplayName = "Strong"),
 	// 넘어짐
 	AirBone UMETA(DisplayName = "AirBone"),
+	// Parry 반동
+	ParryReaction UMETA(DisplayName = "ParryReaction"),
+	// Groggy
+	Groggy UMETA(DisplayName = "Groggy"),
 };
 
 UENUM(BlueprintType)

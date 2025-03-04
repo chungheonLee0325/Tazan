@@ -92,7 +92,7 @@ protected:
 	// Death Setting
 	// 죽음 후 destroy 지연 시간
 	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
-	float DestroyDelayTime = 5.0f;
+	float DestroyDelayTime = 3.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
 	UParticleSystem* DeathEffect;
@@ -151,7 +151,7 @@ public:
 	// Move Rotate Interface
 	void StopRotate() const;
 	void StopMove() const;
-	void StopAll() const;
+	void StopAll();
 	
 	// Move 기능 퍼사드 제공
 	void MoveActorTo(const FVector& TargetPosition, float Duration,
@@ -204,15 +204,17 @@ public:
 	void StopBGM();
 
 #pragma region DamageSystem
+	FOnMontageEnded StaggerEndDelegate;
+	
+	UFUNCTION()
+	void OnStaggerEnded(UAnimMontage* Montage, bool bInterrupted);
+	
 	// Stagger 처리 핸들
 	UFUNCTION()
-	virtual void HandleStaggerBegin(EStaggerType Type, float Duration);
+	virtual void HandleStaggerBegin(EStaggerType Type);
 	UFUNCTION()
 	virtual void HandleStaggerEnd();
-	// ToDo : 종료 Bind 인자 추가?
-	void PlayStaggerAnimation(EStaggerType Type) const;
-	float GetStaggerAnimationDuration(EStaggerType Type) const;
-
+	
 	// 퍼펙트 가드 처리 핸들
 	virtual void HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data);
 	
@@ -261,4 +263,5 @@ private:
 	ATazanGameMode* m_GameMode = nullptr;
 
 	void RotateToGuardTarget(const FVector& Target);
+	void PlayStaggerAnimation(EStaggerType Type);
 };

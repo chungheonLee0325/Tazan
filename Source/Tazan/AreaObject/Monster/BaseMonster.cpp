@@ -4,8 +4,14 @@
 #include "BaseMonster.h"
 
 #include "AI/Base/BaseAiFSM.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Tazan/AreaObject/Player/Player_Kazan.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
-#include "Tazan/AreaObject/Skill/Monster/BossMonsters/SkillRoulette.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Y_SkillRoulette.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 
 
@@ -17,15 +23,51 @@ ABaseMonster::ABaseMonster()
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	SkillRoulette = CreateDefaultSubobject<USkillRoulette>(TEXT("SkillRoulette"));
-	
-	// Death Effect Load
-	//static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(
-	//	TEXT("/Script/Engine.ParticleSystem'/Game/_Resource/FX/Realistic_Starter_VFX_Pack_Vol2/Particles/Destruction/P_Destruction_Electric.P_Destruction_Electric'"));
-	//if (ParticleAsset.Succeeded())
-	//{
-	//	DeathEffect = ParticleAsset.Object;
-	//}
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// AI Perception 컴포넌트 생성
+	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
+
+	// 시야 설정 생성 및 구성
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
+	SightConfig->SightRadius = SightRadius;
+	SightConfig->LoseSightRadius = LoseSightRadius;
+	SightConfig->PeripheralVisionAngleDegrees = 90.0f;
+	SightConfig->SetMaxAge(0.5f);
+	SightConfig->AutoSuccessRangeFromLastSeenLocation = 0.0f;
+
+	// 팀 설정 - 여기서는 모든 팀을 감지
+	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+
+	// AI Perception 컴포넌트에 시야 설정 추가
+	AIPerceptionComponent->ConfigureSense(*SightConfig);
+	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
+
+	// 감지 이벤트에 함수 바인딩
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseMonster::OnPerceptionUpdated);
+}
+
+UBaseSkillRoulette* ABaseMonster::GetSkillRoulette() const
+{
+	return m_SkillRoulette;
+}
+
+void ABaseMonster::HandleStaggerBegin(EStaggerType Type)
+{
+	if (m_AiFSM != nullptr) m_AiFSM->ChangeState(EAiStateType::DoNothing);
+	Super::HandleStaggerBegin(Type);
+}
+
+void ABaseMonster::HandleStaggerEnd()
+{
+	Super::HandleStaggerEnd();
+	if (m_AiFSM != nullptr) m_AiFSM->ChangeState(EAiStateType::SelectSkill);
+}
+
+UBaseSkillRoulette* ABaseMonster::CreateSkillRoulette()
+{
+	return CreateDefaultSubobject<UBaseSkillRoulette>(TEXT("SkillRouletteComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -38,13 +80,14 @@ void ABaseMonster::BeginPlay()
 	if (skillbagID != 0)
 	{
 		dt_SkillBag = gameInstance->GetDataSkillBag(skillbagID);
-		if (SkillRoulette != nullptr)
+		if (m_SkillRoulette != nullptr)
 		{
-			SkillRoulette->InitFromSkillBag(dt_SkillBag);
+			m_SkillRoulette->InitFromSkillBag(dt_SkillBag);
 		}
 		else
 		{
 			LOG_PRINT(TEXT("스킬룰렛 없음"));
+			LOG_SCREEN("SkillRoulette is nullptr. please set in construct");
 		}
 	}
 	else
@@ -53,10 +96,16 @@ void ABaseMonster::BeginPlay()
 	}
 
 	m_SpawnLocation = GetActorLocation();
-	
+
 	if (m_AiFSM != nullptr)
 	{
 		m_AiFSM->InitStatePool();
+		m_AiFSM->CheckIsValidAiStates();
+	}
+	else
+	{
+		LOG_PRINT(TEXT("FSM is nullptr"));
+		LOG_SCREEN("FSM is nullptr. please set in construct");
 	}
 }
 
@@ -115,7 +164,22 @@ FVector ABaseMonster::GetDirToTarget()
 		LOG_PRINT(TEXT("AggroTarget is null."));
 		return FVector::ZeroVector;
 	}
-	return m_AggroTarget->GetActorLocation()-GetActorLocation();
+	return m_AggroTarget->GetActorLocation() - GetActorLocation();
+}
+
+float ABaseMonster::GetNextSkillRange()
+{
+	return NextSkill == nullptr ? 0.f : NextSkill->GetSkillRange();
+}
+
+FVector ABaseMonster::GetSpawnLocation()
+{
+	return m_SpawnLocation;
+}
+
+float ABaseMonster::GetSightLength()
+{
+	return SightRadius;
 }
 
 void ABaseMonster::OnDie()
@@ -123,7 +187,7 @@ void ABaseMonster::OnDie()
 	Super::OnDie();
 
 	// FSM 정지
-	if (m_AiFSM != nullptr)	m_AiFSM->StopFSM();
+	if (m_AiFSM != nullptr) m_AiFSM->StopFSM();
 	// Skill 정지
 	if (nullptr != m_CurrentSkill) m_CurrentSkill->CancelCast();
 	// 움직임 정지
@@ -132,19 +196,19 @@ void ABaseMonster::OnDie()
 
 void ABaseMonster::AddParryStack()
 {
-	if (bIsParrySkill)
+	++ParryStack;
+	// LOG_SCREEN("패리 스택: %d",ParryStack);
+	if (ParryStack == ParryStackMax)
 	{
-		++ParryStack;
-		//LOG_SCREEN("패리 스택: %d",ParryStack);
-		if (ParryStack == ParryStackMax)
-		{
-			ParryStackPenalty();
-		}
+		ParryStackPenalty();
 	}
 }
 
 void ABaseMonster::ParryStackPenalty()
 {
+	// LOG_SCREEN("패리 패널티!");
+	HandleStaggerBegin(EStaggerType::ParryReaction);
+	/*
 	// LOG_SCREEN("패리 패널티!");
 	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
 	if (animInst)
@@ -159,6 +223,7 @@ void ABaseMonster::ParryStackPenalty()
 		}
 	}
 	ParryStack = 0;
+	*/
 }
 
 void ABaseMonster::InitParryStack()
@@ -168,10 +233,37 @@ void ABaseMonster::InitParryStack()
 
 void ABaseMonster::RemoveSkillEntryByID(const int id)
 {
-	SkillRoulette->RemoveSkillEntryByID(id);
+	m_SkillRoulette->RemoveSkillEntryByID(id);
 }
 
 void ABaseMonster::AddSkillEntryByID(const int id)
 {
-	SkillRoulette->AddSkillEntryByID(id);
+	m_SkillRoulette->AddSkillEntryByID(id);
+}
+
+void ABaseMonster::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+{
+	// 감지된 액터가 유효한지 확인
+	if (Actor && Stimulus.WasSuccessfullySensed())
+	{
+		// 플레이어인지 확인 (플레이어 클래스로 캐스팅)
+		APlayer_Kazan* PlayerCharacter = Cast<APlayer_Kazan>(Actor);
+		if (PlayerCharacter)
+		{
+			// 플레이어가 감지되었으므로 현재 타겟으로 설정
+			m_AggroTarget = PlayerCharacter;
+		}
+	}
+	// 감지는 Perception으로, Aggro 해제는 fsm에서
+	/*
+	else if (Actor && !Stimulus.WasSuccessfullySensed())
+	{
+		// 액터를 더 이상 감지하지 못함
+		if (Actor == m_AggroTarget)
+		{
+			// 현재 타겟을 잃었으므로 리셋
+			m_AggroTarget = nullptr;
+		}
+	}
+	*/
 }

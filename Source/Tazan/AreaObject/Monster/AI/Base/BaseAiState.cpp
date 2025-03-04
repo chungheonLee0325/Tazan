@@ -21,9 +21,18 @@ EAiStateType UBaseAiState::AiStateType() const
 	return m_AiStateType;
 }
 
+void UBaseAiState::ChangeState(EAiStateType NewState) const
+{
+	m_AiFSM->ChangeState(NewState);
+}
+
 void UBaseAiState::SetOwner(ABaseMonster* Owner)
 {
 	m_Owner = Owner;
+}
+
+void UBaseAiState::CheckIsValid()
+{
 }
 
 void UBaseAiState::SetNextState(EAiStateType NextState)
@@ -31,23 +40,12 @@ void UBaseAiState::SetNextState(EAiStateType NextState)
 	m_NextState = NextState;
 }
 
-void UBaseAiState::AnimMontagePlay(ABaseMonster* baseMonster, UAnimMontage* montage)
+void UBaseAiState::SetSuccessState(EAiStateType SuccessState)
 {
-	UAnimInstance* animInst = baseMonster->GetMesh()->GetAnimInstance();
-
-	if (animInst && montage)
-	{
-		// 몽타주 재생
-		animInst->Montage_Play(montage);
-			
-		// 몽타주 종료 delegate 바인딩
-		FOnMontageEnded montageEndDelegate;
-		montageEndDelegate.BindUObject(this, &UBaseAiState::AnimMontageEnd);
-		animInst->Montage_SetEndDelegate(montageEndDelegate, montage);
-	}
+	m_SuccessState = SuccessState;
 }
 
-void UBaseAiState::AnimMontageEnd(UAnimMontage* Montage, bool bInterrupted)
+void UBaseAiState::SetFailState(EAiStateType FailState)
 {
-	m_AiFSM->ChangeState(m_NextState);
+	m_FailState = FailState;
 }

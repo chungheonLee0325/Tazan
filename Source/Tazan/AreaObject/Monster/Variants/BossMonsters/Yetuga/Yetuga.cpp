@@ -20,6 +20,7 @@ AYetuga::AYetuga()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	m_AiFSM = AYetuga::CreateFSM();
+	m_SkillRoulette = AYetuga::CreateSkillRoulette();
 	
 	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
 
@@ -65,9 +66,28 @@ UBaseAiFSM* AYetuga::CreateFSM()
 	return CreateDefaultSubobject<UYetugaFSM>(TEXT("FSM"));
 }
 
+UBaseSkillRoulette* AYetuga::CreateSkillRoulette()
+{
+	return CreateDefaultSubobject<UY_SkillRoulette>(TEXT("SkillRouletteComponent"));
+}
+
 void AYetuga::ParryStackPenalty()
 {
-	Super::ParryStackPenalty();
+	// LOG_SCREEN("패리 패널티!");
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst)
+	{
+		if (ParryPenaltyAnimation != nullptr)
+		{
+			animInst->Montage_Play(ParryPenaltyAnimation);
+		}
+		else
+		{
+			LOG_SCREEN_ERROR(this, "패리 패널티 애니 비어있음");
+		}
+	}
+	ParryStack = 0;
+	
 	YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
 }
 

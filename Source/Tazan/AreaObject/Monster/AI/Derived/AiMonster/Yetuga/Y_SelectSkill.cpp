@@ -6,7 +6,7 @@
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
-#include "Tazan/AreaObject/Skill/Monster/BossMonsters/SkillRoulette.h"
+#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Y_SkillRoulette.h"
 
 void UY_SelectSkill::InitState()
 {

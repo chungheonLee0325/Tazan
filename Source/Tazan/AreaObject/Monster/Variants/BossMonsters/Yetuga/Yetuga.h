@@ -54,6 +54,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual UBaseAiFSM* CreateFSM() override;
 
+	virtual UBaseSkillRoulette* CreateSkillRoulette() override;
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
