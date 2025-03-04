@@ -39,9 +39,9 @@ public:
 	virtual void OnCastEnd() override;
 	virtual void CancelCast() override;
 	virtual void OnCastTick(float DeltaTime) override;
-	void SetCasterMesh(int AttackDataIndex, UAnimNotifyState* NotifyState);
-	void ProcessHitDetection(UAnimNotifyState* NotifyState);
-	void ResetCollisionData(UAnimNotifyState* NotifyState);
+	void SetCasterMesh(int AttackDataIndex);
+	void ProcessHitDetection(int AttackDataIndex);
+	void ResetCollisionData(int AttackDataIndex);
 	bool PerformCollisionCheck(
 		EHitDetectionType DetectionType,
 		const FVector& StartLocation,
@@ -73,10 +73,11 @@ protected:
 	bool bIsHitOnce = false;
 
 private:
-	void DrawDebugHitDetection(UAnimNotifyState* NotifyState, const FVector& Start, const FVector& End,
+	void DrawDebugHitDetection(int AttackDataIndex, const FVector& Start, const FVector& End,
 	                           const TArray<FHitResult>& HitResults,
 	                           const FRotator& SocketRotation);
 
 	UPROPERTY()
-	TMap<UAnimNotifyState*, FAttackCollision> NotifyStateMap;
+	// ToDo : UAnimNotifyState 대신 int(AttackIndex)를 써도 될듯함
+	TMap<int, FAttackCollision> NotifyStateMap;
 };
