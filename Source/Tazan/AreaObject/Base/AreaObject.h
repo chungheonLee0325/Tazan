@@ -122,7 +122,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	float IncreaseHP(float Delta) const;
 	UFUNCTION(BlueprintCallable, Category = "HP")
-	float DecreaseHP(float Delta) const;
+	virtual float DecreaseHP(float Delta);
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	void SetHPByRate(float Rate) const;
 	UFUNCTION(BlueprintCallable, Category = "HP")
@@ -134,7 +134,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
 	float IncreaseStamina(float Delta) const;
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
-	float DecreaseStamina(float Delta, bool bIsDamaged = true) const;
+	virtual float DecreaseStamina(float Delta, bool bIsDamaged = true);
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
 	float GetStamina() const;
 	UFUNCTION(BlueprintCallable, Category = "Stamina")

@@ -537,7 +537,7 @@ float AAreaObject::IncreaseHP(float Delta) const
 	return m_HealthComponent->IncreaseHP(Delta);
 }
 
-float AAreaObject::DecreaseHP(float Delta) const
+float AAreaObject::DecreaseHP(float Delta)
 {
 	return m_HealthComponent->DecreaseHP(Delta);
 }
@@ -567,7 +567,7 @@ float AAreaObject::IncreaseStamina(float Delta) const
 	return m_StaminaComponent->IncreaseStamina(Delta);
 }
 
-float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged) const
+float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged)
 {
 	// ToDo : 탈진상태 추가 및 브루탈 어택 변수 셋팅, 탈진 델리게이트 호출 - bIsDamaged == true일때만
 	if (IsGroggy)

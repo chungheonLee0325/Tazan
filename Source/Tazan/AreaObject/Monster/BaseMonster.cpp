@@ -49,14 +49,15 @@ ABaseMonster::ABaseMonster()
 
 	// 감지 이벤트에 함수 바인딩
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseMonster::OnPerceptionUpdated);
-	
+
 	// HP UI
 	HPWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPUI"));
 	HPWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	HPWidgetComponent->SetupAttachment(RootComponent);
 	HPWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, HeightHPUI));
-	
-	ConstructorHelpers::FClassFinder<UPlayerStatusWidget> monsterHPWidget(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_BasicMonsterStatusWidget.WB_BasicMonsterStatusWidget_C'"));
+
+	ConstructorHelpers::FClassFinder<UPlayerStatusWidget> monsterHPWidget(TEXT(
+		"/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_BasicMonsterStatusWidget.WB_BasicMonsterStatusWidget_C'"));
 	if (monsterHPWidget.Succeeded())
 	{
 		HPWidgetComponent->SetWidgetClass(monsterHPWidget.Class);
@@ -66,6 +67,44 @@ ABaseMonster::ABaseMonster()
 UBaseSkillRoulette* ABaseMonster::GetSkillRoulette() const
 {
 	return m_SkillRoulette;
+}
+
+float ABaseMonster::DecreaseHP(float Delta)
+{
+	SetHPWidgetVisibilityByDuration(8.f);
+
+	return Super::DecreaseHP(Delta);
+}
+
+float ABaseMonster::DecreaseStamina(float Delta, bool bIsDamaged)
+{
+	if (bIsDamaged)
+	{
+		SetHPWidgetVisibilityByDuration(8.f);
+	}
+	return Super::DecreaseStamina(Delta, bIsDamaged);
+}
+
+void ABaseMonster::SetHPWidgetVisibility(bool IsVisible)
+{
+	if (dt_AreaObject->EnemyType != EEnemyType::Boss)
+	{
+		HPWidgetComponent->SetVisibility(IsVisible);
+	}
+}
+
+void ABaseMonster::SetHPWidgetVisibilityByDuration(float Duration)
+{
+	SetHPWidgetVisibility(true);
+	TWeakObjectPtr<ABaseMonster> weakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(HPWidgetVisibleTimer, [weakThis]()
+	{
+		ABaseMonster* strongThis = weakThis.Get();
+		if (strongThis != nullptr)
+		{
+			strongThis->SetHPWidgetVisibility(false);
+		}
+	}, Duration, false);
 }
 
 void ABaseMonster::HandleStaggerBegin(EStaggerType Type)
@@ -90,10 +129,13 @@ void ABaseMonster::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// HP UI 위치 Set
-	HeightHPUI = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 10;
-	HPWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, HeightHPUI));
-	//HPWidgetComponent->SetVisibility(true);
+	// HP UI 위치, Visible Setting
+	if (dt_AreaObject->EnemyType != EEnemyType::Boss)
+	{
+		HeightHPUI = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 10;
+		HPWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, HeightHPUI));
+		HPWidgetComponent->SetVisibility(false);
+	}
 
 	UTazanGameInstance* gameInstance = Cast<UTazanGameInstance>(GetGameInstance());
 	int skillbagID = dt_AreaObject->SkillBagID;
@@ -219,7 +261,7 @@ void ABaseMonster::AddParryStack()
 	if (bIsParrySkill)
 	{
 		++ParryStack;
-		LOG_SCREEN("패리 스택: %d",ParryStack);
+		LOG_SCREEN("패리 스택: %d", ParryStack);
 		if (ParryStack == ParryStackMax)
 		{
 			ParryStackPenalty();
@@ -247,7 +289,7 @@ void ABaseMonster::InitializeHUD()
 			// 초기값 설정
 			StatusWidget->UpdateHealth(GetHP(), 0.0f, m_HealthComponent->GetMaxHP());
 		}
-		
+
 		// Stamina 변경 이벤트 바인딩
 		if (m_StaminaComponent)
 		{
