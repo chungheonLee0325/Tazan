@@ -6,6 +6,7 @@
 
 class UProgressBar;
 class UTextBlock;
+class UImage;
 
 UCLASS()
 class TAZAN_API UPlayerStatusWidget : public UUserWidget
@@ -20,6 +21,10 @@ public:
     void UpdateHealth(float CurrentHP, float Delta, float MaxHP);
     UFUNCTION()
     void UpdateStamina(float CurrentStamina, float Delta, float MaxStamina);
+    UFUNCTION()
+    void UpdateHPPotionStack(int stack);
+    UFUNCTION()
+    void DisableHPPotionBG(bool IsLoop);
 
 protected:
     UPROPERTY(meta = (BindWidget))
@@ -33,4 +38,13 @@ protected:
     
     UPROPERTY(meta = (BindWidget))
     UTextBlock* StaminaText;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* HPPotionStack;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* HPPotionBG;
+
+    UPROPERTY(Transient, meta = (BindWidgetAnim))
+    UWidgetAnimation* DisableAnimation;
 }; 

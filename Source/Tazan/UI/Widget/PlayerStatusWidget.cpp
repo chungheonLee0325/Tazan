@@ -1,4 +1,6 @@
 #include "PlayerStatusWidget.h"
+
+#include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
@@ -31,4 +33,24 @@ void UPlayerStatusWidget::UpdateStamina(float CurrentStamina, float Delta, float
     {
         StaminaText->SetText(FText::FromString(FString::Printf(TEXT("%.0f/%.0f"), CurrentStamina, MaxStamina)));
     }
-} 
+}
+
+void UPlayerStatusWidget::UpdateHPPotionStack(int stack)
+{
+    if (HPPotionStack)
+    {
+        HPPotionStack->SetText(FText::FromString(FString::Printf(TEXT("%d"), stack)));
+    }
+}
+
+void UPlayerStatusWidget::DisableHPPotionBG(bool IsLoop)
+{
+    if (IsLoop)
+    {
+        HPPotionBG->SetColorAndOpacity(FLinearColor(1,1,1,1));
+    }
+    else
+    {
+        PlayAnimation(DisableAnimation);
+    }
+}

@@ -157,7 +157,7 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 {
 	// IFF 처리
 	// ToDo : 변경 예정
-	AAreaObject* damageCauser = Cast<AAreaObject>(DamageCauser); 
+	AAreaObject* damageCauser = Cast<AAreaObject>(DamageCauser);
 	if (damageCauser)
 	{
 		// 같은 타입의 AreaObject끼리는 데미지 x
@@ -166,8 +166,8 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 			return 0;
 		}
 	}
-	
-	
+
+
 	// ToDo : Can Attack Logic 추가? -> 설인 만들면 추가해야할듯
 	if (IsDie() || HasCondition(EConditionBitsType::Invincible))
 		return 0.0f;
@@ -314,7 +314,7 @@ void AAreaObject::StopAll()
 void AAreaObject::OnDie()
 {
 	StopAll();
-	
+
 	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
 	// 몽타주 정지
 	animInstance->StopAllMontages(0.1f);
@@ -537,7 +537,7 @@ float AAreaObject::IncreaseHP(float Delta) const
 	return m_HealthComponent->IncreaseHP(Delta);
 }
 
-float AAreaObject::DecreaseHP(float Delta) const
+float AAreaObject::DecreaseHP(float Delta)
 {
 	return m_HealthComponent->DecreaseHP(Delta);
 }
@@ -552,12 +552,22 @@ float AAreaObject::GetHP() const
 	return m_HealthComponent->GetHP();
 }
 
+float AAreaObject::GetMaxHP() const
+{
+	return m_HealthComponent->GetMaxHP();
+}
+
+bool AAreaObject::IsMaxHP() const
+{
+	return FMath::IsNearlyEqual(GetHP(), GetMaxHP());
+}
+
 float AAreaObject::IncreaseStamina(float Delta) const
 {
 	return m_StaminaComponent->IncreaseStamina(Delta);
 }
 
-float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged) const
+float AAreaObject::DecreaseStamina(float Delta, bool bIsDamaged)
 {
 	// ToDo : 탈진상태 추가 및 브루탈 어택 변수 셋팅, 탈진 델리게이트 호출 - bIsDamaged == true일때만
 	if (IsGroggy)
@@ -621,7 +631,7 @@ void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Da
 	if (AAreaObject* attacker = Cast<AAreaObject>(DamageCauser))
 	{
 		attacker->DecreaseStamina(PERFECT_GUARD_STAMINA_REFLECTION_DAMAGE);
-		
+
 		ABaseMonster* monster = Cast<ABaseMonster>(DamageCauser);
 		if (monster != nullptr)
 		{

@@ -83,6 +83,11 @@ public:
 	UPROPERTY()
 	FTimerHandle OnDieHandle;
 
+	virtual float DecreaseHP(float Delta) override;
+	virtual float DecreaseStamina(float Delta, bool bIsDamaged = true) override;
+	void SetHPWidgetVisibility(bool IsVisible);
+	void SetHPWidgetVisibilityByDuration(float Duration);
+	FTimerHandle HPWidgetVisibleTimer;
 protected:
 	// Combat System
 	void HandleStaggerBegin(EStaggerType Type) override;

@@ -13,6 +13,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
+#include "Tazan/AreaObject/Monster/BaseMonster.h"
+#include "Tazan/UI/Widget/PlayerStatusWidget.h"
 #include "Tazan/Utilities/LogMacro.h"
 
 
@@ -80,7 +82,8 @@ void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		// ToDo : UI 완성시 삭제
 		FVector location = CurrentTarget->GetActorLocation();
 		location.Z += CurrentTarget->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 1.2f;
-		location += CurrentTarget->GetActorForwardVector()*CurrentTarget->GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.7f;
+		location += CurrentTarget->GetActorForwardVector() * CurrentTarget->GetCapsuleComponent()->
+		                                                                    GetScaledCapsuleRadius() * 0.7f;
 		DrawDebugSphere(GetWorld(), location, 10, 40, FColor::Yellow, false, 0.01f);
 	}
 }
@@ -93,6 +96,13 @@ bool ULockOnComponent::ToggleLockOn()
 		AAreaObject* NewTarget = FindBestTarget();
 		if (NewTarget)
 		{
+			// ToDo : 이동 예정? 별도 메서드로 분리할듯
+			ABaseMonster* monster = Cast<ABaseMonster>(NewTarget);
+			if (monster != nullptr)
+			{
+				monster->SetHPWidgetVisibility(true);
+			}
+
 			CurrentTarget = NewTarget;
 			bIsLockOnMode = true;
 			//OnLockOnStateChanged.Broadcast(true, CurrentTarget);
@@ -117,6 +127,12 @@ bool ULockOnComponent::ToggleLockOn()
 	else
 	{
 		// 락온 해제
+		ABaseMonster* monster = Cast<ABaseMonster>(CurrentTarget);
+		if (monster != nullptr)
+		{
+			monster->SetHPWidgetVisibility(false);
+		}
+
 		bIsLockOnMode = false;
 		CurrentTarget = nullptr;
 		//OnLockOnStateChanged.Broadcast(false, nullptr);
@@ -386,6 +402,17 @@ void ULockOnComponent::SwitchTarget(const FVector2D& Direction)
 
 	if (BestNewTarget)
 	{
+		ABaseMonster* prevTarget = Cast<ABaseMonster>(CurrentTarget);
+		if (prevTarget != nullptr)
+		{
+			prevTarget->SetHPWidgetVisibility(false);
+		}
+		ABaseMonster* newTarget = Cast<ABaseMonster>(BestNewTarget);
+		if (newTarget != nullptr)
+		{
+			newTarget->SetHPWidgetVisibility(true);
+		}
+
 		CurrentTarget = BestNewTarget;
 		//OnTargetSwitched.Broadcast(CurrentTarget);
 		UpdateLockOnWidget();

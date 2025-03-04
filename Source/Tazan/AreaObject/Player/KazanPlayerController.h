@@ -34,6 +34,8 @@ public:
 
 	UPROPERTY()
 	class UUserWidget* FailWidget;
+
+	class UPlayerStatusWidget* GetPlayerStatusWidget() const;
 private:
 	// UI 초기화 및 바인딩
 	void InitializeHUD();
@@ -60,6 +62,8 @@ private:
 	void On_LockOn_Pressed();
 	/** Called for SwitchTarget input */
 	void On_SwitchTarget_Triggered(const FInputActionValue& Value);
+	/** Called for HPRecover input */
+	void On_RecoverHP_Pressed(const FInputActionValue& Value);
 
 	// Owner
 	UPROPERTY(VisibleAnywhere)
@@ -114,4 +118,8 @@ private:
 	/** SwitchTarget Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SwitchTargetAction;
+
+	/** RecoverHP Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* HPRecoverAction;
 };

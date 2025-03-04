@@ -45,7 +45,7 @@ public:
 
 	// 최대체력
 	UFUNCTION()
-	float GetMaxHP() const { return m_HPMax; };
+	float GetMaxHP() const;
 
 	// 체력 변경 델리게이트
 	UPROPERTY(BlueprintAssignable, Category = "Events")

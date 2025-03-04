@@ -85,3 +85,8 @@ float UHealthComponent::GetHP() const
 {
 	return m_HP;
 }
+
+float UHealthComponent::GetMaxHP() const
+{
+	return m_HPMax;
+}
