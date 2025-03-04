@@ -37,26 +37,26 @@ void UYetugaFSM::InitStatePool()
 	if (!yetuga) return;
 
 	// Wait 
-	auto StandOff = CreateState<UY_StandOff>(this, m_Owner, EAiStateType::Wait);
+	auto StandOff = CreateState<UY_StandOff>(this, m_Owner);
 	AddState(EAiStateType::Wait, StandOff);
 	// StandOff->SetNextState(EAiStateType::SelectSkill);
 	
 	// Idle
-	auto Groggy = CreateState<UY_Groggy>(this, m_Owner, EAiStateType::Idle);
+	auto Groggy = CreateState<UY_Groggy>(this, m_Owner);
 	AddState(EAiStateType::Idle, Groggy);
 
 	// Attack
-	auto Attack = CreateState<UY_Attack>(this, m_Owner, EAiStateType::Attack);
+	auto Attack = CreateState<UY_Attack>(this, m_Owner);
 	AddState(EAiStateType::Attack, Attack);
 	Attack->SetNextState(EAiStateType::SelectSkill);
 
 	//SelectSkill
-	auto SelectSkill = CreateState<UY_SelectSkill>(this, m_Owner, EAiStateType::SelectSkill);
+	auto SelectSkill = CreateState<UY_SelectSkill>(this, m_Owner);
 	SelectSkill->SetSkillRoulette(yetuga->GetSkillRoulette());
 	AddState(EAiStateType::SelectSkill, SelectSkill);
 
 	// Chase
-	auto Chase = CreateState<UY_Chase>(this, m_Owner, EAiStateType::Chase);
+	auto Chase = CreateState<UY_Chase>(this, m_Owner);
 	AddState(EAiStateType::Chase, Chase);
 	Chase->SetNextState(EAiStateType::Attack);
 }

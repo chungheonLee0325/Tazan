@@ -19,6 +19,7 @@ public:
 
 	virtual void OnCastStart(class AAreaObject* Caster, AAreaObject* Target) override;
 	virtual void CancelCast() override;
+	virtual void OnCastTick(float DeltaTime) override;
 	
 	UFUNCTION()
 	void Stun();
