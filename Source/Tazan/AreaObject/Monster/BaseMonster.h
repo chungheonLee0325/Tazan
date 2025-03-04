@@ -83,12 +83,17 @@ public:
 	FSkillBagData* dt_SkillBag;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Skill")
 	USkillRoulette* SkillRoulette = nullptr;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category="Skill")
 	UBaseSkill* NextSkill;
 
-	//퍼펙트 가드 패널티 애니메이션
+	/// Perfect Gaurd 애니메이션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Parry")
 	UAnimMontage* ParryPenaltyAnimation;
+
+	// Perfect Gaurd
+	bool bIsParrySkill = false;
+	UPROPERTY(EditDefaultsOnly, Category = "Parry")
+	int ParryStackMax = 5;
 	
 	UPROPERTY()
 	FTimerHandle OnDieHandle;
@@ -106,11 +111,9 @@ private:
 	UPROPERTY()
 	AActor* m_CurrentTarget;
 
-	//퍼펙트 가드시 누적될 데미지
+	// Perfect Gaurd
 	UPROPERTY(VisibleDefaultsOnly, Category = "Parry")
 	int ParryStack = 0;
-	UPROPERTY(EditDefaultsOnly, Category = "Parry")
-	int ParryStackMax = 5;
 
 public:
 	// Core Functions

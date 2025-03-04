@@ -4,9 +4,6 @@
 #include "BaseMonster.h"
 
 #include "AI/Base/BaseAiFSM.h"
-#include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/AreaObject/Skill/Monster/BossMonsters/SkillRoulette.h"
 #include "Tazan/Contents/TazanGameInstance.h"
@@ -135,11 +132,14 @@ void ABaseMonster::OnDie()
 
 void ABaseMonster::AddParryStack()
 {
-	++ParryStack;
-	// LOG_SCREEN("패리 스택: %d",ParryStack);
-	if (ParryStack == ParryStackMax)
+	if (bIsParrySkill)
 	{
-		ParryStackPenalty();
+		++ParryStack;
+		//LOG_SCREEN("패리 스택: %d",ParryStack);
+		if (ParryStack == ParryStackMax)
+		{
+			ParryStackPenalty();
+		}
 	}
 }
 
