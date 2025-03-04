@@ -175,6 +175,16 @@ enum class EMovementInterpolationType : uint8
 	EaseOutElastic UMETA(DisplayName = "Ease Out Elastic"),
 };
 
+UENUM(BlueprintType)
+enum class EReactionDirection : uint8
+{
+	None UMETA(DisplayName = "None"), // 블루프린트에서 표시될 이름
+	UP UMETA(DisplayName = "UP"),
+	DOWN UMETA(DisplayName = "DOWN"),
+	LEFT UMETA(DisplayName = "LEFT"),
+	RIGHT UMETA(DisplayName = "RIGHT")
+};
+
 // Struct
 // AreaObject 데이터 테이블용 구조체
 USTRUCT(BlueprintType)
