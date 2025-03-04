@@ -87,6 +87,9 @@ public:
 	void SetPlayerNormalState() { SetPlayerState(EPlayerState::NORMAL); }
 	void SetComboState(bool bCanCombo, int SkillID);
 
+	void SetHPRecoverMax() { HPRecoverStack = 3; }
+	void DecreaseHPRecoverStack() { HPRecoverStack--; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -120,6 +123,9 @@ public:
 	/** Called for run input */
 	void On_Run_Pressed();
 	void On_Run_Released();
+
+	/** Called for run input */
+	void HPRecover_Pressed();
 
 	virtual void HandlePerfectDodge() override;
 	virtual void HandleGroggy(float Duration) override;
@@ -233,4 +239,7 @@ private:
 
 	UPROPERTY()
 	ULockOnComponent* LockOnComponent;
+
+	UPROPERTY()
+	int HPRecoverStack = 3;
 };

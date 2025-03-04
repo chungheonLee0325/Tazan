@@ -71,7 +71,7 @@ protected:
 	// Perfect dodge damage multiplier
 	const float PERFECT_DODGE_DAMAGE_MULTIPLIER = 1.5f;
 	bool bPerfectDodgeBuffActive = false;
-	
+
 
 	// VFX references
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|VFX")
@@ -127,6 +127,8 @@ public:
 	void SetHPByRate(float Rate) const;
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	float GetHP() const;
+	float GetMaxHP() const;
+	bool IsMaxHP() const;
 
 	// Stamina 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category = "Stamina")
@@ -152,16 +154,16 @@ public:
 	void StopRotate() const;
 	void StopMove() const;
 	void StopAll();
-	
+
 	// Move 기능 퍼사드 제공
 	void MoveActorTo(const FVector& TargetPosition, float Duration,
-					 EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
-					 bool bStickToGround = false);
+	                 EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
+	                 bool bStickToGround = false);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
-							  EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
-							  bool bStickToGround = false);
+	                          EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
+	                          bool bStickToGround = false);
 
 	// Rotate 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
@@ -205,19 +207,19 @@ public:
 
 #pragma region DamageSystem
 	FOnMontageEnded StaggerEndDelegate;
-	
+
 	UFUNCTION()
 	void OnStaggerEnded(UAnimMontage* Montage, bool bInterrupted);
-	
+
 	// Stagger 처리 핸들
 	UFUNCTION()
 	virtual void HandleStaggerBegin(EStaggerType Type);
 	UFUNCTION()
 	virtual void HandleStaggerEnd();
-	
+
 	// 퍼펙트 가드 처리 핸들
 	virtual void HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data);
-	
+
 	// 가드 처리 핸들
 	virtual void HandleGuard(AActor* DamageCauser, const FAttackData& Data);
 	// 퍼펙트 회피 처리 핸들
@@ -241,13 +243,14 @@ public:
 
 	// 넉백 관련
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void HandleKnockBack(const FVector& TargetPos, const FAttackData& AttackData, float KnockBackForceMultiplier = 1.0f);
+	void HandleKnockBack(const FVector& TargetPos, const FAttackData& AttackData,
+	                     float KnockBackForceMultiplier = 1.0f);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyKnockBack(const FVector& KnockBackForce);
 	float KnockBackDuration = 0.1f;
 	// 넉백 거리 배율
 	float m_KnockBackForceMultiplier = 1.0f;
-	
+
 #pragma endregion DamageSystem
 	// 가드 상태 변경 시 호출
 	virtual void SetGuardState(bool bIsGuarding);

@@ -188,8 +188,6 @@ void ABaseMonster::OnDie()
 
 	// FSM 정지
 	if (m_AiFSM != nullptr) m_AiFSM->StopFSM();
-	// Skill 정지
-	if (nullptr != m_CurrentSkill) m_CurrentSkill->CancelCast();
 	// 움직임 정지
 	StopAll();
 }

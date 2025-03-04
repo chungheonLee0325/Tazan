@@ -70,6 +70,13 @@ AKazanPlayerController::AKazanPlayerController()
 		SwitchTargetAction = tempSwitchTargetAction.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempRecoverHP(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanHpRecover.IA_KazanHpRecover'"));
+	if (tempRecoverHP.Succeeded())
+	{
+		HPRecoverAction = tempRecoverHP.Object;
+	}
+
 	Kazan = nullptr;
 
 	// UI 클래스 설정
@@ -80,8 +87,9 @@ AKazanPlayerController::AKazanPlayerController()
 	{
 		StatusWidgetClass = WidgetClassFinder.Class;
 	}
-	
-	ConstructorHelpers::FClassFinder<UUserWidget> missionFailWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_KazanHasFallen.WB_KazanHasFallen_C'"));
+
+	ConstructorHelpers::FClassFinder<UUserWidget> missionFailWidget(
+		TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_KazanHasFallen.WB_KazanHasFallen_C'"));
 	if (missionFailWidget.Succeeded())
 	{
 		MissionFailClass = missionFailWidget.Class;
@@ -169,6 +177,10 @@ void AKazanPlayerController::SetupInputComponent()
 		                                   &AKazanPlayerController::On_LockOn_Pressed);
 		EnhancedInputComponent->BindAction(SwitchTargetAction, ETriggerEvent::Triggered, this,
 		                                   &AKazanPlayerController::On_SwitchTarget_Triggered);
+
+		// HPRecover
+		EnhancedInputComponent->BindAction(HPRecoverAction, ETriggerEvent::Started, this,
+		                                   &AKazanPlayerController::On_RecoverHP_Pressed);
 	}
 	else
 	{
@@ -234,28 +246,6 @@ void AKazanPlayerController::On_Run_Released(const FInputActionValue& InputActio
 {
 }
 
-void AKazanPlayerController::AddCurrency(ECurrencyType CurrencyType, int CurrencyValue)
-{
-	if (CurrencyValue < 0) return;
-	CurrencyValues[CurrencyType] += CurrencyValue;
-	this->OnCurrencyChange.Broadcast(CurrencyType, CurrencyValues[CurrencyType], CurrencyValue);
-}
-
-void AKazanPlayerController::RemoveCurrency(ECurrencyType CurrencyType, int CurrencyValue)
-{
-	if (CurrencyValue < 0) return;
-	// 스태미나 감소
-	float oldCurrency = CurrencyValues[CurrencyType];
-	CurrencyValues[CurrencyType] = FMath::Max(CurrencyValues[CurrencyType] - CurrencyValue, 0);
-	this->OnCurrencyChange.Broadcast(CurrencyType, CurrencyValues[CurrencyType],
-	                                 -(oldCurrency - CurrencyValues[CurrencyType]));
-}
-
-int AKazanPlayerController::GetCurrencyValue(ECurrencyType CurrencyType)
-{
-	return CurrencyValues[CurrencyType];
-}
-
 void AKazanPlayerController::On_LockOn_Pressed()
 {
 	if (!Kazan) return;
@@ -301,4 +291,32 @@ void AKazanPlayerController::On_SwitchTarget_Triggered(const FInputActionValue& 
 			LockOnComp->SwitchTarget(SwitchDirection);
 		}
 	}
+}
+
+void AKazanPlayerController::On_RecoverHP_Pressed(const FInputActionValue& Value)
+{
+	Kazan->HPRecover_Pressed();
+}
+
+
+void AKazanPlayerController::AddCurrency(ECurrencyType CurrencyType, int CurrencyValue)
+{
+	if (CurrencyValue < 0) return;
+	CurrencyValues[CurrencyType] += CurrencyValue;
+	this->OnCurrencyChange.Broadcast(CurrencyType, CurrencyValues[CurrencyType], CurrencyValue);
+}
+
+void AKazanPlayerController::RemoveCurrency(ECurrencyType CurrencyType, int CurrencyValue)
+{
+	if (CurrencyValue < 0) return;
+	// 스태미나 감소
+	float oldCurrency = CurrencyValues[CurrencyType];
+	CurrencyValues[CurrencyType] = FMath::Max(CurrencyValues[CurrencyType] - CurrencyValue, 0);
+	this->OnCurrencyChange.Broadcast(CurrencyType, CurrencyValues[CurrencyType],
+	                                 -(oldCurrency - CurrencyValues[CurrencyType]));
+}
+
+int AKazanPlayerController::GetCurrencyValue(ECurrencyType CurrencyType)
+{
+	return CurrencyValues[CurrencyType];
 }

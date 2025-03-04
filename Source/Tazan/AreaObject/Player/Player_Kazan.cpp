@@ -283,7 +283,7 @@ void APlayer_Kazan::ZoomCameraWithSpeed(float TargetSize, float ZoomSpeed)
 		if (APlayer_Kazan* StrongThis = weakThis.Get())
 		{
 			float CurrentFieldOfView = StrongThis->FollowCamera->FieldOfView;
-			if (FMath::IsNearlyEqual(CurrentFieldOfView,StrongThis->TargetFieldOfView))
+			if (FMath::IsNearlyEqual(CurrentFieldOfView, StrongThis->TargetFieldOfView))
 			{
 				StrongThis->GetWorld()->GetTimerManager().ClearTimer(StrongThis->ZoomCameraTimerHandle);
 				StrongThis->IsZoomCameraWithSpeed = false;
@@ -295,7 +295,8 @@ void APlayer_Kazan::ZoomCameraWithSpeed(float TargetSize, float ZoomSpeed)
 	}, 0.01f, true);
 }
 
-void APlayer_Kazan::HandlePlayerCamera(AAreaObject* TargetAreaObject, FRotator TargetRotate, float RotateSpeed, float TargetSize, float ZoomSpeed)
+void APlayer_Kazan::HandlePlayerCamera(AAreaObject* TargetAreaObject, FRotator TargetRotate, float RotateSpeed,
+                                       float TargetSize, float ZoomSpeed)
 {
 	if (LockOnComponent->GetCurrentTarget() == TargetAreaObject)
 	{
@@ -401,11 +402,11 @@ void APlayer_Kazan::SetComboState(bool bCanCombo, int SkillID)
 
 void APlayer_Kazan::SetPlayerState(EPlayerState NewState)
 {
-	if (CurrentPlayerState == EPlayerState::GUARD )
+	if (CurrentPlayerState == EPlayerState::GUARD)
 	{
 		SetGuardState(false);
 	}
-	
+
 	CurrentPlayerState = NewState;
 
 	// 상태 변경에 따른 추가 처리
@@ -707,6 +708,24 @@ void APlayer_Kazan::On_Run_Released()
 {
 }
 
+void APlayer_Kazan::HPRecover_Pressed()
+{
+	// 포션 스택이 0 보다 크고, HP가 닳아있고, action 수행 가능할때만 실행
+	if (HPRecoverStack <= 0 || IsMaxHP() || !CanPerformAction(CurrentPlayerState, "Action"))
+	{
+		return;
+	}
+
+	int hpRecoverSkillID = 5;
+	// ToDo : blend pose 이용한 걸어다니기
+	TObjectPtr<UBaseSkill> skill = GetSkillByID(hpRecoverSkillID);
+	if (CastSkill(skill, this))
+	{
+		SetPlayerState(EPlayerState::ACTION);
+		skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
+	}
+}
+
 void APlayer_Kazan::SetGuardState(bool bIsGuarding)
 {
 	// 스태미나 회복률 셋팅
@@ -731,7 +750,7 @@ void APlayer_Kazan::SetGuardState(bool bIsGuarding)
 	else
 	{
 		KazanAnimInstance->bIsGuard = false;
-		
+
 		// 가드 Condition 제거
 		RemoveCondition(EConditionBitsType::Guard);
 
