@@ -38,12 +38,10 @@ public:
 
 	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class UPlayerStatusWidget> StatusWidgetClass;
+	TSubclassOf<class UPlayerStatusWidget> BossStatusWidgetClass;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> MissionCompleteClass;
-
-	UPROPERTY()
-	class UPlayerStatusWidget* StatusWidget;
 
 private:
 	// UI
@@ -94,6 +92,6 @@ public:
 	void FastBall();
 
 private:
-	void InitializeHUD();
+	virtual void InitializeHUD() override;
 	
 };

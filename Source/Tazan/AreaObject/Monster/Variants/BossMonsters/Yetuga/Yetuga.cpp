@@ -6,6 +6,7 @@
 #include "Yetuga_RockS.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tazan/Animation/Monster/YetugaAnimInstance.h"
@@ -29,6 +30,8 @@ AYetuga::AYetuga()
 	// 예투가 넉백 거리 배율 설정
 	m_KnockBackForceMultiplier = 0.0f;
 
+	bIsParrySkill = false;
+
 	ChargeStunCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("StunCollison"));
 	ChargeStunCollision->SetupAttachment(RootComponent);
 
@@ -38,10 +41,12 @@ AYetuga::AYetuga()
 	ChargeStunCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	ChargeStunCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
-	static ConstructorHelpers::FClassFinder<UPlayerStatusWidget> WidgetClassFinder(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_YetugaStatusWidget.WB_YetugaStatusWidget_C'"));
-	if (WidgetClassFinder.Succeeded())
+	HPWidgetComponent->SetVisibility(false);
+
+	ConstructorHelpers::FClassFinder<UPlayerStatusWidget> YetugaHPWidget(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_YetugaStatusWidget.WB_YetugaStatusWidget_C'"));
+	if (YetugaHPWidget.Succeeded())
 	{
-		StatusWidgetClass = WidgetClassFinder.Class;
+		BossStatusWidgetClass = YetugaHPWidget.Class;
 	}
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> missionCompWidget(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_MissionComplete.WB_MissionComplete_C'"));
@@ -73,7 +78,14 @@ UBaseSkillRoulette* AYetuga::CreateSkillRoulette()
 
 void AYetuga::ParryStackPenalty()
 {
-	// LOG_SCREEN("패리 패널티!");
+	// if (m_CurrentSkill)
+	// {
+	// 	m_CurrentSkill->CancelCast();
+	// }
+
+	bIsParrySkill = false;
+	InitParryStack();
+	
 	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
 	if (animInst)
 	{
@@ -86,7 +98,6 @@ void AYetuga::ParryStackPenalty()
 			LOG_SCREEN_ERROR(this, "패리 패널티 애니 비어있음");
 		}
 	}
-	ParryStack = 0;
 	
 	YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
 }
@@ -156,10 +167,10 @@ void AYetuga::OnDie()
 
 void AYetuga::YetugaStart()
 {
-	InitializeHUD();
+	// InitializeHUD();
 	
 	//시작시 어퍼컷 콤보공격 확정 실행
-	//NextSkill = GetSkillByID(11000);
+	NextSkill = GetSkillByID(11000);
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
@@ -207,14 +218,14 @@ void AYetuga::FastBall()
 
 void AYetuga::InitializeHUD()
 {
-	if (!StatusWidgetClass) return;
+	if (!BossStatusWidgetClass) return;
 	if (!MissionCompleteClass) return;
 	
-	// UI 위젯 생성
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
-	StatusWidget = CreateWidget<UPlayerStatusWidget>(pc, StatusWidgetClass);
-	CompleteWidget = CreateWidget<UUserWidget>(pc, MissionCompleteClass);
 	
+	StatusWidget = CreateWidget<UPlayerStatusWidget>(pc, BossStatusWidgetClass);
+	CompleteWidget = CreateWidget<UUserWidget>(pc, MissionCompleteClass);
+
 	if (StatusWidget)
 	{
 		StatusWidget->AddToViewport();
