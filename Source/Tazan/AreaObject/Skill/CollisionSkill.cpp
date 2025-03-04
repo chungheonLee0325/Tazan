@@ -36,7 +36,7 @@ void UCollisionSkill::SetCasterMesh(int AttackDataIndex, UAnimNotifyState* Notif
 {
 	// 초기화
 	FAttackCollision AttackCollision;
-	bHasHit = false;
+	bIsHitOnce = false;
 	AttackCollision.bHasPreviousPositions = false;
 	// LOG_PRINT(TEXT("히트 업데이트"));
 
@@ -160,7 +160,7 @@ void UCollisionSkill::ProcessHitDetection(UAnimNotifyState* NotifyState)
 		return;
 	}
 
-	bHasHit = true;
+	bIsHitOnce = true;
 
 	// 히트 결과 처리 (중복 제거)
 	TSet<AActor*> ProcessedActors;

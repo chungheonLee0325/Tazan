@@ -14,7 +14,7 @@ void UY_Recover::OnCastEnd()
 	Super::OnCastEnd();
 	m_Caster->IsGroggy = false;
 
-	AYetuga* y = Cast<AYetuga>(m_Caster);
+	ABaseMonster* y = Cast<ABaseMonster>(m_Caster);
 	if (y)
 	{
 		y->StatusWidget->UpdateStamina(500.0f,1.0f,500.0f);

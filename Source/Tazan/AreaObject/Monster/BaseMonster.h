@@ -39,6 +39,7 @@ BaseMonster System
 #include "Tazan/Utilities/LogMacro.h"
 #include "BaseMonster.generated.h"
 
+class UWidgetComponent;
 struct FAIStimulus;
 class USkillBag;
 class UBaseAiFSM;
@@ -55,15 +56,32 @@ public:
 	// Skill
 	FSkillBagData* dt_SkillBag;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	UBaseSkill* NextSkill;
-
-	//퍼펙트 가드 패널티 애니메이션
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Parry")
-	UAnimMontage* ParryPenaltyAnimation;
 
 	UFUNCTION()
 	UBaseSkillRoulette* GetSkillRoulette() const;
+	
+	/// Perfect Gaurd 애니메이션
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | Parry")
+	UAnimMontage* ParryPenaltyAnimation;
+
+	// Perfect Gaurd
+	bool bIsParrySkill = true;
+	UPROPERTY(EditDefaultsOnly, Category = "Parry")
+	int ParryStackMax = 5;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	UWidgetComponent* HPWidgetComponent;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	class UPlayerStatusWidget* StatusWidget;
+	
+	UPROPERTY(EditAnywhere, Category = "UI")
+	float HeightHPUI = 160.0f;
+	
+	UPROPERTY()
+	FTimerHandle OnDieHandle;
 
 protected:
 	// Combat System
@@ -82,17 +100,14 @@ protected:
 	float SightRadius = 1500.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Sight")
 	float LoseSightRadius = 1500.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Parry")
-	int ParryStackMax = 5;
-
+	
 	//퍼펙트 가드시 누적될 데미지
 	UPROPERTY(VisibleDefaultsOnly, Category = "Parry")
 	int ParryStack = 0;
+	
 private:
 	UPROPERTY()
 	AActor* m_CurrentTarget;
-
 
 public:
 	// Core Functions
@@ -168,4 +183,6 @@ protected:
 
 	// Perfect Guard
 	virtual void ParryStackPenalty();
+
+	virtual void InitializeHUD();
 };

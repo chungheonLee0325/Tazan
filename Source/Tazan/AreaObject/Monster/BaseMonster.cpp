@@ -5,14 +5,17 @@
 
 #include "AI/Base/BaseAiFSM.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/AreaObject/Skill/Monster/BossMonsters/Y_SkillRoulette.h"
 #include "Tazan/Contents/TazanGameInstance.h"
+#include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 
 // Sets default values
@@ -46,6 +49,19 @@ ABaseMonster::ABaseMonster()
 
 	// 감지 이벤트에 함수 바인딩
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseMonster::OnPerceptionUpdated);
+
+
+	// HP UI
+	HPWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPUI"));
+	HPWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	HPWidgetComponent->SetupAttachment(RootComponent);
+	HPWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, HeightHPUI));
+	
+	ConstructorHelpers::FClassFinder<UPlayerStatusWidget> monsterHPWidget(TEXT("/Script/UMG.WidgetBlueprintGeneratedClass'/Game/_BluePrints/Widget/WB_BasicMonsterStatusWidget.WB_BasicMonsterStatusWidget_C'"));
+	if (monsterHPWidget.Succeeded())
+	{
+		HPWidgetComponent->SetWidgetClass(monsterHPWidget.Class);
+	}
 }
 
 UBaseSkillRoulette* ABaseMonster::GetSkillRoulette() const
@@ -107,6 +123,8 @@ void ABaseMonster::BeginPlay()
 		LOG_PRINT(TEXT("FSM is nullptr"));
 		LOG_SCREEN("FSM is nullptr. please set in construct");
 	}
+
+	InitializeHUD();
 }
 
 // Called every frame
@@ -196,11 +214,14 @@ void ABaseMonster::OnDie()
 
 void ABaseMonster::AddParryStack()
 {
-	++ParryStack;
-	// LOG_SCREEN("패리 스택: %d",ParryStack);
-	if (ParryStack == ParryStackMax)
+	if (bIsParrySkill)
 	{
-		ParryStackPenalty();
+		++ParryStack;
+		LOG_SCREEN("패리 스택: %d",ParryStack);
+		if (ParryStack == ParryStackMax)
+		{
+			ParryStackPenalty();
+		}
 	}
 }
 
@@ -208,22 +229,31 @@ void ABaseMonster::ParryStackPenalty()
 {
 	// LOG_SCREEN("패리 패널티!");
 	HandleStaggerBegin(EStaggerType::ParryReaction);
-	/*
-	// LOG_SCREEN("패리 패널티!");
-	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
-	if (animInst)
+	InitParryStack();
+}
+
+void ABaseMonster::InitializeHUD()
+{
+	StatusWidget = Cast<UPlayerStatusWidget>(HPWidgetComponent->GetWidget());
+
+	if (HPWidgetComponent)
 	{
-		if (ParryPenaltyAnimation != nullptr)
+		// HP 변경 이벤트 바인딩
+		if (m_HealthComponent)
 		{
-			animInst->Montage_Play(ParryPenaltyAnimation);
+			m_HealthComponent->OnHealthChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateHealth);
+			// 초기값 설정
+			StatusWidget->UpdateHealth(GetHP(), 0.0f, m_HealthComponent->GetMaxHP());
 		}
-		else
+		
+		// Stamina 변경 이벤트 바인딩
+		if (m_StaminaComponent)
 		{
-			LOG_SCREEN_ERROR(this, "패리 패널티 애니 비어있음");
+			m_StaminaComponent->OnStaminaChanged.AddDynamic(StatusWidget, &UPlayerStatusWidget::UpdateStamina);
+			// 초기값 설정
+			StatusWidget->UpdateStamina(GetStamina(), 0.0f, m_StaminaComponent->GetMaxStamina());
 		}
 	}
-	ParryStack = 0;
-	*/
 }
 
 void ABaseMonster::InitParryStack()
