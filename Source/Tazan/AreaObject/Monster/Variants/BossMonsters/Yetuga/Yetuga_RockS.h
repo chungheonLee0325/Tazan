@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "Yetuga_RockS.generated.h"
 
+class UProjectileMovementComponent;
+class AAreaObject;
+class ABaseMonster;
+
 UCLASS()
 class TAZAN_API AYetuga_RockS : public AActor
 {
@@ -17,11 +21,31 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class USphereComponent* Root;
 	UPROPERTY(EditDefaultsOnly)
-	class UStaticMeshComponent* Mesh;
+	class USkeletalMeshComponent* Mesh;
+	UPROPERTY(EditDefaultsOnly)
+	UProjectileMovementComponent* ProjectileMovement;
+
+	UPROPERTY(EditDefaultsOnly, Category="Destroy Animation")
+	UAnimMontage* FloorDestroyAni;
+	UPROPERTY(EditDefaultsOnly, Category="Destroy Animation")
+	UAnimMontage* TargetDestroyAni;
+
+private:
+	UPROPERTY()
+	ABaseMonster* Caster;
+	UPROPERTY()
+	AAreaObject* Target;
 
 protected:
 	virtual void BeginPlay() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
+	
+	UFUNCTION()
+	void Overlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	void SetCaster(ABaseMonster* caster);
+	void SetTarget(AAreaObject* player);
+	void Fire();
 };
