@@ -70,7 +70,7 @@ public:
 	bool bPersistentLines = false;
 
 protected:
-	bool bHasHit = false;
+	bool bIsHitOnce = false;
 
 private:
 	void DrawDebugHitDetection(UAnimNotifyState* NotifyState, const FVector& Start, const FVector& End,

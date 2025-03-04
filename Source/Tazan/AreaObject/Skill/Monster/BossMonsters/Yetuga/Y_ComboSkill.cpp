@@ -18,7 +18,7 @@ void UY_ComboSkill::OnCastStart(class AAreaObject* Caster, AAreaObject* Target)
 
 void UY_ComboSkill::OnCastFire()
 {
-	if (bHasHit)
+	if (bIsHitOnce)
 	{
 		m_SkillData->NextSkillID = 11001;
 		OnCastEnd();
