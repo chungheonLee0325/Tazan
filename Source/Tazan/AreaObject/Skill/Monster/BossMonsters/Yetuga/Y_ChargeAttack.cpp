@@ -37,15 +37,14 @@ void UY_ChargeAttack::OnCastTick(float DeltaTime)
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, start, end, ECC_Visibility, QueryParams);
     
 	// 디버그용 라인 그리기
-	// FColor LineColor = bHit ? FColor::Red : FColor::Green;
-	//DrawDebugLine(GetWorld(), start, bHit ? HitResult.Location : end, LineColor, false, 2.0f, 0, 2.0f);
+	FColor LineColor = bHit ? FColor::Red : FColor::Green;
+	DrawDebugLine(GetWorld(), start, bHit ? HitResult.Location : end, LineColor, false, 2.0f, 0, 2.0f);
     
 	if (bHit)
 	{
 		float hitDist = FVector::Dist(start, HitResult.Location);
-		UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
 
-		if (hitDist <= 150.0f)
+		if (hitDist <= 160.0f)
 		{
 			this->CancelCast();
 			Stun();
