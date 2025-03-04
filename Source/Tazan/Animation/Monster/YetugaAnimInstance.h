@@ -50,6 +50,7 @@ protected:
 
 	void GroggyInProgress(float dt);
 	void ParryEntering(float dt);
+	void ChargeEntering();
 	void GroggyEnd();
 
 };
