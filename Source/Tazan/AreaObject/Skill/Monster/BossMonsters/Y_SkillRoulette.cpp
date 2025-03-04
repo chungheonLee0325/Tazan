@@ -28,10 +28,10 @@ void UY_SkillRoulette::AdjustSkillWeightsByCombatContext(TArray<FSkillRouletteEn
 		ApplySkillWeight(LocalEntries, EAiSkillType::Long, 1000.0f);
 	}
 
-	//직전 스킬 타입이 원거리 공격이면, 원거리 공격 확률 DOWN
+	//직전 스킬 타입이 원거리 공격이면, 거리 벌리기 확률 Down
 	else if (PrevSkillType == EAiSkillType::Long)
 	{
-		ApplySkillWeight(LocalEntries, EAiSkillType::Long, 0.25f);
+		ApplySkillWeight(LocalEntries, EAiSkillType::Back, 0.1f);
 	}
 
 	//직전 스킬 타입이 좌/우 공격이면, 턴어택 거의 확정 시전

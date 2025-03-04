@@ -26,13 +26,36 @@ void UCollisionSkill::OnCastTick(float DeltaTime)
 	{
 		return;
 	}
-	for (auto& pair : NotifyStateMap)
+	if (NotifyStateMap.IsEmpty())
 	{
-		ProcessHitDetection(pair.Key);
+		return;
 	}
+
+	// 키 배열을 복사하여 안전하게 순회
+	TArray<int> Keys;
+	NotifyStateMap.GetKeys(Keys);
+
+	for (int AttackDataIndex : Keys)
+	{
+		// 존재하는지 다시 확인 (CancelCast가 실행될 수도 있으므로)
+		if (NotifyStateMap.Contains(AttackDataIndex))
+		{
+			ProcessHitDetection(AttackDataIndex);
+		}
+	}
+
+	
+	//for (auto pair : NotifyStateMap)
+	//{
+	//	if (NotifyStateMap.IsEmpty())
+	//	{
+	//		break;
+	//	}
+	//	ProcessHitDetection(pair.Key);
+	//}
 }
 
-void UCollisionSkill::SetCasterMesh(int AttackDataIndex, UAnimNotifyState* NotifyState)
+void UCollisionSkill::SetCasterMesh(int AttackDataIndex)
 {
 	// 초기화
 	FAttackCollision AttackCollision;
@@ -61,12 +84,12 @@ void UCollisionSkill::SetCasterMesh(int AttackDataIndex, UAnimNotifyState* Notif
 		}
 	}
 	AttackCollision.IsEnableHitDetection = true;
-	NotifyStateMap.Add(NotifyState, AttackCollision);
+	NotifyStateMap.Add(AttackDataIndex, AttackCollision);
 }
 
-void UCollisionSkill::ProcessHitDetection(UAnimNotifyState* NotifyState)
+void UCollisionSkill::ProcessHitDetection(int AttackDataIndex)
 {
-	FAttackCollision* AttackCollision = NotifyStateMap.Find(NotifyState);
+	FAttackCollision* AttackCollision = NotifyStateMap.Find(AttackDataIndex);
 	if (!AttackCollision->OwnerSourceMesh || !m_Caster)
 		return;
 
@@ -118,7 +141,7 @@ void UCollisionSkill::ProcessHitDetection(UAnimNotifyState* NotifyState)
 			// 디버그 드로잉 
 			if (bDebugDraw)
 			{
-				DrawDebugHitDetection(NotifyState, InterpStartLocation, InterpEndLocation, StepHitResults,
+				DrawDebugHitDetection(AttackDataIndex, InterpStartLocation, InterpEndLocation, StepHitResults,
 				                      InterpRotation);
 			}
 
@@ -145,7 +168,7 @@ void UCollisionSkill::ProcessHitDetection(UAnimNotifyState* NotifyState)
 		// 디버그 드로잉
 		if (bDebugDraw)
 		{
-			DrawDebugHitDetection(NotifyState, CurrentStartLocation, CurrentEndLocation, AllHitResults,
+			DrawDebugHitDetection(AttackDataIndex, CurrentStartLocation, CurrentEndLocation, AllHitResults,
 			                      CurrentSocketRotation);
 		}
 	}
@@ -185,16 +208,16 @@ void UCollisionSkill::ProcessHitDetection(UAnimNotifyState* NotifyState)
 	}
 }
 
-void UCollisionSkill::ResetCollisionData(UAnimNotifyState* NotifyState)
+void UCollisionSkill::ResetCollisionData(int AttackDataIndex)
 {
-	FAttackCollision* AttackCollision = NotifyStateMap.Find(NotifyState);
+	FAttackCollision* AttackCollision = NotifyStateMap.Find(AttackDataIndex);
 	if (AttackCollision == nullptr) return;
+	NotifyStateMap.Remove(AttackDataIndex);
 	AttackCollision->IsEnableHitDetection = false;
 	AttackCollision->HitActors.Empty();
 	AttackCollision->IndexedAttackData = nullptr;
 	AttackCollision->OwnerSourceMesh = nullptr;
 	AttackCollision->bHasPreviousPositions = false;
-	NotifyStateMap.Remove(NotifyState);
 }
 
 bool UCollisionSkill::PerformCollisionCheck(
@@ -268,10 +291,10 @@ bool UCollisionSkill::PerformCollisionCheck(
 	return bHit;
 }
 
-void UCollisionSkill::DrawDebugHitDetection(UAnimNotifyState* NotifyState, const FVector& Start, const FVector& End,
+void UCollisionSkill::DrawDebugHitDetection(int AttackDataIndex, const FVector& Start, const FVector& End,
                                             const TArray<FHitResult>& HitResults, const FRotator& SocketRotation)
 {
-	FAttackCollision* AttackCollision = NotifyStateMap.Find(NotifyState);
+	FAttackCollision* AttackCollision = NotifyStateMap.Find(AttackDataIndex);
 	auto& HitBoxData = AttackCollision->IndexedAttackData->HitBoxData;
 	UWorld* World = m_Caster->GetWorld();
 	if (!World) return;
