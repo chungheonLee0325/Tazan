@@ -33,10 +33,10 @@ AYetuga_RockS::AYetuga_RockS()
 
 	Root->SetGenerateOverlapEvents(true);
 	
-	Root->SetCollisionObjectType(ECC_EngineTraceChannel1);
-	Root->SetCollisionResponseToAllChannels(ECR_Ignore);
-	Root->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
-	Root->SetCollisionResponseToChannel(ECC_WorldStatic,ECR_Overlap);
+	Root->SetCollisionObjectType(ECC_EngineTraceChannel2);
+	// Root->SetCollisionResponseToAllChannels(ECR_Ignore);
+	//Root->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
+	//Root->SetCollisionResponseToChannel(ECC_WorldStatic,ECR_Overlap);
 
 	ConstructorHelpers::FObjectFinder<UAnimMontage>am1(TEXT("/Script/Engine.AnimMontage'/Game/_Resource/Yetuga/Rock/AM_RockDestroy_01.AM_RockDestroy_01'"));
 	if (am1.Succeeded())
