@@ -110,6 +110,11 @@ void AKazanPlayerController::BeginPlay()
 	InitializeHUD();
 }
 
+UPlayerStatusWidget* AKazanPlayerController::GetPlayerStatusWidget() const
+{
+	return StatusWidget;
+}
+
 void AKazanPlayerController::InitializeHUD()
 {
 	if (!StatusWidgetClass || !Kazan) return;

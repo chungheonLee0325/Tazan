@@ -82,13 +82,14 @@ public:
 	bool IsSpecial = false;
 	FTimerHandle SpecialTimerHandle;
 	bool bIsGuard;
+	int HP_Potion_Max_Stack = 3;
 
 	void SetPlayerState(EPlayerState NewState);
 	void SetPlayerNormalState() { SetPlayerState(EPlayerState::NORMAL); }
 	void SetComboState(bool bCanCombo, int SkillID);
 
-	void SetHPRecoverMax() { HPRecoverStack = 3; }
-	void DecreaseHPRecoverStack() { HPRecoverStack--; }
+	void SetHPRecoverMax();
+	void DecreaseHPRecoverStack();
 
 protected:
 	// Called when the game starts or when spawned
@@ -124,9 +125,9 @@ public:
 	void On_Run_Pressed();
 	void On_Run_Released();
 
-	/** Called for run input */
+	/** Called for HPRecover input */
 	void HPRecover_Pressed();
-
+	
 	virtual void HandlePerfectDodge() override;
 	virtual void HandleGroggy(float Duration) override;
 	virtual void HandleStaggerBegin(EStaggerType Type) override;

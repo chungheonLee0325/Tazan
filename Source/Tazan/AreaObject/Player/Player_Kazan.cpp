@@ -13,6 +13,7 @@
 #include "Tazan/AreaObject/Utility/GhostTrail.h"
 #include "Tazan/Utilities/LogMacro.h"
 #include "Tazan/AreaObject/Player/LockOnComponent.h"
+#include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -710,9 +711,15 @@ void APlayer_Kazan::On_Run_Released()
 
 void APlayer_Kazan::HPRecover_Pressed()
 {
-	// 포션 스택이 0 보다 크고, HP가 닳아있고, action 수행 가능할때만 실행
-	if (HPRecoverStack <= 0 || IsMaxHP() || !CanPerformAction(CurrentPlayerState, "Action"))
+	// 포션 스택이 0이면 동작 x
+	if (HPRecoverStack == 0)
 	{
+		return;
+	}
+	// HP가 닳아있고, action 수행 가능할때만 실행
+	if (IsMaxHP() || !CanPerformAction(CurrentPlayerState, "Action"))
+	{
+		KazanPlayerController->GetPlayerStatusWidget()->DisableHPPotionBG(false);
 		return;
 	}
 
@@ -724,6 +731,20 @@ void APlayer_Kazan::HPRecover_Pressed()
 		SetPlayerState(EPlayerState::ACTION);
 		skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
 	}
+}
+
+void APlayer_Kazan::SetHPRecoverMax()
+{
+	HPRecoverStack = HP_Potion_Max_Stack;
+}
+
+void APlayer_Kazan::DecreaseHPRecoverStack()
+{
+	if (--HPRecoverStack == 0)
+	{
+		KazanPlayerController->GetPlayerStatusWidget()->DisableHPPotionBG(true);
+	}
+	KazanPlayerController->GetPlayerStatusWidget()->UpdateHPPotionStack(HPRecoverStack);
 }
 
 void APlayer_Kazan::SetGuardState(bool bIsGuarding)

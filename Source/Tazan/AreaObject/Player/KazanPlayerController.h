@@ -34,6 +34,8 @@ public:
 
 	UPROPERTY()
 	class UUserWidget* FailWidget;
+
+	class UPlayerStatusWidget* GetPlayerStatusWidget() const;
 private:
 	// UI 초기화 및 바인딩
 	void InitializeHUD();
