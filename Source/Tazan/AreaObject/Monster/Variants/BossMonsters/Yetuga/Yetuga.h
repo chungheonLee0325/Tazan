@@ -75,7 +75,10 @@ public:
 	void ChangeStateToSelectSkill() { m_AiFSM->ChangeState(EAiStateType::SelectSkill); }
 	UFUNCTION(BlueprintCallable)
 	void ChangeStateToAttack() { m_AiFSM->ChangeState(EAiStateType::Attack); }
+	UFUNCTION(BlueprintCallable)
+	void ChangeStateToGroggy() { m_AiFSM->ChangeState(EAiStateType::Idle); }
 
+	void OnStun(UAnimMontage* AnimMontage, bool bArg);
 	// 스킬 관련
 	UFUNCTION(BlueprintCallable)
 	void ChargeSkillStun();

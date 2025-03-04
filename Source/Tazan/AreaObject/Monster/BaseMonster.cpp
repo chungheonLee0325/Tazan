@@ -258,10 +258,11 @@ void ABaseMonster::OnDie()
 
 void ABaseMonster::AddParryStack()
 {
+	// LOG_PRINT(TEXT("패리 스택 추가"));
 	if (bIsParrySkill)
 	{
 		++ParryStack;
-		LOG_SCREEN("패리 스택: %d", ParryStack);
+		// LOG_SCREEN("패리 스택: %d", ParryStack);
 		if (ParryStack == ParryStackMax)
 		{
 			ParryStackPenalty();
@@ -271,7 +272,7 @@ void ABaseMonster::AddParryStack()
 
 void ABaseMonster::ParryStackPenalty()
 {
-	// LOG_SCREEN("패리 패널티!");
+	// LOG_PRINT(TEXT("패리 패널티!"));
 	HandleStaggerBegin(EStaggerType::ParryReaction);
 	InitParryStack();
 }
@@ -302,6 +303,7 @@ void ABaseMonster::InitializeHUD()
 
 void ABaseMonster::InitParryStack()
 {
+	// LOG_PRINT(TEXT("패리 스택 초기화"));
 	ParryStack = 0;
 }
 

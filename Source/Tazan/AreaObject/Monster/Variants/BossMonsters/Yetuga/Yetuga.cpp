@@ -69,6 +69,7 @@ void AYetuga::ParryStackPenalty()
 	// if (m_CurrentSkill)
 	// {
 	// 	m_CurrentSkill->CancelCast();
+	// 	ClearCurrentSkill();
 	// }
 
 	bIsParrySkill = false;
@@ -80,6 +81,7 @@ void AYetuga::ParryStackPenalty()
 		if (ParryPenaltyAnimation != nullptr)
 		{
 			animInst->Montage_Play(ParryPenaltyAnimation);
+			ChangeStateToGroggy();
 		}
 		else
 		{
@@ -150,18 +152,27 @@ void AYetuga::YetugaStart()
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
+void AYetuga::OnStun(UAnimMontage* AnimMontage, bool bArg)
+{
+	YetugaABP->CurrentAnimState = EYAnimState::GroggyProcess;
+}
+
 void AYetuga::ChargeSkillStun()
 {
-	// LOG_SCREEN("차지 스턴 콜");
-	//YetugaABP->CurrentAnimState = EYAnimState::ChargeGroggy;
-	
 	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
 	if (animInst)
 	{
 		if (ChargeStunAni != nullptr)
 		{
+			// 델리게이트 객체 생성
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindUObject(this, &AYetuga::OnStun);
+        
+			// 몽타주가 끝날 때 위 델리게이트가 호출되도록 바인딩
+			animInst->Montage_SetEndDelegate(MontageEndedDelegate, ChargeStunAni);
+			
 			animInst->Montage_Play(ChargeStunAni);
-			YetugaABP->CurrentAnimState = EYAnimState::ParryGroggyEnter;
+			ChangeStateToGroggy();
 		}
 		else
 		{
