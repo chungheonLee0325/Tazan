@@ -77,9 +77,10 @@ void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	
 	if (OtherActor == Target)
 	{
-		//Caster->CalcDamage(*AttackCollision->IndexedAttackData, m_Caster, hitActor, Hit);
+		// Caster->CalcDamage(*AttackData->IndexedAttackData, m_Caster, hitActor, SweepResult);
 	}
-	
+
+	// Todo : HitVfx 출력
 	LOG_SCREEN("파괴: %s", *OtherActor->GetName() );
 	this->Destroy();
 }

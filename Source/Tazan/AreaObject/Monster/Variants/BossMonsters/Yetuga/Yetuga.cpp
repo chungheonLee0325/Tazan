@@ -184,6 +184,8 @@ void AYetuga::FastBall()
 	
 	if (spawnedRock)
 	{
+		// ToDo : Init으로 묶기 + Init에서 FAttackData 넘겨주기
+		//FAttackData* AttackData = m_CurrentSkill->GetAttackDataByIndex(index);
 		spawnedRock->SetCaster(this);
 		spawnedRock->SetTarget(m_AggroTarget);
 		spawnedRock->Fire();
