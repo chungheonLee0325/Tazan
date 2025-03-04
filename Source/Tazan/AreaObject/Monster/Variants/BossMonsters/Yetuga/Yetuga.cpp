@@ -3,6 +3,7 @@
 
 #include "Yetuga.h"
 
+#include "Yetuga_RockS.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -138,7 +139,7 @@ void AYetuga::YetugaStart()
 	InitializeHUD();
 	
 	//시작시 어퍼컷 콤보공격 확정 실행
-	NextSkill = GetSkillByID(11000);
+	//NextSkill = GetSkillByID(11000);
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 
@@ -168,6 +169,20 @@ void AYetuga::Recover()
 	
 	NextSkill = GetSkillByID(19000);
 	m_AiFSM->ChangeState(EAiStateType::Attack);
+}
+
+void AYetuga::FastBall()
+{
+	AYetuga_RockS* spawnedRock = GetWorld()->SpawnActor<AYetuga_RockS>(AYetuga_RockS::StaticClass(),GetActorLocation(),GetActorRotation());
+	
+	if (spawnedRock)
+	{
+		LOG_PRINT(TEXT("돌 생성완료"));
+		spawnedRock->SetCaster(this);
+		spawnedRock->SetTarget(m_AggroTarget);
+		spawnedRock->Fire();
+	}
+	else LOG_PRINT(TEXT("돌 안만들어짐.."));
 }
 
 void AYetuga::InitializeHUD()

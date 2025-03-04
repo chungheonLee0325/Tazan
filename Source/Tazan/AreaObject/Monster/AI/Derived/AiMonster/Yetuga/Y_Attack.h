@@ -23,9 +23,10 @@ public:
 
 	UFUNCTION()
 	void OnSkillCompleted();
+	UFUNCTION()
+	void AddSkillEntry(const int id);
 
 private:
 	int SkillID = 0;
 	bool bHasFailed = false;
-	bool bIsYSkill;
 };

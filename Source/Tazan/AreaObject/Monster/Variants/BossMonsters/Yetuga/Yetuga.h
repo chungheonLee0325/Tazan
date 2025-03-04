@@ -7,6 +7,7 @@
 #include "Tazan/AreaObject/Monster/AI/Base/BaseAiFSM.h"
 #include "Yetuga.generated.h"
 
+class AYetuga_RockS;
 class UBoxComponent;
 class UYetugaAnimInstance;
 class UY_BaseSkill;
@@ -23,6 +24,9 @@ public:
 
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TSubclassOf<AYetuga_RockS> SmallRock;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category= "Skill | ChargeAttack")
 	UBoxComponent* ChargeStunCollision;
@@ -70,19 +74,23 @@ public:
 	
 	TSet<int> GetSkillInstancesID() const {return m_OwnSkillIDSet;}
 
-	// 블루프린트용
+	// 전투 시작
 	UFUNCTION(BlueprintCallable)
 	void YetugaStart();
 
+	// 상태 전이
 	UFUNCTION(BlueprintCallable)
 	void ChangeStateToSelectSkill() { m_AiFSM->ChangeState(EAiStateType::SelectSkill); }
 	UFUNCTION(BlueprintCallable)
 	void ChangeStateToAttack() { m_AiFSM->ChangeState(EAiStateType::Attack); }
-	
+
+	// 스킬 관련
 	UFUNCTION(BlueprintCallable)
 	void ChargeSkillStun();
 	UFUNCTION(BlueprintCallable)
 	void Recover();
+	UFUNCTION(BlueprintCallable)
+	void FastBall();
 
 private:
 	void InitializeHUD();
