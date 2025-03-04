@@ -52,7 +52,7 @@ void UYetugaAnimInstance::ChargeEntering()
 void UYetugaAnimInstance::GroggyInProgress(float dt)
 {
 	curTime += dt;
-	LOG_SCREEN("%f",curTime);
+	// LOG_SCREEN("%f",curTime);
 	if (curTime >= GroggyDuration)
 	{
 		curTime = 0.0f;
