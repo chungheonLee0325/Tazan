@@ -338,7 +338,7 @@ void AAreaObject::OnDie()
 				UGameplayStatics::SpawnEmitterAtLocation(strongThis->GetWorld(), strongThis->DeathEffect,
 				                                         strongThis->GetActorLocation());
 			}
-			strongThis->Destroy();
+			//strongThis->Destroy();
 		}
 	}, DestroyDelayTime, false);
 }
@@ -349,6 +349,16 @@ void AAreaObject::OnKill()
 
 void AAreaObject::OnRevival()
 {
+	// Die Montage 종료
+	StopAnimMontage();
+
+	// condition 제거
+	RemoveCondition(EConditionBitsType::Dead);
+	//콜리전 활성화
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	m_HealthComponent->InitHealth(dt_AreaObject->HPMax);
+	m_PoiseComponent->InitPoise(dt_AreaObject->BasePoise);
+	m_StaminaComponent->InitStamina(dt_AreaObject->StaminaMax, dt_AreaObject->StaminaRecoveryRate, dt_AreaObject->GroggyDuration);
 }
 
 UBaseSkill* AAreaObject::GetCurrentSkill()

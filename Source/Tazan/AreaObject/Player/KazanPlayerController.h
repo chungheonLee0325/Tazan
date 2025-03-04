@@ -64,6 +64,8 @@ private:
 	void On_SwitchTarget_Triggered(const FInputActionValue& Value);
 	/** Called for HPRecover input */
 	void On_RecoverHP_Pressed(const FInputActionValue& Value);
+	/** Called for HPRecover input */
+	void On_Restart_Pressed(const FInputActionValue& Value);
 
 	// Owner
 	UPROPERTY(VisibleAnywhere)
@@ -122,4 +124,8 @@ private:
 	/** RecoverHP Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* HPRecoverAction;
+
+	/** Restart Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RestartAction;
 };
