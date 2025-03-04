@@ -49,8 +49,7 @@ ABaseMonster::ABaseMonster()
 
 	// 감지 이벤트에 함수 바인딩
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseMonster::OnPerceptionUpdated);
-
-
+	
 	// HP UI
 	HPWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPUI"));
 	HPWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
@@ -90,6 +89,11 @@ UBaseSkillRoulette* ABaseMonster::CreateSkillRoulette()
 void ABaseMonster::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// HP UI 위치 Set
+	HeightHPUI = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 10;
+	HPWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, HeightHPUI));
+	//HPWidgetComponent->SetVisibility(true);
 
 	UTazanGameInstance* gameInstance = Cast<UTazanGameInstance>(GetGameInstance());
 	int skillbagID = dt_AreaObject->SkillBagID;
