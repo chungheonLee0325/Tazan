@@ -27,9 +27,6 @@ public:
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<AYetuga_RockS> SmallRock;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category= "Skill | ChargeAttack")
-	UBoxComponent* ChargeStunCollision;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category =  "Animation | ChargeStun")
 	UAnimMontage* ChargeStunAni;
@@ -56,10 +53,6 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	UFUNCTION()
-	void OnYetugaHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-					  UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	// 오버라이드 함수
 	virtual bool IsWeakPointHit(const FVector& HitLoc) override;

@@ -36,6 +36,8 @@ private:
 	UPROPERTY()
 	AAreaObject* Target;
 
+	// FAttackCollision* AttackCollision;
+
 protected:
 	virtual void BeginPlay() override;
 

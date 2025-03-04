@@ -27,19 +27,9 @@ AYetuga::AYetuga()
 
 	m_AreaObjectID = 100;
 	
-	// 예투가 넉백 거리 배율 설정
 	m_KnockBackForceMultiplier = 0.0f;
 
 	bIsParrySkill = false;
-
-	ChargeStunCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("StunCollison"));
-	ChargeStunCollision->SetupAttachment(RootComponent);
-
-	ChargeStunCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	ChargeStunCollision->SetSimulatePhysics(true);
-	ChargeStunCollision->SetNotifyRigidBodyCollision(true);
-	ChargeStunCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
-	ChargeStunCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
 	HPWidgetComponent->SetVisibility(false);
 
@@ -59,8 +49,6 @@ AYetuga::AYetuga()
 void AYetuga::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	GetCapsuleComponent()->OnComponentHit.AddDynamic(this,&AYetuga::OnYetugaHit);
 	
 	m_AggroTarget = Cast<AAreaObject>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
 	YetugaABP = Cast<UYetugaAnimInstance>(GetMesh()->GetAnimInstance());
@@ -133,18 +121,6 @@ void AYetuga::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AYetuga::OnYetugaHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-					  UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (OtherComp->GetCollisionObjectType() == ECC_WorldStatic)
-	{
-		if (m_CurrentSkill.IsA(UY_ChargeAttack::StaticClass()))
-		{
-			m_CurrentSkill->CancelCast();
-		}
-	}
-}
-
 bool AYetuga::IsWeakPointHit(const FVector& HitLoc)
 {
 	FVector hitDir = HitLoc - GetActorLocation();
@@ -208,12 +184,10 @@ void AYetuga::FastBall()
 	
 	if (spawnedRock)
 	{
-		LOG_PRINT(TEXT("돌 생성완료"));
 		spawnedRock->SetCaster(this);
 		spawnedRock->SetTarget(m_AggroTarget);
 		spawnedRock->Fire();
 	}
-	else LOG_PRINT(TEXT("돌 안만들어짐.."));
 }
 
 void AYetuga::InitializeHUD()

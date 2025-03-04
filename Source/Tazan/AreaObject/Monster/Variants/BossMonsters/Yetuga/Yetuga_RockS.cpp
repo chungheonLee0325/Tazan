@@ -3,12 +3,16 @@
 
 #include "Yetuga_RockS.h"
 
+#include "Yetuga.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "ProfilingDebugging/CookStats.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/Utilities/LogMacro.h"
 
+
+class AYetuga;
 
 AYetuga_RockS::AYetuga_RockS()
 {
@@ -65,7 +69,18 @@ void AYetuga_RockS::Tick(float DeltaTime)
 void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	LOG_SCREEN("돌 파괴");
+	AYetuga* yetuga = Cast<AYetuga>(OtherActor);
+	if (yetuga)
+	{
+		return;
+	}
+	
+	if (OtherActor == Target)
+	{
+		//Caster->CalcDamage(*AttackCollision->IndexedAttackData, m_Caster, hitActor, Hit);
+	}
+	
+	LOG_SCREEN("파괴: %s", *OtherActor->GetName() );
 	this->Destroy();
 }
 
