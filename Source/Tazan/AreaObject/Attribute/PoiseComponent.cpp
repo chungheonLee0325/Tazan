@@ -31,7 +31,7 @@ int32 UPoiseComponent::CalculateTotalDefensePoise() const
 	//return FMath::Max(0, m_BasePoise + AnimationPoiseBonus + TotalModifiers);
 }
 
-void UPoiseComponent::PoiseProcess(const FAttackData& AttackData)
+void UPoiseComponent::PoiseProcess(const FAttackData& AttackData, const FName& Direction)
 {
 	if (AttackData.StaggerType == EStaggerType::None) return;
 	// 우선순위 비교 로직
@@ -51,7 +51,7 @@ void UPoiseComponent::PoiseProcess(const FAttackData& AttackData)
 	}
 	// 스태거 적용
 	CurrentStagger = staggerType;
-	m_Owner->HandleStaggerBegin(staggerType);
+	m_Owner->HandleStaggerBegin(staggerType, Direction);
 }
 
 void UPoiseComponent::ClearCurrentStagger()

@@ -107,10 +107,10 @@ void ABaseMonster::SetHPWidgetVisibilityByDuration(float Duration)
 	}, Duration, false);
 }
 
-void ABaseMonster::HandleStaggerBegin(EStaggerType Type)
+void ABaseMonster::HandleStaggerBegin(EStaggerType Type, const FName& Direction)
 {
 	if (m_AiFSM != nullptr) m_AiFSM->ChangeState(EAiStateType::DoNothing);
-	Super::HandleStaggerBegin(Type);
+	Super::HandleStaggerBegin(Type, Direction);
 }
 
 void ABaseMonster::HandleStaggerEnd()
@@ -273,7 +273,7 @@ void ABaseMonster::AddParryStack()
 void ABaseMonster::ParryStackPenalty()
 {
 	// LOG_PRINT(TEXT("패리 패널티!"));
-	HandleStaggerBegin(EStaggerType::ParryReaction);
+	HandleStaggerBegin(EStaggerType::ParryReaction, FName("Default"));
 	InitParryStack();
 }
 

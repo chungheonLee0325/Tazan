@@ -193,9 +193,9 @@ void APlayer_Kazan::HandleGroggy(float Duration)
 	Super::HandleGroggy(Duration);
 }
 
-void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type)
+void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type, const FName& Direction)
 {
-	Super::HandleStaggerBegin(Type);
+	Super::HandleStaggerBegin(Type, Direction);
 	SetPlayerState(EPlayerState::STAGGER);
 }
 
@@ -237,6 +237,20 @@ void APlayer_Kazan::HandlePerfectDodge()
 			}
 		}
 	}, 0.2f, false);
+}
+
+void APlayer_Kazan::HandleGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data)
+{
+	Super::HandleGuard(DamageCauser, HitLocation, Data);
+	auto dir = DetermineDirection(DamageCauser->GetActorLocation());
+	PlayAnimMontage(GuardReactionMontage, 1.0f, dir);
+}
+
+void APlayer_Kazan::HandlePerfectGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data)
+{
+	Super::HandlePerfectGuard(DamageCauser, HitLocation, Data);
+	auto dir = DetermineDirection(DamageCauser->GetActorLocation());
+	PlayAnimMontage(PerfectGuardReactionMontage, 1.0f, dir);
 }
 
 void APlayer_Kazan::Reward(FItemData* ItemData, int ItemValue) const

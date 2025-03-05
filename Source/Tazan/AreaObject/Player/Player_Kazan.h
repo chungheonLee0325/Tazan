@@ -96,7 +96,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void OnDie() override;
-	
+
 	virtual void OnRevival() override;
 
 public:
@@ -138,10 +138,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Checkpoint")
 	void RespawnAtCheckpoint();
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UAnimMontage* GuardReactionMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UAnimMontage* PerfectGuardReactionMontage;
+
 	virtual void HandlePerfectDodge() override;
+	virtual void HandleGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data) override;
+	virtual void HandlePerfectGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data) override;
 	virtual void HandleGroggy(float Duration) override;
-	virtual void HandleStaggerBegin(EStaggerType Type) override;
+ 	virtual void HandleStaggerBegin(EStaggerType Type, const FName& Direction) override;
 	virtual void HandleStaggerEnd() override;
 
 	void Reward(FItemData* ItemData, int ItemValue) const;

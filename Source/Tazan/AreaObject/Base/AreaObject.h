@@ -101,7 +101,8 @@ protected:
 	FTimerHandle DeathTimerHandle;
 
 	// ToDo : BluePrintFunction Library
-	EReactionDirection DetermineDirection(const FVector& TargetPos) const;
+	FName DetermineDirection(const FVector& TargetPos) const;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -114,7 +115,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
-	
+
 	UFUNCTION(BlueprintCallable)
 	virtual void OnDie();
 	UFUNCTION(BlueprintCallable)
@@ -219,15 +220,15 @@ public:
 
 	// Stagger 처리 핸들
 	UFUNCTION()
-	virtual void HandleStaggerBegin(EStaggerType Type);
+	virtual void HandleStaggerBegin(EStaggerType Type, const FName& Direction);
 	UFUNCTION()
 	virtual void HandleStaggerEnd();
 
 	// 퍼펙트 가드 처리 핸들
-	virtual void HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data);
+	virtual void HandlePerfectGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data);
 
 	// 가드 처리 핸들
-	virtual void HandleGuard(AActor* DamageCauser, const FAttackData& Data);
+	virtual void HandleGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data);
 	// 퍼펙트 회피 처리 핸들
 	virtual void HandlePerfectDodge();
 
@@ -272,5 +273,5 @@ private:
 	ATazanGameMode* m_GameMode = nullptr;
 
 	void RotateToGuardTarget(const FVector& Target);
-	void PlayStaggerAnimation(EStaggerType Type);
+	void PlayStaggerAnimation(EStaggerType Type, const FName& Direction);
 };
