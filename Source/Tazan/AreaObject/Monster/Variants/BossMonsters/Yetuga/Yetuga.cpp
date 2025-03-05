@@ -157,7 +157,7 @@ void AYetuga::OnDie()
 
 void AYetuga::YetugaStart()
 {
-	// InitializeHUD();
+	InitializeHUD();
 	
 	//시작시 어퍼컷 콤보공격 확정 실행
 	NextSkill = GetSkillByID(11000);
