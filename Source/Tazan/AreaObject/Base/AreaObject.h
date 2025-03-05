@@ -100,6 +100,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Death Settings")
 	FTimerHandle DeathTimerHandle;
 
+	// ToDo : BluePrintFunction Library
+	EReactionDirection DetermineDirection(const FVector& TargetPos) const;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

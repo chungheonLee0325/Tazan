@@ -15,7 +15,7 @@ void UCollisionSkill::OnCastEnd()
 void UCollisionSkill::CancelCast()
 {
 	Super::CancelCast();
-	NotifyStateMap.Empty();
+	//NotifyStateMap.Empty();
 }
 
 void UCollisionSkill::OnCastTick(float DeltaTime)
@@ -44,7 +44,7 @@ void UCollisionSkill::OnCastTick(float DeltaTime)
 		}
 	}
 
-	
+
 	//for (auto pair : NotifyStateMap)
 	//{
 	//	if (NotifyStateMap.IsEmpty())
@@ -58,6 +58,8 @@ void UCollisionSkill::OnCastTick(float DeltaTime)
 void UCollisionSkill::SetCasterMesh(int AttackDataIndex)
 {
 	// 초기화
+	if (AttackDataIndex == 0) NotifyStateMap.Empty();
+
 	FAttackCollision AttackCollision;
 	bIsHitOnce = false;
 	AttackCollision.bHasPreviousPositions = false;

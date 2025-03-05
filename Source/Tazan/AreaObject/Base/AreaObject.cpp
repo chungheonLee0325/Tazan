@@ -112,6 +112,33 @@ void AAreaObject::PostInitializeComponents()
 	Super::PostInitializeComponents();
 }
 
+EReactionDirection AAreaObject::DetermineDirection(const FVector& TargetPos) const
+{
+	FVector StartPos = GetActorLocation();
+	// 공격 위치에서 방어자로의 방향 벡터
+	FVector Direction = (StartPos - TargetPos).GetSafeNormal();
+    
+	// 방어자의 로컬 좌우, 상하 방향 계산
+	FVector RightVector = FVector::CrossProduct(GetActorForwardVector(), FVector::UpVector);
+    
+	// 내적을 통해 방향 각도 계산
+	float ForwardDot = FVector::DotProduct(Direction, GetActorForwardVector());
+	float RightDot = FVector::DotProduct(Direction, RightVector);
+	float UpDot = FVector::DotProduct(Direction, FVector::UpVector);
+
+	// 각도 기반 방향 판정
+	if (FMath::Abs(UpDot) > FMath::Abs(RightDot))
+	{
+		// 수직 방향이 더 강함
+		return (UpDot > 0) ? EReactionDirection::UP : EReactionDirection::DOWN;
+	}
+	else
+	{
+		// 수평 방향이 더 강함
+		return (RightDot > 0) ? EReactionDirection::RIGHT : EReactionDirection::LEFT;
+	}
+}
+
 // Called every frame
 void AAreaObject::Tick(float DeltaTime)
 {
