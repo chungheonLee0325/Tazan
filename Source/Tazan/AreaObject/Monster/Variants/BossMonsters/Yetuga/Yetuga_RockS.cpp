@@ -83,7 +83,7 @@ void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		return;
 	}
 	
-	LOG_SCREEN("돌 오버랩");
+	// LOG_SCREEN("돌 오버랩");
 	bIsHitOnce = true;
 	
 	if (OtherActor == Target)
@@ -144,7 +144,7 @@ void AYetuga_RockS::Fire()
 
 void AYetuga_RockS::OnDestroy(UAnimMontage* AnimMontage, bool bArg)
 {
-	LOG_SCREEN("돌 파괴");
+	//LOG_SCREEN("돌 파괴");
 	Destroy();
 }
 

@@ -16,8 +16,10 @@
 #include "Tazan/AreaObject/Skill/Monster/BossMonsters/Y_SkillRoulette.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
+#include "Variants/BossMonsters/Yetuga/Yetuga.h"
 
 
+class AYetuga;
 // Sets default values
 ABaseMonster::ABaseMonster()
 {
@@ -170,7 +172,12 @@ void ABaseMonster::BeginPlay()
 		LOG_SCREEN("FSM is nullptr. please set in construct");
 	}
 
-	InitializeHUD();
+	AYetuga* ye = Cast<AYetuga>(this);
+	if (ye == nullptr)
+	{
+		//LOG_SCREEN("예투가가 아님");
+		InitializeHUD();
+	}
 }
 
 // Called every frame
