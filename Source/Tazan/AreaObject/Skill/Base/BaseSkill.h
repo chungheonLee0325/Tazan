@@ -93,6 +93,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
 	mutable ESkillFailCase SkillFailCase = ESkillFailCase::None;
 
+	void SetNextSkillID(int NextSkillID);
+	virtual void ResetNextSkillByBHit();
+
 protected:
 	UFUNCTION()
 	void AdjustCoolTime();
@@ -115,6 +118,8 @@ protected:
 	TSubclassOf<UBaseSkill> m_NextSkillClass;
 
 	FSkillData* m_SkillData;
+
+	int m_NextSkillID;
 
 	//OnCastEnd에서 사용할 몽타주 종료시 블렌드
 	float MontageBlendTime = 0.1f;

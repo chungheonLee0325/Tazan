@@ -184,7 +184,7 @@ void APlayer_Kazan::OnDie()
 void APlayer_Kazan::OnRevival()
 {
 	Super::OnRevival();
-	KazanPlayerController->FailWidget->RemoveFromViewport();
+	KazanPlayerController->FailWidget->RemoveFromParent();
 	KazanPlayerController->GetPlayerStatusWidget()->SetVisibility(ESlateVisibility::Visible);
 }
 
