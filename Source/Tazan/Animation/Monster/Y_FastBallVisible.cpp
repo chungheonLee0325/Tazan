@@ -9,10 +9,25 @@ void UY_FastBallVisible::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequ
                                      float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
+	if (MeshComp && MeshComp->GetOwner())
+	{
+		Yetuga = Cast<AYetuga>(MeshComp->GetOwner());
+		if (Yetuga != nullptr)
+		{
+			Yetuga->ShowRock();
+		}
+	}
 }
 
 void UY_FastBallVisible::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
+	if (MeshComp && MeshComp->GetOwner())
+	{
+		if (Yetuga != nullptr)
+		{
+			Yetuga->HideRock();
+		}
+	}
 }
