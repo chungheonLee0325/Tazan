@@ -293,6 +293,16 @@ bool UCollisionSkill::PerformCollisionCheck(
 	return bHit;
 }
 
+void UCollisionSkill::ResetNextSkillByBHit()
+{
+	Super::ResetNextSkillByBHit();
+	if (bIsHitOnce)
+	{
+		return;
+	}
+	m_NextSkillID = 0;
+}
+
 void UCollisionSkill::DrawDebugHitDetection(int AttackDataIndex, const FVector& Start, const FVector& End,
                                             const TArray<FHitResult>& HitResults, const FRotator& SocketRotation)
 {

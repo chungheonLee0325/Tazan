@@ -112,15 +112,15 @@ void AAreaObject::PostInitializeComponents()
 	Super::PostInitializeComponents();
 }
 
-EReactionDirection AAreaObject::DetermineDirection(const FVector& TargetPos) const
+FName AAreaObject::DetermineDirection(const FVector& TargetPos) const
 {
 	FVector StartPos = GetActorLocation();
 	// 공격 위치에서 방어자로의 방향 벡터
 	FVector Direction = (StartPos - TargetPos).GetSafeNormal();
-    
+
 	// 방어자의 로컬 좌우, 상하 방향 계산
 	FVector RightVector = FVector::CrossProduct(GetActorForwardVector(), FVector::UpVector);
-    
+
 	// 내적을 통해 방향 각도 계산
 	float ForwardDot = FVector::DotProduct(Direction, GetActorForwardVector());
 	float RightDot = FVector::DotProduct(Direction, RightVector);
@@ -130,12 +130,14 @@ EReactionDirection AAreaObject::DetermineDirection(const FVector& TargetPos) con
 	if (FMath::Abs(UpDot) > FMath::Abs(RightDot))
 	{
 		// 수직 방향이 더 강함
-		return (UpDot > 0) ? EReactionDirection::UP : EReactionDirection::DOWN;
+		//return (UpDot > 0) ? EReactionDirection::UP : EReactionDirection::DOWN;
+		return (UpDot > 0) ? FName("UP") : FName("DOWN");
 	}
 	else
 	{
 		// 수평 방향이 더 강함
-		return (RightDot > 0) ? EReactionDirection::RIGHT : EReactionDirection::LEFT;
+		//return (RightDot > 0) ? EReactionDirection::RIGHT : EReactionDirection::LEFT;
+		return (RightDot > 0) ? FName("RIGHT") : FName("LEFT");
 	}
 }
 
@@ -240,12 +242,12 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 			if (HasCondition(EConditionBitsType::PerfectGuardWindow))
 			{
 				KnockBackCoefficient = 0.3f;
-				HandlePerfectGuard(DamageCauser, attackData);
+				HandlePerfectGuard(DamageCauser, hitResult.Location, attackData);
 			}
 			else
 			{
 				KnockBackCoefficient = 0.8f;
-				HandleGuard(DamageCauser, attackData);
+				HandleGuard(DamageCauser, hitResult.Location, attackData);
 			}
 			HandleKnockBack(DamageCauser->GetActorLocation(), attackData, KnockBackCoefficient);
 			return ActualDamage;
@@ -262,7 +264,8 @@ float AAreaObject::TakeDamage(float Damage, const FDamageEvent& DamageEvent, ACo
 		// 넉백 처리
 		HandleKnockBack(DamageCauser->GetActorLocation(), attackData, m_KnockBackForceMultiplier);
 
-		m_PoiseComponent->PoiseProcess(attackData);
+		auto dir = DetermineDirection(DamageCauser->GetActorLocation());
+		m_PoiseComponent->PoiseProcess(attackData, dir);
 	}
 
 	ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
@@ -385,7 +388,8 @@ void AAreaObject::OnRevival()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	m_HealthComponent->InitHealth(dt_AreaObject->HPMax);
 	m_PoiseComponent->InitPoise(dt_AreaObject->BasePoise);
-	m_StaminaComponent->InitStamina(dt_AreaObject->StaminaMax, dt_AreaObject->StaminaRecoveryRate, dt_AreaObject->GroggyDuration);
+	m_StaminaComponent->InitStamina(dt_AreaObject->StaminaMax, dt_AreaObject->StaminaRecoveryRate,
+	                                dt_AreaObject->GroggyDuration);
 }
 
 UBaseSkill* AAreaObject::GetCurrentSkill()
@@ -534,12 +538,12 @@ void AAreaObject::LookAtLocationDirect(const FVector& TargetLocation) const
 	m_RotateUtilComponent->LookAtLocationDirect(TargetLocation);
 }
 
-void AAreaObject::HandleStaggerBegin(EStaggerType Type)
+void AAreaObject::HandleStaggerBegin(EStaggerType Type, const FName& Direction)
 {
 	if (IsDie())
 		return;
 	// 애니메이션 재생
-	PlayStaggerAnimation(Type);
+	PlayStaggerAnimation(Type, Direction);
 }
 
 void AAreaObject::HandleStaggerEnd()
@@ -549,14 +553,15 @@ void AAreaObject::HandleStaggerEnd()
 }
 
 
-void AAreaObject::PlayStaggerAnimation(EStaggerType Type)
+void AAreaObject::PlayStaggerAnimation(EStaggerType Type, const FName& Direction)
 {
 	if (UAnimMontage** montage = dt_AreaObject->Stagger_AnimMontages.Find(Type))
 	{
 		if (*montage) // Valid check for UAnimMontage*
 		{
 			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-			AnimInstance->Montage_Play(*montage);
+			PlayAnimMontage(*montage, 1.0f, Direction);
+			//AnimInstance->Montage_Play(*montage,1.0f, Direction);
 
 			StaggerEndDelegate.BindUObject(this, &AAreaObject::OnStaggerEnded);
 			AnimInstance->Montage_SetEndDelegate(StaggerEndDelegate, *montage);
@@ -625,7 +630,7 @@ bool AAreaObject::CanUseStamina(float Cost) const
 	return m_StaminaComponent->CanUseStamina(Cost);
 }
 
-void AAreaObject::HandleGuard(AActor* DamageCauser, const FAttackData& Data)
+void AAreaObject::HandleGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data)
 {
 	// Regular guard stamina cost
 	DecreaseStamina(Data.StaminaDamageAmount * GUARD_STAMINA_MULTIPLY_RATE);
@@ -656,7 +661,7 @@ void AAreaObject::OnStaggerEnded(UAnimMontage* Montage, bool bInterrupted)
 	}
 }
 
-void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FAttackData& Data)
+void AAreaObject::HandlePerfectGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data)
 {
 	// Perfect guard stamina cost
 	DecreaseStamina(Data.StaminaDamageAmount * PERFECT_GUARD_STAMINA_MULTIPLY_RATE);

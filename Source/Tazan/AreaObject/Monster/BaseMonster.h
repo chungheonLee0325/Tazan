@@ -90,7 +90,7 @@ public:
 	FTimerHandle HPWidgetVisibleTimer;
 protected:
 	// Combat System
-	void HandleStaggerBegin(EStaggerType Type) override;
+	void HandleStaggerBegin(EStaggerType Type, const FName& Direction) override;
 	virtual void HandleStaggerEnd() override;
 	UPROPERTY()
 	AAreaObject* m_AggroTarget;
