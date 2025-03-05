@@ -20,16 +20,28 @@
 AYetuga::AYetuga()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
 	m_AiFSM = AYetuga::CreateFSM();
 	m_SkillRoulette = AYetuga::CreateSkillRoulette();
 	
 	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
-
+	
 	m_AreaObjectID = 100;
 	
 	m_KnockBackForceMultiplier = 0.0f;
-
+	
 	bIsParrySkill = false;
+
+	SmallRockMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SmallRockMesh"));
+	SmallRockMesh->SetupAttachment(GetMesh(),FName("LeftHand"));
+	SmallRockMesh->SetWorldScale3D(FVector(0.25f, 0.25f, 0.25f));
+	SmallRockMesh->SetVisibility(false);
+	
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>rockMesh(TEXT("/Game/_Resource/Yetuga/Rock/Yetuga_SmallRock.Yetuga_SmallRock"));
+	if (rockMesh.Succeeded())
+	{
+		SmallRockMesh->SetSkeletalMesh(rockMesh.Object);
+	}
 
 	HPWidgetComponent->SetVisibility(false);
 
@@ -197,10 +209,19 @@ void AYetuga::FastBall()
 	{
 		// ToDo : Init으로 묶기 + Init에서 FAttackData 넘겨주기
 		//FAttackData* AttackData = m_CurrentSkill->GetAttackDataByIndex(index);
-		spawnedRock->SetCaster(this);
-		spawnedRock->SetTarget(m_AggroTarget);
+		spawnedRock->InitRock(this,m_AggroTarget);
 		spawnedRock->Fire();
 	}
+}
+
+void AYetuga::ShowRock()
+{
+	SmallRockMesh->SetVisibility(true);
+}
+
+void AYetuga::HideRock()
+{
+	SmallRockMesh->SetVisibility(false);
 }
 
 void AYetuga::InitializeHUD()
