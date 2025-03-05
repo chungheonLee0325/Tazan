@@ -53,6 +53,7 @@ void UBaseSkill::OnCastStart(AAreaObject* Caster, AAreaObject* Target)
 
 	m_Caster = Caster;
 	m_Target = Target;
+	m_NextSkillID = m_SkillData->NextSkillID;
 
 	// 스태미나 소모
 	if (m_SkillData->Cost > 0)
@@ -119,9 +120,9 @@ void UBaseSkill::OnCastEnd()
 	}
 
 	m_Caster->ClearThisCurrentSkill(this);
-	if (0 != m_SkillData->NextSkillID)
+	if (0 != m_NextSkillID)
 	{
-		UBaseSkill* nextSkill = m_Caster->GetSkillByID(m_SkillData->NextSkillID);
+		UBaseSkill* nextSkill = m_Caster->GetSkillByID(m_NextSkillID);
 		if (m_Caster->CastSkill(nextSkill, m_Target))
 		{
 			nextSkill->OnSkillComplete = OnSkillComplete;
@@ -255,6 +256,15 @@ bool UBaseSkill::IsInRange(const AAreaObject* Caster, const AAreaObject* Target)
 		SkillFailCase = ESkillFailCase::OutRange;
 		return false;
 	}
+}
+
+void UBaseSkill::SetNextSkillID(int NextSkillID)
+{
+	m_NextSkillID = NextSkillID;
+}
+
+void UBaseSkill::ResetNextSkillByBHit()
+{
 }
 
 void UBaseSkill::AdjustCoolTime()

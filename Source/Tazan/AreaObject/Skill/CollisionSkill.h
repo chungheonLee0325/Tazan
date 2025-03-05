@@ -50,7 +50,8 @@ public:
 		const FHitBoxData& HitBoxData,
 		const FCollisionQueryParams& QueryParams,
 		TArray<FHitResult>& OutHitResults);
-
+	virtual void ResetNextSkillByBHit() override;
+	
 	// 디버그 드로잉 옵션
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDraw = true;
