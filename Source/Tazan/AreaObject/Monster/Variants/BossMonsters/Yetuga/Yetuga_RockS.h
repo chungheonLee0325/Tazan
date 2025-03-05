@@ -36,6 +36,7 @@ private:
 	UPROPERTY()
 	AAreaObject* Target;
 
+	bool bIsHitOnce = false;
 	// FAttackCollision* AttackCollision;
 
 protected:
@@ -43,11 +44,12 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	
+
 	UFUNCTION()
 	void Overlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
-	void SetCaster(ABaseMonster* caster);
-	void SetTarget(AAreaObject* player);
+	void InitRock(ABaseMonster* caster, AAreaObject* player);
+
 	void Fire();
+	void OnDestroy(UAnimMontage* AnimMontage, bool bArg);
 };

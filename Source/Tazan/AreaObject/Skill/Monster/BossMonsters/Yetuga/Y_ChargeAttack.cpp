@@ -37,8 +37,8 @@ void UY_ChargeAttack::OnCastTick(float DeltaTime)
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, start, end, ECC_Visibility, QueryParams);
     
 	// 디버그용 라인 그리기
-	FColor LineColor = bHit ? FColor::Red : FColor::Green;
-	DrawDebugLine(GetWorld(), start, bHit ? HitResult.Location : end, LineColor, false, 2.0f, 0, 2.0f);
+	// FColor LineColor = bHit ? FColor::Red : FColor::Green;
+	// DrawDebugLine(GetWorld(), start, bHit ? HitResult.Location : end, LineColor, false, 2.0f, 0, 2.0f);
     
 	if (bHit)
 	{
