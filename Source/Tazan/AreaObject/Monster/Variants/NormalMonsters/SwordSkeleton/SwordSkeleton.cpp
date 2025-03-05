@@ -86,6 +86,27 @@ void ASwordSkeleton::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ASwordSkeleton::HandleGroggy(float Duration)
+{
+	if (IsDie())
+		return;
+	IsGroggy = true;
+	m_PoiseComponent->SetCurrentStagger(EStaggerType::Groggy);
+	HandleStaggerBegin(EStaggerType::Groggy,FName("Default"));
+}
+
+void ASwordSkeleton::HandleStaggerEnd()
+{
+	//if (IsGroggy) IsGroggy = false;
+	//if(m_PoiseComponent->GetCurrentStaggerType() == EStaggerType::Groggy)
+	if (IsGroggy)
+	{
+		OnGroggyEnd();
+		IncreaseStamina(3000.f);
+	}
+	Super::HandleStaggerEnd();
+}
+
 // Called every frame
 void ASwordSkeleton::Tick(float DeltaTime)
 {

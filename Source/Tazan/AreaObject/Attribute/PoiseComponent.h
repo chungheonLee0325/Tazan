@@ -14,12 +14,16 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TAZAN_API UPoiseComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
 public:
 	UPoiseComponent();
 
 	void InitPoise(int BasePoise);
-	
+
 	virtual void BeginPlay() override;
+
+	EStaggerType GetCurrentStaggerType() const { return CurrentStagger; };
+	void SetCurrentStagger(EStaggerType NewStagger) { CurrentStagger = NewStagger; };
 
 	// 강인도 계산
 	UFUNCTION(BlueprintCallable)

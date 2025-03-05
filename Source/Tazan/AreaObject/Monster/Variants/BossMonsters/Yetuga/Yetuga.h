@@ -24,6 +24,9 @@ public:
 
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	USkeletalMeshComponent* SmallRockMesh;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<AYetuga_RockS> SmallRock;
@@ -82,10 +85,16 @@ public:
 	// 스킬 관련
 	UFUNCTION(BlueprintCallable)
 	void ChargeSkillStun();
+	
 	UFUNCTION(BlueprintCallable)
 	void Recover();
+	
 	UFUNCTION(BlueprintCallable)
 	void FastBall();
+	UFUNCTION(BlueprintCallable)
+	void ShowRock();
+	UFUNCTION(BlueprintCallable)
+	void HideRock();
 
 private:
 	virtual void InitializeHUD() override;

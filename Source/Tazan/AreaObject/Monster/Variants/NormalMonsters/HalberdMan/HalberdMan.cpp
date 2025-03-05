@@ -21,6 +21,8 @@ AHalberdMan::AHalberdMan()
 	// Skill Setting
 	m_SkillRoulette = AHalberdMan::CreateSkillRoulette();
 
+	ParryStackMax = 2;
+
 	// CapsuleComponent Setting
 	GetCapsuleComponent()->SetCapsuleHalfHeight(150.f);
 	GetCapsuleComponent()->SetCapsuleRadius(50.f);
@@ -82,6 +84,25 @@ UBaseAiFSM* AHalberdMan::CreateFSM()
 UBaseSkillRoulette* AHalberdMan::CreateSkillRoulette()
 {
 	return Super::CreateSkillRoulette();
+}
+
+void AHalberdMan::HandleGroggy(float Duration)
+{
+	if (IsDie())
+		return;
+	IsGroggy = true;
+	m_PoiseComponent->SetCurrentStagger(EStaggerType::Groggy);
+	HandleStaggerBegin(EStaggerType::Groggy,FName("Default"));
+}
+
+void AHalberdMan::HandleStaggerEnd()
+{
+	if (IsGroggy)
+	{
+		OnGroggyEnd();
+		IncreaseStamina(3000.f);
+	}
+	Super::HandleStaggerEnd();
 }
 
 

@@ -190,8 +190,14 @@ void APlayer_Kazan::OnRevival()
 
 void APlayer_Kazan::HandleGroggy(float Duration)
 {
-	Super::HandleGroggy(Duration);
+	if (IsDie())
+		return;
+	IsGroggy = true;
+	// ToDo : Poise Component에게 직접 요청
+	m_PoiseComponent->SetCurrentStagger(EStaggerType::Groggy);
+	HandleStaggerBegin(EStaggerType::Groggy,FName("Default"));
 }
+
 
 void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type, const FName& Direction)
 {
@@ -201,6 +207,11 @@ void APlayer_Kazan::HandleStaggerBegin(EStaggerType Type, const FName& Direction
 
 void APlayer_Kazan::HandleStaggerEnd()
 {
+	if (IsGroggy)
+	{
+		IncreaseStamina(3000.f);
+		OnGroggyEnd();
+	}
 	Super::HandleStaggerEnd();
 	SetPlayerState(EPlayerState::NORMAL);
 }
@@ -241,16 +252,16 @@ void APlayer_Kazan::HandlePerfectDodge()
 
 void APlayer_Kazan::HandleGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data)
 {
-	Super::HandleGuard(DamageCauser, HitLocation, Data);
 	auto dir = DetermineDirection(DamageCauser->GetActorLocation());
 	PlayAnimMontage(GuardReactionMontage, 1.0f, dir);
+	Super::HandleGuard(DamageCauser, HitLocation, Data);
 }
 
 void APlayer_Kazan::HandlePerfectGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data)
 {
-	Super::HandlePerfectGuard(DamageCauser, HitLocation, Data);
 	auto dir = DetermineDirection(DamageCauser->GetActorLocation());
 	PlayAnimMontage(PerfectGuardReactionMontage, 1.0f, dir);
+	Super::HandlePerfectGuard(DamageCauser, HitLocation, Data);
 }
 
 void APlayer_Kazan::Reward(FItemData* ItemData, int ItemValue) const

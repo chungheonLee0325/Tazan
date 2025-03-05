@@ -148,6 +148,7 @@ public:
 	virtual void HandleGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data) override;
 	virtual void HandlePerfectGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data) override;
 	virtual void HandleGroggy(float Duration) override;
+
  	virtual void HandleStaggerBegin(EStaggerType Type, const FName& Direction) override;
 	virtual void HandleStaggerEnd() override;
 

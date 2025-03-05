@@ -20,6 +20,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual UBaseAiFSM* CreateFSM() override;
 	virtual UBaseSkillRoulette* CreateSkillRoulette() override;
+	virtual void HandleGroggy(float Duration) override;
+	virtual void HandleStaggerEnd() override;
 
 public:
 	// Called every frame
