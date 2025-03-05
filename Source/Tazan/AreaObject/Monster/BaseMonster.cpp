@@ -250,6 +250,16 @@ void ABaseMonster::OnDie()
 {
 	Super::OnDie();
 
+	TWeakObjectPtr<AAreaObject> weakThis = this;
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, [weakThis]()
+	{
+		AAreaObject* strongThis = weakThis.Get(); // 콜리전 전환
+
+		if (strongThis != nullptr)
+		{
+			strongThis->Destroy();
+		}
+	}, DestroyDelayTime, false);
 	// FSM 정지
 	if (m_AiFSM != nullptr) m_AiFSM->StopFSM();
 	// 움직임 정지
