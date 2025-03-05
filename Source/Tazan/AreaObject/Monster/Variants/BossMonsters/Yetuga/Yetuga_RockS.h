@@ -36,6 +36,7 @@ private:
 	UPROPERTY()
 	AAreaObject* Target;
 
+	bool bIsHitOnce = false;
 	// FAttackCollision* AttackCollision;
 
 protected:

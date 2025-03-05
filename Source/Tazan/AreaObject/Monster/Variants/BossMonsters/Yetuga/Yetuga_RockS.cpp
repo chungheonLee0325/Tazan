@@ -77,17 +77,19 @@ void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	{
 		return;
 	}
+
+	if (bIsHitOnce)
+	{
+		return;
+	}
+	
+	LOG_SCREEN("돌 오버랩");
+	bIsHitOnce = true;
 	
 	if (OtherActor == Target)
 	{
 		// Caster->CalcDamage(*AttackData->IndexedAttackData, Caster, hitActor, SweepResult);
 		UAnimInstance* animInst = Mesh->GetAnimInstance();
-
-		if (!animInst)
-		{
-			LOG_SCREEN_ERROR(this, "AnimInstance is null");
-			return;
-		}
 
 		if (TargetDestroyAni != nullptr)
 		{
@@ -97,26 +99,19 @@ void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 			animInst->Montage_SetEndDelegate(MontageEndedDelegate, TargetDestroyAni);
 			animInst->Montage_Play(TargetDestroyAni);
 		}
-		else
-		{
-			LOG_SCREEN_ERROR(this, "애니 몽타주 널");
-		}
-		return;
-	}
-
-	if (FloorDestroyAni != nullptr)
-	{
-		UAnimInstance* animInst = Mesh->GetAnimInstance();
-	
-		FOnMontageEnded MontageEndedDelegate;
-		MontageEndedDelegate.BindUObject(this, &AYetuga_RockS::OnDestroy);
-		
-		animInst->Montage_SetEndDelegate(MontageEndedDelegate, FloorDestroyAni);
-		Mesh->GetAnimInstance()->Montage_Play(FloorDestroyAni);
 	}
 	else
 	{
-		LOG_SCREEN_ERROR(this, "애니 몽타주 널");
+		UAnimInstance* animInst = Mesh->GetAnimInstance();
+		
+		if (FloorDestroyAni != nullptr)
+		{
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindUObject(this, &AYetuga_RockS::OnDestroy);
+		
+			animInst->Montage_SetEndDelegate(MontageEndedDelegate, FloorDestroyAni);
+			animInst->Montage_Play(FloorDestroyAni);
+		}
 	}
 }
 
