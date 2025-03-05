@@ -32,15 +32,18 @@ AYetuga_RockS::AYetuga_RockS()
 		Mesh->SetSkeletalMesh(RockMesh.Object);
 	}
 	
+	ConstructorHelpers::FClassFinder<UAnimInstance> TempABP(TEXT("/Script/Engine.AnimBlueprintGeneratedClass'/Game/_BluePrints/AreaObject/Monster/BossMonsters/ABP_Rock.ABP_Rock_C'"));
+	if (TempABP.Succeeded())
+	{
+		Mesh->SetAnimInstanceClass(TempABP.Class);
+	}
+	
 	ProjectileMovement=CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-	// ProjectileMovement->bAutoActivate = false;
+	ProjectileMovement->ProjectileGravityScale = 0.9f;
 
 	Root->SetGenerateOverlapEvents(true);
 	
 	Root->SetCollisionObjectType(ECC_EngineTraceChannel2);
-	// Root->SetCollisionResponseToAllChannels(ECR_Ignore);
-	//Root->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
-	//Root->SetCollisionResponseToChannel(ECC_WorldStatic,ECR_Overlap);
 
 	ConstructorHelpers::FObjectFinder<UAnimMontage>am1(TEXT("/Script/Engine.AnimMontage'/Game/_Resource/Yetuga/Rock/AM_RockDestroy_01.AM_RockDestroy_01'"));
 	if (am1.Succeeded())
@@ -74,15 +77,48 @@ void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	{
 		return;
 	}
+
+	if (bIsHitOnce)
+	{
+		return;
+	}
+	
+	LOG_SCREEN("돌 오버랩");
+	bIsHitOnce = true;
 	
 	if (OtherActor == Target)
 	{
-		// Caster->CalcDamage(*AttackData->IndexedAttackData, m_Caster, hitActor, SweepResult);
-	}
+		// Caster->CalcDamage(*AttackData->IndexedAttackData, Caster, hitActor, SweepResult);
+		UAnimInstance* animInst = Mesh->GetAnimInstance();
 
-	// Todo : HitVfx 출력
-	LOG_SCREEN("파괴: %s", *OtherActor->GetName() );
-	this->Destroy();
+		if (TargetDestroyAni != nullptr)
+		{
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindUObject(this, &AYetuga_RockS::OnDestroy);
+		
+			animInst->Montage_SetEndDelegate(MontageEndedDelegate, TargetDestroyAni);
+			animInst->Montage_Play(TargetDestroyAni);
+		}
+	}
+	else
+	{
+		UAnimInstance* animInst = Mesh->GetAnimInstance();
+		
+		if (FloorDestroyAni != nullptr)
+		{
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindUObject(this, &AYetuga_RockS::OnDestroy);
+		
+			animInst->Montage_SetEndDelegate(MontageEndedDelegate, FloorDestroyAni);
+			animInst->Montage_Play(FloorDestroyAni);
+		}
+	}
+}
+
+void AYetuga_RockS::InitRock(ABaseMonster* caster, AAreaObject* player)
+{
+	Caster = caster;
+	Target = player;
 }
 
 void AYetuga_RockS::Fire()
@@ -95,7 +131,7 @@ void AYetuga_RockS::Fire()
 	if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), arcValue))
 	{
 		Root->SetGenerateOverlapEvents(true);
-		FPredictProjectilePathParams predictParams(20.0f, startLoc, outVelocity, 15.0f);
+		FPredictProjectilePathParams predictParams(20.0f, startLoc, outVelocity*100.0f, 15.0f);
 		
 		predictParams.OverrideGravityZ = GetWorld()->GetGravityZ();
 		FPredictProjectilePathResult result;
@@ -106,14 +142,9 @@ void AYetuga_RockS::Fire()
 	}
 }
 
-
-void AYetuga_RockS::SetCaster(ABaseMonster* caster)
+void AYetuga_RockS::OnDestroy(UAnimMontage* AnimMontage, bool bArg)
 {
-	Caster = caster;
-}
-
-void AYetuga_RockS::SetTarget(AAreaObject* player)
-{
-	Target = player;
+	LOG_SCREEN("돌 파괴");
+	Destroy();
 }
 
