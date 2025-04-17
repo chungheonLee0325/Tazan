@@ -72,6 +72,7 @@
 * ├── UI/             # UI 관련 클래스 (Widgets, FloatingDamage)
 * └── Utilities/      # 공용 유틸리티 (LogMacro, TazanUtility)
 
+
 ## ⚙️ 설치 및 실행 방법
 
 1.  **요구 사양:**
