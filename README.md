@@ -53,26 +53,26 @@
 * **Key Systems:** Enhanced Input, Animation Montage & Notify, UMG, Data Tables, Custom FSM, Custom Skill System
 
 ## 📂 프로젝트 구조
-
-* Tazan/
-* ├── Animation/      # 애니메이션 관련 클래스 (AnimInstance, Notifies)
-* │   ├── Common/
-* │   ├── Monster/
-* │   └── Player/
-* ├── AreaObject/     # 게임 월드 내 액터 관련 클래스
-* │   ├── AI/         # 몬스터 AI (FSM, States)
-* │   ├── Attribute/  # 캐릭터 속성 컴포넌트 (Health, Stamina, Poise 등)
-* │   ├── Base/       # 기본 AreaObject 클래스
-* │   ├── Monster/    # 몬스터 관련 클래스 (Base, Variants, AI Controller)
-* │   ├── Player/     # 플레이어 관련 클래스 (Character, Controller, State, LockOn)
-* │   ├── Skill/      # 스킬 관련 클래스 (Base, Specific Skills)
-* │   └── Utility/    # 보조 유틸리티 액터/컴포넌트 (GhostTrail, MoveUtil)
-* ├── Contents/       # 게임 프레임워크 클래스 (GameInstance, GameMode, GameState)
-* ├── Items/          # 아이템 관련 클래스 (BaseItem)
-* ├── ResourceManager/ # 게임 데이터/타입 정의 (KazanGameType)
-* ├── UI/             # UI 관련 클래스 (Widgets, FloatingDamage)
-* └── Utilities/      # 공용 유틸리티 (LogMacro, TazanUtility)
-
+'''
+Tazan/
+├── Animation/      # 애니메이션 관련 클래스 (AnimInstance, Notifies)
+│   ├── Common/
+│   ├── Monster/
+│   └── Player/
+├── AreaObject/     # 게임 월드 내 액터 관련 클래스
+│   ├── AI/         # 몬스터 AI (FSM, States)
+│   ├── Attribute/  # 캐릭터 속성 컴포넌트 (Health, Stamina, Poise 등)
+│   ├── Base/       # 기본 AreaObject 클래스
+│   ├── Monster/    # 몬스터 관련 클래스 (Base, Variants, AI Controller)
+│   ├── Player/     # 플레이어 관련 클래스 (Character, Controller, State, LockOn)
+│   ├── Skill/      # 스킬 관련 클래스 (Base, Specific Skills)
+│   └── Utility/    # 보조 유틸리티 액터/컴포넌트 (GhostTrail, MoveUtil)
+├── Contents/       # 게임 프레임워크 클래스 (GameInstance, GameMode, GameState)
+├── Items/          # 아이템 관련 클래스 (BaseItem)
+├── ResourceManager/ # 게임 데이터/타입 정의 (KazanGameType)
+├── UI/             # UI 관련 클래스 (Widgets, FloatingDamage)
+└── Utilities/      # 공용 유틸리티 (LogMacro, TazanUtility)
+'''
 
 ## ⚙️ 설치 및 실행 방법
 
