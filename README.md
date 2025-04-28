@@ -53,7 +53,7 @@
 * **Key Systems:** Enhanced Input, Animation Montage & Notify, UMG, Data Tables, Custom FSM, Custom Skill System
 
 ## 📂 프로젝트 구조
-'''
+```
 Tazan/
 ├── Animation/      # 애니메이션 관련 클래스 (AnimInstance, Notifies)
 │   ├── Common/
@@ -72,7 +72,7 @@ Tazan/
 ├── ResourceManager/ # 게임 데이터/타입 정의 (KazanGameType)
 ├── UI/             # UI 관련 클래스 (Widgets, FloatingDamage)
 └── Utilities/      # 공용 유틸리티 (LogMacro, TazanUtility)
-'''
+```
 
 ## ⚙️ 설치 및 실행 방법
 
