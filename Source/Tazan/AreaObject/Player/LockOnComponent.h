@@ -38,16 +38,17 @@ private:
 	FVector2D LastSwitchInput;
 	float SwitchTargetDeadzone = 0.5f;
 
-	// UI 관련 추가
 	UPROPERTY()
-	//class ULockOnWidget* LockOnWidget;
-	class UWidgetComponent* LockOnWidget;
+	class ULockOnWidget* LockOnWidgetInstance;
+    
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class ULockOnWidget> LockOnWidgetClass;
+	
 	UPROPERTY()
 	AAreaObject* m_Owner;
-	//TSubclassOf<ULockOnWidget> WidgetClass;
+	UPROPERTY()
 	APlayerController* m_PlayerController;
-
-	void InitializeLockOnWidget();
+	
 	void UpdateLockOnWidget();
 
 public:
@@ -76,6 +77,14 @@ protected:
 	// 타겟 관리 및 검증
 	void UpdatePotentialTargets();
 	void UpdateCurrentTarget();
-	bool IsTargetInRange(AAreaObject* Target) const;
 	bool IsTargetVisible(AAreaObject* Target) const;
+
+private:
+	// 타겟 자동 해제 타이머
+	float LostRangeTimer = 0.0f;
+	float LostRangeTime = 1.0f;
+	float LostVisibilityTimer = 0.0f;
+	float LostVisibilityTime = 3.0f;
+	float BackTurnedTimer = 0.0f;
+	float BackTurnedTime = 2.0f;
 };

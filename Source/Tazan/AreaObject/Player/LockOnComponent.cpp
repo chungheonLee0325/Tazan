@@ -22,19 +22,6 @@
 ULockOnComponent::ULockOnComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-	LockOnWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("LockOnWidget"));
-	LockOnWidget->SetWidgetSpace(EWidgetSpace::Screen);
-	LockOnWidget->SetDrawAtDesiredSize(true);
-
-	// 위젯 클래스 로드 및 생성
-	static ConstructorHelpers::FClassFinder<ULockOnWidget> WidgetClassFinder(
-		TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_LockOnWidget.WB_LockOnWidget_C'"));
-	if (WidgetClassFinder.Succeeded())
-	{
-		LockOnWidget->SetWidgetClass(WidgetClassFinder.Class);
-		//WidgetClass = WidgetClassFinder.Class;
-	}
 }
 
 
@@ -42,26 +29,20 @@ ULockOnComponent::ULockOnComponent()
 void ULockOnComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
+    
 	m_Owner = Cast<AAreaObject>(GetOwner());
 	m_PlayerController = Cast<APlayerController>(m_Owner->GetController());
-	InitializeLockOnWidget();
-}
-
-void ULockOnComponent::InitializeLockOnWidget()
-{
-	if (!m_Owner) return;
-	if (!m_PlayerController) return;
-	//LockOnWidget = CreateWidget<ULockOnWidget>(m_PlayerController, WidgetClass);
-	if (LockOnWidget)
+	
+	if (m_PlayerController && LockOnWidgetClass)
 	{
-		//LockOnWidget->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-		LockOnWidget->SetWidgetSpace(EWidgetSpace::Screen);
-		LockOnWidget->SetDrawSize(FVector2D(100.f, 100.f));
-		LockOnWidget->AttachToComponent(m_Owner->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
-		LockOnWidget->RegisterComponent();
-		LockOnWidget->SetVisibility(true);
+		LockOnWidgetInstance = CreateWidget<ULockOnWidget>(m_PlayerController, LockOnWidgetClass);
+		if (LockOnWidgetInstance)
+		{
+			// 높은 Z-Order로 항상 위에 표시
+			LockOnWidgetInstance->AddToViewport(100);
+			// ViewPort에 추가하되 초기에는 숨김
+			LockOnWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 
@@ -77,45 +58,28 @@ void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		UpdateCurrentTarget();
 		UpdateLockOnWidget();
 	}
-	if (CurrentTarget != nullptr)
-	{
-		// ToDo : UI 완성시 삭제
-		FVector location = CurrentTarget->GetActorLocation();
-		location.Z += CurrentTarget->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 1.2f;
-		location += CurrentTarget->GetActorForwardVector() * CurrentTarget->GetCapsuleComponent()->
-		                                                                    GetScaledCapsuleRadius() * 0.7f;
-		DrawDebugSphere(GetWorld(), location, 10, 40, FColor::Yellow, false, 0.01f);
-	}
 }
 
 bool ULockOnComponent::ToggleLockOn()
 {
 	if (!bIsLockOnMode)
 	{
-		// 락온 시작
 		AAreaObject* NewTarget = FindBestTarget();
 		if (NewTarget)
 		{
-			// ToDo : 이동 예정? 별도 메서드로 분리할듯
-			ABaseMonster* monster = Cast<ABaseMonster>(NewTarget);
-			if (monster != nullptr)
+			// 몬스터 HP 위젯 표시
+			if (ABaseMonster* monster = Cast<ABaseMonster>(NewTarget))
 			{
 				monster->SetHPWidgetVisibility(true);
 			}
 
 			CurrentTarget = NewTarget;
 			bIsLockOnMode = true;
-			//OnLockOnStateChanged.Broadcast(true, CurrentTarget);
 
 			// UI 표시
-			if (LockOnWidget)
+			if (LockOnWidgetInstance)
 			{
-				//LockOnWidget->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-				//LockOnWidget->AttachToComponent(NewTarget, FAttachmentTransformRules::KeepRelativeTransform);
-				LockOnWidget->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-				LockOnWidget->AttachToComponent(NewTarget->GetMesh(),
-				                                FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-				LockOnWidget->SetVisibility(true);
+				LockOnWidgetInstance->SetVisibility(ESlateVisibility::HitTestInvisible);
 				UpdateLockOnWidget();
 			}
 		}
@@ -127,22 +91,18 @@ bool ULockOnComponent::ToggleLockOn()
 	else
 	{
 		// 락온 해제
-		ABaseMonster* monster = Cast<ABaseMonster>(CurrentTarget);
-		if (monster != nullptr)
+		if (ABaseMonster* monster = Cast<ABaseMonster>(CurrentTarget))
 		{
 			monster->SetHPWidgetVisibility(false);
 		}
 
 		bIsLockOnMode = false;
 		CurrentTarget = nullptr;
-		//OnLockOnStateChanged.Broadcast(false, nullptr);
 
 		// UI 숨기기
-		if (LockOnWidget)
+		if (LockOnWidgetInstance)
 		{
-			LockOnWidget->K2_DetachFromComponent();
-			LockOnWidget->SetVisibility(false);
-			//LockOnWidget->ClearTargets();
+			LockOnWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 	return true;
@@ -279,19 +239,80 @@ void ULockOnComponent::UpdatePotentialTargets()
 
 void ULockOnComponent::UpdateCurrentTarget()
 {
-	if (!CurrentTarget || !IsTargetIsDead(CurrentTarget))
-	{
-		// 현재 타겟이 죽으면 다른 대상 락온 찾기 
-		ToggleLockOn();
-		ToggleLockOn();
-	}
-	if (!CurrentTarget || !IsTargetDistanceValid(CurrentTarget))
-	{
-		// 현재 타겟이 유효하지 않으면 락온 해제
-		ToggleLockOn();
-	}
-
-	// 필요한 경우 여기에 추가 업데이트 로직
+    if (!CurrentTarget || !m_Owner) return;
+    
+    bool ShouldDisengage = false;
+    FString DisengageReason;
+    
+    // 1. 타겟 사망
+    if (CurrentTarget->IsDie())
+    {
+        ShouldDisengage = true;
+        DisengageReason = "Target Died";
+        
+        // 죽은 타겟 근처의 다른 타겟으로 자동 전환 시도
+        ToggleLockOn();
+        ToggleLockOn();
+    }
+    
+    // 2. 거리 체크 
+    float Distance = FVector::Distance(m_Owner->GetActorLocation(), CurrentTarget->GetActorLocation());
+    if (Distance > LockOnLostRange)
+    {
+        LostRangeTimer += GetWorld()->GetDeltaSeconds();
+        if (LostRangeTimer > LostRangeTime)
+        {
+            ShouldDisengage = true;
+            DisengageReason = "Out of Range";
+        }
+    }
+    else
+    {
+        LostRangeTimer = 0.0f;
+    }
+    
+    // 3. 시야 차단 체크
+    if (!IsTargetVisible(CurrentTarget))
+    {
+        LostVisibilityTimer += GetWorld()->GetDeltaSeconds();
+        if (LostVisibilityTimer > LostVisibilityTime)
+        {
+            ShouldDisengage = true;
+            DisengageReason = "Lost Visibility";
+        }
+    }
+    else
+    {
+        LostVisibilityTimer = 0.0f;
+    }
+    
+    // 4. 각도 체크 (플레이어가 반대 방향을 보고 있을 때)
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	m_PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	FVector CameraForward = CameraRotation.Vector();
+	
+    FVector ToTarget = (CurrentTarget->GetActorLocation() - CameraLocation).GetSafeNormal();
+    float DotProduct = FVector::DotProduct(CameraForward, ToTarget);
+    if (DotProduct < -0.5f) // 120도 이상 벗어남
+    {
+        BackTurnedTimer += GetWorld()->GetDeltaSeconds();
+        if (BackTurnedTimer > BackTurnedTime)
+        {
+            ShouldDisengage = true;
+            DisengageReason = "Player Turned Away";
+        }
+    }
+    else
+    {
+        BackTurnedTimer = 0.0f;
+    }
+    
+    if (ShouldDisengage)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Lock-on disengaged: %s"), *DisengageReason);
+        ToggleLockOn(); // 록온 해제
+    }
 }
 
 bool ULockOnComponent::IsTargetValid(AAreaObject* Target) const
@@ -301,20 +322,15 @@ bool ULockOnComponent::IsTargetValid(AAreaObject* Target) const
 	if (!IsTargetDistanceValid(Target))
 		return false;
 	// 시야각 체크
-	// Get camera location and direction
 	FVector CameraLocation;
 	FRotator CameraRotation;
 	m_PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 	FVector CameraForward = CameraRotation.Vector();
 
-	// Calculate direction to target from camera's perspective
 	FVector DirectionToTarget = (Target->GetActorLocation() - CameraLocation).GetSafeNormal();
-
-	// Angle check using camera's forward vector
+	
 	float DotResult = FVector::DotProduct(CameraForward, DirectionToTarget);
-
-	// You can define a minimum dot product threshold corresponding to your desired angle
-	// For example, 0.5 corresponds to approximately 60 degrees field of view (30 degrees on each side)
+	
 	const float MinDotProductThreshold = 0.5f; // Adjust this value as needed
 
 	if (DotResult < MinDotProductThreshold)
@@ -421,11 +437,47 @@ void ULockOnComponent::SwitchTarget(const FVector2D& Direction)
 
 void ULockOnComponent::UpdateLockOnWidget()
 {
-	if (!LockOnWidget) return;
-
-	// 메인 타겟 마커 업데이트
-	//LockOnWidget->UpdateTargetMarker(CurrentTarget);
-
-	// 잠재적 타겟 마커 업데이트
-	//UpdatePotentialTargets();
+    if (!LockOnWidgetInstance || !CurrentTarget || !m_PlayerController) return;
+    
+    // 타겟 위치 계산
+    FVector TargetWorldLocation = CurrentTarget->GetActorLocation();
+    
+    // 스크린 좌표로 변환
+    FVector2D ScreenPosition;
+    bool bIsOnScreen = UGameplayStatics::ProjectWorldToScreen(m_PlayerController, TargetWorldLocation, ScreenPosition);
+    
+    if (bIsOnScreen)
+    {
+        // 화면 내에 있을 때
+        LockOnWidgetInstance->SetPositionInViewport(ScreenPosition);
+        LockOnWidgetInstance->UpdateTargetMarker(CurrentTarget);
+        LockOnWidgetInstance->SetRenderOpacity(1.0f);
+    }
+    else
+    {
+        // 화면 밖에 있을 때 - 가장자리에 인디케이터 표시
+        int32 ViewportSizeX, ViewportSizeY;
+        m_PlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
+        FVector2D ViewportCenter(ViewportSizeX * 0.5f, ViewportSizeY * 0.5f);
+        
+        // 화면 중앙에서 타겟 방향으로의 벡터
+        FVector2D DirectionToTarget = ScreenPosition - ViewportCenter;
+        DirectionToTarget.Normalize();
+        
+        // 화면 가장자리 위치 계산
+        const float EdgeMargin = 80.0f;
+        float MaxX = (ViewportSizeX * 0.5f) - EdgeMargin;
+        float MaxY = (ViewportSizeY * 0.5f) - EdgeMargin;
+        
+        // 가장자리와의 교점 계산
+        float ScaleX = FMath::Abs(DirectionToTarget.X) > 0.001f ? MaxX / FMath::Abs(DirectionToTarget.X) : MAX_FLT;
+        float ScaleY = FMath::Abs(DirectionToTarget.Y) > 0.001f ? MaxY / FMath::Abs(DirectionToTarget.Y) : MAX_FLT;
+        float Scale = FMath::Min(ScaleX, ScaleY);
+        
+        FVector2D EdgePosition = ViewportCenter + DirectionToTarget * Scale;
+        
+        LockOnWidgetInstance->SetPositionInViewport(EdgePosition);
+        LockOnWidgetInstance->UpdateTargetMarker(CurrentTarget);
+        LockOnWidgetInstance->SetRenderOpacity(0.6f); // 화면 밖 타겟은 반투명하게
+    }
 }

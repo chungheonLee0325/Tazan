@@ -257,7 +257,7 @@ private:
 	// 락온 관련 이동/회전
 	void UpdateLockedRotation(float DeltaTime);
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	ULockOnComponent* LockOnComponent;
 
 	UPROPERTY()
