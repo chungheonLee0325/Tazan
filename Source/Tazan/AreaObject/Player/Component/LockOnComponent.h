@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Player_Kazan.h"
+#include "Tazan/AreaObject/Player/Player_Kazan.h"
 #include "Components/ActorComponent.h"
 #include "LockOnComponent.generated.h"
 

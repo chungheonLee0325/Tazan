@@ -5,7 +5,7 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "LockOnComponent.h"
+#include "Tazan/AreaObject/Player/Component/LockOnComponent.h"
 #include "Player_Kazan.h"
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"

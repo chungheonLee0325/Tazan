@@ -12,7 +12,7 @@
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/AreaObject/Utility/GhostTrail.h"
 #include "Tazan/Utilities/LogMacro.h"
-#include "Tazan/AreaObject/Player/LockOnComponent.h"
+#include "Tazan/AreaObject/Player/Component/LockOnComponent.h"
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 
