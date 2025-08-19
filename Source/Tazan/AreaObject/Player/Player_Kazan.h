@@ -123,9 +123,10 @@ public:
 	/** Called for evade input */
 	void Dodge_Pressed();
 
-	/** Called for run input */
-	void On_Run_Pressed();
-	void On_Run_Released();
+	/** Called for Sprint input */
+	void On_Sprint_Pressed();
+	void On_Sprint_Triggered();
+	void On_Sprint_Released();
 
 	/** Called for HPRecover input */
 	void HPRecover_Pressed();
@@ -227,6 +228,8 @@ private:
 
 	// Data
 	const float MAX_WALK_SPEED = 500.f;
+	const float SPRINT_SPEED_RATIO = 1.8f;
+	const float SPRINT_COST = 0.5f;
 	const float MAX_GUARD_WALK_SPEED = 200.f;
 
 	// 가드 관련 변수들    

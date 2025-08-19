@@ -67,7 +67,7 @@ float UStaminaComponent::DecreaseStamina(float Delta, bool bIsDamaged)
 		OnApplyGroggyDelegate.Broadcast(m_GroggyDuration);
 		OnStaminaChanged.Broadcast(m_Stamina, 0, m_StaminaMax);
 		GetWorld()->GetTimerManager().ClearTimer(RecoveryDelayHandle);
-		m_Stamina = m_StaminaMax;
+		IncreaseStamina(m_StaminaMax);
 	}
 	return m_Stamina;
 }

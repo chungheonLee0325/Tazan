@@ -195,7 +195,7 @@ void APlayer_Kazan::HandleGroggy(float Duration)
 	IsGroggy = true;
 	// ToDo : Poise Component에게 직접 요청
 	m_PoiseComponent->SetCurrentStagger(EStaggerType::Groggy);
-	HandleStaggerBegin(EStaggerType::Groggy,FName("Default"));
+	HandleStaggerBegin(EStaggerType::Groggy, FName("Default"));
 }
 
 
@@ -737,12 +737,20 @@ void APlayer_Kazan::Dodge_Pressed()
 	*/
 }
 
-void APlayer_Kazan::On_Run_Pressed()
+void APlayer_Kazan::On_Sprint_Pressed()
 {
+	float SprintSpeed = MAX_WALK_SPEED * SPRINT_SPEED_RATIO;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 }
 
-void APlayer_Kazan::On_Run_Released()
+void APlayer_Kazan::On_Sprint_Triggered()
 {
+	DecreaseStamina(0.5f, false);
+}
+
+void APlayer_Kazan::On_Sprint_Released()
+{
+	GetCharacterMovement()->MaxWalkSpeed = MAX_WALK_SPEED;
 }
 
 void APlayer_Kazan::HPRecover_Pressed()

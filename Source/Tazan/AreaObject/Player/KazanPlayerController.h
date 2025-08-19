@@ -55,9 +55,22 @@ private:
 	void On_Parry_Released(const FInputActionValue& InputActionValue);
 	/** Called for evade input */
 	void On_Dodge_Pressed(const FInputActionValue& InputActionValue);
-	/** Called for run input */
-	void On_Run_Pressed(const FInputActionValue& InputActionValue);
-	void On_Run_Released(const FInputActionValue& InputActionValue);
+	/** Called for sprint input */
+	void On_Sprint_Pressed(const FInputActionValue& InputActionValue);
+	void On_Sprint_Triggerd(const FInputActionValue& InputActionValue);
+	void On_Sprint_Released(const FInputActionValue& InputActionValue);
+	/** Called for skill input */
+	void On_Skill_1_Pressed(const FInputActionValue& InputActionValue);
+	void On_Skill_1_Triggered(const FInputActionValue& InputActionValue);
+	void On_Skill_1_Released(const FInputActionValue& InputActionValue);
+
+	void On_Skill_2_Pressed(const FInputActionValue& InputActionValue);
+	void On_Skill_2_Triggered(const FInputActionValue& InputActionValue);
+	void On_Skill_2_Released(const FInputActionValue& InputActionValue);
+
+	void On_Skill_3_Pressed(const FInputActionValue& InputActionValue);
+	void On_Skill_3_Triggered(const FInputActionValue& InputActionValue);
+	void On_Skill_3_Released(const FInputActionValue& InputActionValue);
 	/** Called for LockOn input */
 	void On_LockOn_Pressed();
 	/** Called for SwitchTarget input */
@@ -97,6 +110,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	/** Sprint Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
+
 	/** Attack_C Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AttackCAction;
@@ -105,9 +122,21 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AttackSAction;
 
+	/** Skill 1 Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Skill_1_Action;
+
+	/** Skill 2 Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Skill_2_Action;
+
+	/** Skill 3 Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Skill_3_Action;
+	
 	/** Parry Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ParryAction;
+	UInputAction* GuardAction;
 
 	/** Evade Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

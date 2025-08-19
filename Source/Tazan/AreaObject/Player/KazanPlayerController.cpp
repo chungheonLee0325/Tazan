@@ -32,6 +32,30 @@ AKazanPlayerController::AKazanPlayerController()
 	{
 		LookAction = tempLookAction.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempSprintAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_Sprint.IA_Sprint'"));
+	if (tempSprintAction.Succeeded())
+	{
+		SprintAction = tempSprintAction.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempSkill1Action(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanSkill1.IA_KazanSkill1'"));
+	if (tempSkill1Action.Succeeded())
+	{
+		Skill_1_Action = tempSkill1Action.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempSkill2Action(
+	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanSkill2.IA_KazanSkill2'"));
+	if (tempSkill2Action.Succeeded())
+	{
+		Skill_2_Action = tempSkill2Action.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempSkill3Action(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanSkill3.IA_KazanSkill3'"));
+	if (tempSkill3Action.Succeeded())
+	{
+		Skill_3_Action = tempSkill3Action.Object;
+	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempAttackCAction(
 		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_C.IA_KazanAttack_C'"));
 	if (tempAttackCAction.Succeeded())
@@ -48,7 +72,7 @@ AKazanPlayerController::AKazanPlayerController()
 		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanParry.IA_KazanParry'"));
 	if (tempParryAction.Succeeded())
 	{
-		ParryAction = tempParryAction.Object;
+		GuardAction = tempParryAction.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempEvadeAction(
 		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanEvade.IA_KazanEvade'"));
@@ -174,10 +198,42 @@ void AKazanPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Triggered, this,
 		                                   &AKazanPlayerController::On_Attack_Strong_Triggered);
 
-		// Parry
-		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Started, this,
+		// Sprint
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this,
+										   &AKazanPlayerController::On_Sprint_Pressed);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this,
+										   &AKazanPlayerController::On_Sprint_Released);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this,
+										   &AKazanPlayerController::On_Sprint_Triggerd);
+
+		// Skill 1
+		EnhancedInputComponent->BindAction(Skill_1_Action, ETriggerEvent::Started, this,
+										   &AKazanPlayerController::On_Skill_1_Pressed);
+		EnhancedInputComponent->BindAction(Skill_1_Action, ETriggerEvent::Completed, this,
+										   &AKazanPlayerController::On_Skill_1_Released);
+		EnhancedInputComponent->BindAction(Skill_1_Action, ETriggerEvent::Triggered, this,
+										   &AKazanPlayerController::On_Skill_1_Triggered);
+
+		// Skill 2
+		EnhancedInputComponent->BindAction(Skill_2_Action, ETriggerEvent::Started, this,
+										   &AKazanPlayerController::On_Skill_2_Pressed);
+		EnhancedInputComponent->BindAction(Skill_2_Action, ETriggerEvent::Completed, this,
+										   &AKazanPlayerController::On_Skill_2_Released);
+		EnhancedInputComponent->BindAction(Skill_2_Action, ETriggerEvent::Triggered, this,
+										   &AKazanPlayerController::On_Skill_2_Triggered);
+
+		// Skill 3
+		EnhancedInputComponent->BindAction(Skill_3_Action, ETriggerEvent::Started, this,
+										   &AKazanPlayerController::On_Skill_3_Pressed);
+		EnhancedInputComponent->BindAction(Skill_3_Action, ETriggerEvent::Completed, this,
+										   &AKazanPlayerController::On_Skill_3_Released);
+		EnhancedInputComponent->BindAction(Skill_3_Action, ETriggerEvent::Triggered, this,
+										   &AKazanPlayerController::On_Skill_3_Triggered);
+		
+		// Guard
+		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Started, this,
 		                                   &AKazanPlayerController::On_Parry_Pressed);
-		EnhancedInputComponent->BindAction(ParryAction, ETriggerEvent::Completed, this,
+		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this,
 		                                   &AKazanPlayerController::On_Parry_Released);
 
 		// Evade
@@ -254,12 +310,19 @@ void AKazanPlayerController::On_Dodge_Pressed(const FInputActionValue& InputActi
 	Kazan->Dodge_Pressed();
 }
 
-void AKazanPlayerController::On_Run_Pressed(const FInputActionValue& InputActionValue)
+void AKazanPlayerController::On_Sprint_Pressed(const FInputActionValue& InputActionValue)
 {
+	Kazan->On_Sprint_Pressed();
 }
 
-void AKazanPlayerController::On_Run_Released(const FInputActionValue& InputActionValue)
+void AKazanPlayerController::On_Sprint_Triggerd(const FInputActionValue& InputActionValue)
 {
+	Kazan->On_Sprint_Triggered();
+}
+
+void AKazanPlayerController::On_Sprint_Released(const FInputActionValue& InputActionValue)
+{
+	Kazan->On_Sprint_Released();
 }
 
 void AKazanPlayerController::On_LockOn_Pressed()
@@ -340,4 +403,40 @@ void AKazanPlayerController::RemoveCurrency(ECurrencyType CurrencyType, int Curr
 int AKazanPlayerController::GetCurrencyValue(ECurrencyType CurrencyType)
 {
 	return CurrencyValues[CurrencyType];
+}
+
+void AKazanPlayerController::On_Skill_1_Pressed(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_1_Triggered(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_1_Released(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_2_Pressed(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_2_Triggered(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_2_Released(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_3_Pressed(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_3_Triggered(const FInputActionValue& InputActionValue)
+{
+}
+
+void AKazanPlayerController::On_Skill_3_Released(const FInputActionValue& InputActionValue)
+{
 }
