@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Tazan/Animation/Player/KazanAnimInstance.h"
+#include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Skill/Base/BaseSkill.h"
 #include "Tazan/AreaObject/Utility/GhostTrail.h"
 #include "Tazan/Utilities/LogMacro.h"
@@ -739,18 +740,40 @@ void APlayer_Kazan::Dodge_Pressed()
 
 void APlayer_Kazan::On_Sprint_Pressed()
 {
+	// 가드 중에는 달리기 시작 불가
+	if (bIsGuard || CurrentPlayerState == EPlayerState::GUARD || !CanPerformAction(CurrentPlayerState, "Move"))
+		return;
+
+	// 최소 요구치 검사
+	if (GetStamina() < SprintStartMinStamina)
+		return;
+
+	bIsSprinting = true;
+
 	float SprintSpeed = MAX_WALK_SPEED * SPRINT_SPEED_RATIO;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 }
 
 void APlayer_Kazan::On_Sprint_Triggered()
 {
-	DecreaseStamina(0.5f, false);
+	// 가드 중이거나 스프린트 상태가 아닐 때는 소모/처리 금지
+	if (!bIsSprinting || bIsGuard || CurrentPlayerState == EPlayerState::GUARD)
+		return;
+
+	if (DecreaseStamina(0.5f, false) < SprintMaintainMinStamina)
+	{
+		On_Sprint_Released();
+		return;
+	}
 }
 
 void APlayer_Kazan::On_Sprint_Released()
 {
-	GetCharacterMovement()->MaxWalkSpeed = MAX_WALK_SPEED;
+	bIsSprinting = false;
+
+	// 가드 중이면 가드 속도 유지, 아니면 보행 속도로 복귀
+	GetCharacterMovement()->MaxWalkSpeed =
+		(bIsGuard || CurrentPlayerState == EPlayerState::GUARD) ? MAX_GUARD_WALK_SPEED : MAX_WALK_SPEED;
 }
 
 void APlayer_Kazan::HPRecover_Pressed()
@@ -834,6 +857,11 @@ void APlayer_Kazan::SetGuardState(bool bIsGuarding)
 		// 퍼펙트 가드 Condition 추가
 		AddCondition(EConditionBitsType::PerfectGuardWindow, 0.1f);
 
+		// 스프린트 강제 종료 및 가드 속도 적용
+		if (bIsSprinting)
+		{
+			bIsSprinting = false;
+		}
 		// Movement Setting
 		GetCharacterMovement()->MaxWalkSpeed = MAX_GUARD_WALK_SPEED;
 		// Rotation Setting
