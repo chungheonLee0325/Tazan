@@ -82,6 +82,7 @@ public:
 	bool IsSpecial = false;
 	FTimerHandle SpecialTimerHandle;
 	bool bIsGuard;
+	bool bIsSprinting = false;
 	int HP_Potion_Max_Stack = 3;
 
 	void SetPlayerState(EPlayerState NewState);
@@ -231,6 +232,14 @@ private:
 	const float SPRINT_SPEED_RATIO = 1.8f;
 	const float SPRINT_COST = 0.5f;
 	const float MAX_GUARD_WALK_SPEED = 200.f;
+
+	// ----- Sprint limits -----
+	// 시작 최소치
+	UPROPERTY(EditDefaultsOnly, Category="Sprint")
+	float SprintStartMinStamina = 10.f;
+	// 유지 최저치
+	UPROPERTY(EditDefaultsOnly, Category="Sprint")
+	float SprintMaintainMinStamina = 0.1f;
 
 	// 가드 관련 변수들    
 	UPROPERTY(EditDefaultsOnly, Category = "Guard")
