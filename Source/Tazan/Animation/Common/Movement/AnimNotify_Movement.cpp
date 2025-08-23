@@ -6,35 +6,6 @@
 #include "Tazan/AreaObject/Player/Component/LockOnComponent.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 
-static AActor* ResolveLockOnTarget(AAreaObject* AreaObject, bool bUseLockOn)
-{
-    if (!AreaObject) return nullptr;
-
-    // 1) 플레이어: 락온 우선
-    if (bUseLockOn)
-    {
-        if (auto* Player = Cast<APlayer_Kazan>(AreaObject))
-        {
-            if (auto* L = Player->GetLockOnComponent())
-            {
-                if (L->IsLockOnMode())
-                {
-                    if (AActor* T = L->GetCurrentTarget()) return T;
-                }
-            }
-        }
-    }
-
-    // 2) 몬스터: 어그로 타깃
-    if (auto* Monster = Cast<ABaseMonster>(AreaObject))
-    {
-        if (AActor* Aggro = Monster->GetAggroTarget())
-            return Aggro;
-    }
-
-    return nullptr;
-}
-
 static void FillCommon(FAreaMoveSpec& S, const UAnimNotify_Movement* N)
 {
     S.Interp        = N->Interp;
@@ -43,23 +14,6 @@ static void FillCommon(FAreaMoveSpec& S, const UAnimNotify_Movement* N)
     S.Priority      = N->Priority;
     S.SourceId      = N->SourceId;
     S.Curve         = N->Curve;
-}
-
-static void AutoResolveTargetsIfNeeded(FAreaMoveSpec& S, AAreaObject* Area, bool bUseLockOnToward, bool bUseLockOnFacing)
-{
-    if (!Area) return;
-
-    // Toward
-    if (S.Intent == EMoveIntent::TowardActor && !S.TowardActor.IsValid())
-    {
-        S.TowardActor = ResolveLockOnTarget(Area, bUseLockOnToward);
-    }
-
-    // InFacing(Target)
-    if (S.Intent == EMoveIntent::InFacing && S.FacingDir == ERelMoveDir::Target && !S.TargetActor.IsValid())
-    {
-        S.TargetActor = ResolveLockOnTarget(Area, bUseLockOnFacing);
-    }
 }
 
 void UAnimNotify_Movement::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -78,7 +32,7 @@ void UAnimNotify_Movement::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
             FAreaMoveSpec S = CustomSpec;
             if (bAutoResolveTargetsForSpec)
             {
-                AutoResolveTargetsIfNeeded(S, Area, /*toward*/true, /*facing*/true);
+                UMoveUtilComponent::AutoResolveTargetsIfNeeded(S, Area, /*toward*/true, /*facing*/true);
             }
             Area->StartMoveSpec(S);
             return;
@@ -98,7 +52,7 @@ void UAnimNotify_Movement::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
             S.YawOffsetDeg= YawOffsetDeg;
             FillCommon(S, this);
             if (FacingDir == ERelMoveDir::Target)
-                S.TargetActor = ResolveLockOnTarget(Area, bFacingUseLockOnTarget);
+                S.TargetActor = UMoveUtilComponent::ResolveAreaTarget(Area, bFacingUseLockOnTarget);
             Area->StartMoveSpec(S);
             return;
 
@@ -111,7 +65,7 @@ void UAnimNotify_Movement::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
             S.YawOffsetDeg= YawOffsetDeg;
             FillCommon(S, this);
             if (FacingDir == ERelMoveDir::Target)
-                S.TargetActor = ResolveLockOnTarget(Area, bFacingUseLockOnTarget);
+                S.TargetActor = UMoveUtilComponent::ResolveAreaTarget(Area, bFacingUseLockOnTarget);
             Area->StartMoveSpec(S);
             return;
 
@@ -119,7 +73,7 @@ void UAnimNotify_Movement::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
         {
             S.Intent       = EMoveIntent::TowardActor;
             S.Kinematics   = EKinematics::BySpeed;
-            S.TowardActor  = ResolveLockOnTarget(Area, bUseLockOnTarget);
+            S.TowardActor  = UMoveUtilComponent::ResolveAreaTarget(Area, bUseLockOnTarget);
             if (!S.TowardActor.IsValid()) return;
 
             S.TowardPolicy = TowardPolicy;
