@@ -7,6 +7,7 @@
 #include "Tazan/AreaObject/Attribute/ConditionComponent.h"
 #include "Tazan/AreaObject/Attribute/HealthComponent.h"
 #include "Tazan/AreaObject/Attribute/PoiseComponent.h"
+#include "Tazan/AreaObject/Utility/MoveUtilComponent.h"
 #include "Tazan/AreaObject/Utility/RotateUtilComponent.h"
 #include "Tazan/ResourceManager/KazanGameType.h"
 #include "Tazan/UI/Widget/FloatingDamageWidget.h"
@@ -163,14 +164,17 @@ public:
 	void StopAll();
 
 	// Move 기능 퍼사드 제공
-	void MoveActorTo(const FVector& TargetPosition, float Duration,
-	                 EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
-	                 bool bStickToGround = false);
+	UFUNCTION(BlueprintCallable, Category="Move")
+	void StartMoveSpec(const FAreaMoveSpec& Spec);
 
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
-	                          EMovementInterpolationType InterpType = EMovementInterpolationType::Linear,
-	                          bool bStickToGround = false);
+	UFUNCTION(BlueprintCallable, Category="Move")
+	void UpdateMoveSpec(const FAreaMoveUpdate& Update);
+
+	UFUNCTION(BlueprintCallable, Category="Move")
+	void StopMoveBySourceId(int32 SourceId, EMoveFinishReason Reason = EMoveFinishReason::Canceled);
+
+	UFUNCTION(BlueprintCallable, Category="Move")
+	void StopAllMoves(EMoveFinishReason Reason = EMoveFinishReason::Canceled);
 
 	// Rotate 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category = "Rotation")

@@ -327,12 +327,12 @@ void AAreaObject::StopRotate() const
 
 void AAreaObject::StopMove() const
 {
-	m_MoveUtilComponent->StopMovement();
+	m_MoveUtilComponent->StopAllMoves();
 }
 
 void AAreaObject::StopAll()
 {
-	m_MoveUtilComponent->StopMovement();
+	m_MoveUtilComponent->StopAllMoves();
 	m_RotateUtilComponent->StopRotation();
 	if (m_CurrentSkill != nullptr)
 	{
@@ -514,16 +514,24 @@ bool AAreaObject::ExchangeDead() const
 	return m_ConditionComponent->ExchangeDead();
 }
 
-void AAreaObject::MoveActorTo(const FVector& TargetPosition, float Duration, EMovementInterpolationType InterpType,
-                              bool bStickToGround)
+void AAreaObject::StartMoveSpec(const FAreaMoveSpec& Spec)
 {
-	m_MoveUtilComponent->MoveActorTo(TargetPosition, Duration, InterpType, bStickToGround);
+	if (m_MoveUtilComponent) m_MoveUtilComponent->StartMove(Spec);
 }
 
-void AAreaObject::MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
-                                       EMovementInterpolationType InterpType, bool bStickToGround)
+void AAreaObject::UpdateMoveSpec(const FAreaMoveUpdate& Update)
 {
-	m_MoveUtilComponent->MoveActorToWithSpeed(TargetPosition, Speed, InterpType, bStickToGround);
+	if (m_MoveUtilComponent) m_MoveUtilComponent->UpdateMove(Update);
+}
+
+void AAreaObject::StopMoveBySourceId(int32 SourceId, EMoveFinishReason Reason)
+{
+	if (m_MoveUtilComponent) m_MoveUtilComponent->StopMoveBySourceId(SourceId, Reason);
+}
+
+void AAreaObject::StopAllMoves(EMoveFinishReason Reason)
+{
+	if (m_MoveUtilComponent) m_MoveUtilComponent->StopAllMoves(Reason);
 }
 
 void AAreaObject::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed,
@@ -799,7 +807,24 @@ void AAreaObject::HandleKnockBack(const FVector& TargetPos, const FAttackData& A
 
 void AAreaObject::ApplyKnockBack(const FVector& KnockBackForce)
 {
-	MoveActorTo(KnockBackForce, KnockBackDuration, EMovementInterpolationType::EaseOut);
+	if (FVector::Dist2D(GetActorLocation(), KnockBackForce) < 1.f)
+	{
+		return;
+	}
+
+	FAreaMoveSpec S;
+	S.Intent         = EMoveIntent::ToLocation;                   // 위치로 이동
+	S.Kinematics     = EKinematics::ByDuration;                   // 시간 기반
+	S.TargetLocation = KnockBackForce;                            // 목표 위치
+	S.Duration       = KnockBackDuration;                         // 넉백 시간
+	S.Interp         = EMovementInterpolationType::EaseOut;       // 보간
+	S.bStickToGround = true;                                      // 지면 따라가기
+	S.bSlideOnBlock  = false;                                     // 충돌 시 즉시 정지(=Blocked)
+	S.Priority       = 900;                                       // 강제 이동 계열은 높게
+	S.SourceId       = 901;                                       // KnockBack 전용 SourceId
+	S.Curve          = nullptr;                                   // 필요 시 커브 연결
+
+	StartMoveSpec(S);
 }
 
 void AAreaObject::SetGuardState(bool bIsGuarding)
