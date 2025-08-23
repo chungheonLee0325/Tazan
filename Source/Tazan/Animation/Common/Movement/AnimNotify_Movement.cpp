@@ -1,92 +1,171 @@
-// AnimNotify_AreaMoveEx.cpp
 #include "AnimNotify_Movement.h"
 #include "GameFramework/Character.h"
 #include "Tazan/AreaObject/Base/AreaObject.h"
-#include "Tazan/AreaObject/Monster/BaseMonster.h"
 #include "Tazan/AreaObject/Utility/MoveUtilComponent.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
 #include "Tazan/AreaObject/Player/Component/LockOnComponent.h"
+#include "Tazan/AreaObject/Monster/BaseMonster.h"
 
-static AActor* ResolveTarget(AAreaObject* AreaObject)
+static AActor* ResolveLockOnTarget(AAreaObject* AreaObject, bool bUseLockOn)
 {
-	if (!AreaObject) return nullptr;
+    if (!AreaObject) return nullptr;
 
-	// 플레이어: 락온 우선
-	if (auto* Player = Cast<APlayer_Kazan>(AreaObject))
-	{
-		if (auto* L = Player->GetLockOnComponent())
-		{
-			if (L->IsLockOnMode())
-				return L->GetCurrentTarget();
-		}
-	}
+    // 1) 플레이어: 락온 우선
+    if (bUseLockOn)
+    {
+        if (auto* Player = Cast<APlayer_Kazan>(AreaObject))
+        {
+            if (auto* L = Player->GetLockOnComponent())
+            {
+                if (L->IsLockOnMode())
+                {
+                    if (AActor* T = L->GetCurrentTarget()) return T;
+                }
+            }
+        }
+    }
 
-	// 몬스터: 어그로 타겟
-	if (auto* Monster = Cast<ABaseMonster>(AreaObject)) 
-	{
-		if (AActor* Aggro = Monster->GetAggroTarget())
-			return Aggro;
-	}
-	return nullptr;
+    // 2) 몬스터: 어그로 타깃
+    if (auto* Monster = Cast<ABaseMonster>(AreaObject))
+    {
+        if (AActor* Aggro = Monster->GetAggroTarget())
+            return Aggro;
+    }
+
+    return nullptr;
+}
+
+static void FillCommon(FAreaMoveSpec& S, const UAnimNotify_Movement* N)
+{
+    S.Interp        = N->Interp;
+    S.bStickToGround= N->bStickToGround;
+    S.bSlideOnBlock = N->bSlideOnBlock;
+    S.Priority      = N->Priority;
+    S.SourceId      = N->SourceId;
+    S.Curve         = N->Curve;
+}
+
+static void AutoResolveTargetsIfNeeded(FAreaMoveSpec& S, AAreaObject* Area, bool bUseLockOnToward, bool bUseLockOnFacing)
+{
+    if (!Area) return;
+
+    // Toward
+    if (S.Intent == EMoveIntent::TowardActor && !S.TowardActor.IsValid())
+    {
+        S.TowardActor = ResolveLockOnTarget(Area, bUseLockOnToward);
+    }
+
+    // InFacing(Target)
+    if (S.Intent == EMoveIntent::InFacing && S.FacingDir == ERelMoveDir::Target && !S.TargetActor.IsValid())
+    {
+        S.TargetActor = ResolveLockOnTarget(Area, bUseLockOnFacing);
+    }
 }
 
 void UAnimNotify_Movement::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
-                                    const FAnimNotifyEventReference& EventReference)
+                                  const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComp, Animation, EventReference);
-	if (!MeshComp) return;
+    Super::Notify(MeshComp, Animation, EventReference);
+    if (!MeshComp) return;
+    AActor* Owner = MeshComp->GetOwner();
+    if (!Owner) return;
 
-	AActor* Owner = MeshComp->GetOwner();
-	if (!Owner) return;
+    if (AAreaObject* Area = Cast<AAreaObject>(Owner))
+    {
+        // 고급: CustomSpec 우선
+        if (bUseCustomSpec)
+        {
+            FAreaMoveSpec S = CustomSpec;
+            if (bAutoResolveTargetsForSpec)
+            {
+                AutoResolveTargetsIfNeeded(S, Area, /*toward*/true, /*facing*/true);
+            }
+            Area->StartMoveSpec(S);
+            return;
+        }
 
-	AAreaObject* AreaObject = Cast<AAreaObject>(Owner);
-	if (!AreaObject)
-	{
-		// 폴백: AAreaObject가 아니면 MoveUtil 직접 접근 시도
-		if (ACharacter* Ch = Cast<ACharacter>(Owner))
-		{
-			if (UMoveUtilComponent* MU = Ch->FindComponentByClass<UMoveUtilComponent>())
-			{
-				switch (Mode)
-				{
-				case EAreaMoveNotifyKind::InFacing_Distance:
-					{
-						const FVector Fwd = Ch->GetActorForwardVector();
-						MU->MoveActorToWithSpeed(Ch->GetActorLocation() + Fwd * Distance, Speed_Dist, Interp,
-						                         bStickToGround, Priority, SourceId);
-					}
-					return;
-				case EAreaMoveNotifyKind::InFacing_Duration:
-					MU->MoveInFacingTimed(Speed_Time, Duration, Interp, bStickToGround, Priority, SourceId);
-					return;
-				case EAreaMoveNotifyKind::TowardsActor_Timed:
-					// 폴백에선 락온 미지원
-					return;
-				}
-			}
-		}
-		return;
-	}
+        // 프리셋
+        FAreaMoveSpec S;
 
-	switch (Mode)
-	{
-	case EAreaMoveNotifyKind::InFacing_Distance:
-		AreaObject->MoveInFacing(Distance, Speed_Dist, Interp, bStickToGround, Priority, SourceId);
-		break;
+        switch (Mode)
+        {
+        case EAreaMoveNotifyKind::InFacing_Distance:
+            S.Intent      = EMoveIntent::InFacing;
+            S.Kinematics  = EKinematics::BySpeed;
+            S.Distance    = Distance;
+            S.Speed       = Speed_Dist;
+            S.FacingDir   = FacingDir;
+            S.YawOffsetDeg= YawOffsetDeg;
+            FillCommon(S, this);
+            if (FacingDir == ERelMoveDir::Target)
+                S.TargetActor = ResolveLockOnTarget(Area, bFacingUseLockOnTarget);
+            Area->StartMoveSpec(S);
+            return;
 
-	case EAreaMoveNotifyKind::InFacing_Duration:
-		AreaObject->MoveInFacingTimed(Speed_Time, Duration, Interp, bStickToGround, Priority, SourceId);
-		break;
+        case EAreaMoveNotifyKind::InFacing_Duration:
+            S.Intent      = EMoveIntent::InFacing;
+            S.Kinematics  = EKinematics::ByDuration;
+            S.Speed       = Speed_Time;   // 거리 = 속도 * 시간
+            S.Duration    = Duration;
+            S.FacingDir   = FacingDir;
+            S.YawOffsetDeg= YawOffsetDeg;
+            FillCommon(S, this);
+            if (FacingDir == ERelMoveDir::Target)
+                S.TargetActor = ResolveLockOnTarget(Area, bFacingUseLockOnTarget);
+            Area->StartMoveSpec(S);
+            return;
 
-	case EAreaMoveNotifyKind::TowardsActor_Timed:
-		{
-			AActor* Target = ResolveTarget(AreaObject);
-			if (Target)
-			{
-				AreaObject->MoveTowardsActorTimed(Target, StopDistance, Speed_Toward, MaxDuration, Interp,
-				                                  bStickToGround, Priority, SourceId);
-			}
-		}
-		break;
-	}
+        case EAreaMoveNotifyKind::TowardsActor_Timed:
+        {
+            S.Intent       = EMoveIntent::TowardActor;
+            S.Kinematics   = EKinematics::BySpeed;
+            S.TowardActor  = ResolveLockOnTarget(Area, bUseLockOnTarget);
+            if (!S.TowardActor.IsValid()) return;
+
+            S.TowardPolicy = TowardPolicy;
+            if (TowardPolicy == ETowardPolicy::ReachStopDistance)
+            {
+                S.StopDistance = StopDistance;
+            }
+            else
+            {
+                S.TravelDistance = TravelDistance;
+                // FixedTravel은 보통 타임아웃 비권장 (윈도우/씬 정책에 맞춰 직접 설정 가능)
+            }
+
+            S.Speed        = Speed_Toward;
+            S.MaxDuration  = MaxDuration;
+
+            FillCommon(S, this);
+            Area->StartMoveSpec(S);
+            return;
+        }
+        }
+    }
+
+    // 폴백: AAreaObject가 아닌 경우
+    if (ACharacter* Ch = Cast<ACharacter>(Owner))
+    {
+        if (UMoveUtilComponent* MU = Ch->FindComponentByClass<UMoveUtilComponent>())
+        {
+            if (bUseCustomSpec) { MU->StartMove(CustomSpec); return; }
+
+            FAreaMoveSpec S;
+            switch (Mode)
+            {
+            case EAreaMoveNotifyKind::InFacing_Distance:
+                S.Intent = EMoveIntent::InFacing; S.Kinematics = EKinematics::BySpeed;
+                S.Distance = Distance; S.Speed = Speed_Dist; S.FacingDir = FacingDir; S.YawOffsetDeg = YawOffsetDeg;
+                FillCommon(S, this); MU->StartMove(S); return;
+
+            case EAreaMoveNotifyKind::InFacing_Duration:
+                S.Intent = EMoveIntent::InFacing; S.Kinematics = EKinematics::ByDuration;
+                S.Speed = Speed_Time; S.Duration = Duration; S.FacingDir = FacingDir; S.YawOffsetDeg = YawOffsetDeg;
+                FillCommon(S, this); MU->StartMove(S); return;
+
+            case EAreaMoveNotifyKind::TowardsActor_Timed:
+                return; // 폴백에선 타깃 해석 미지원
+            }
+        }
+    }
 }

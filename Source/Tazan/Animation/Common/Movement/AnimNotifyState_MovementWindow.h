@@ -1,11 +1,11 @@
-// AnimNotifyState_AreaMoveWindow.h
 #pragma once
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "AnimNotify_Movement.h"
+#include "AnimNotify_Movement.h"              // EAreaMoveNotifyKind
+#include "Tazan/AreaObject/Utility/MoveUtilComponent.h" // FAreaMoveSpec/Update
 #include "AnimNotifyState_MovementWindow.generated.h"
 
-UCLASS(meta=(DisplayName="Movement Utility : Movement Window NotifyState"))
+UCLASS(meta=(DisplayName="Area: Move Window (Spec)"))
 class TAZAN_API UAnimNotifyState_MovementWindow : public UAnimNotifyState
 {
     GENERATED_BODY()
@@ -13,43 +13,88 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mode")
     EAreaMoveNotifyKind Mode = EAreaMoveNotifyKind::TowardsActor_Timed;
 
-    // 공통
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-    bool bStickToGround = true;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-    EMovementInterpolationType Interp = EMovementInterpolationType::EaseOut;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Priority")
-    int32 Priority = 100;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Priority")
-    int32 SourceId = 2;
+    // 프리셋 or 커스텀
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Advanced")
+    bool bUseCustomSpec = false;
 
-    // 파라미터
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Distance", meta=(EditCondition="Mode==EAreaMoveNotifyKind::InFacing_Distance"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Advanced", meta=(EditCondition="bUseCustomSpec==true"))
+    FAreaMoveSpec CustomSpec;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Advanced", meta=(EditCondition="bUseCustomSpec==true"))
+    bool bAutoResolveTargetsForSpec = true;
+
+    // 공통
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Common", meta=(EditCondition="bUseCustomSpec==false"))
+    EMovementInterpolationType Interp = EMovementInterpolationType::EaseOut;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Common", meta=(EditCondition="bUseCustomSpec==false"))
+    bool bStickToGround = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Common", meta=(EditCondition="bUseCustomSpec==false"))
+    bool bSlideOnBlock = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Common", meta=(EditCondition="bUseCustomSpec==false"))
+    int32 Priority = 100;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Common", meta=(EditCondition="bUseCustomSpec==false"))
+    int32 SourceId = 2;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move|Common", meta=(EditCondition="bUseCustomSpec==false"))
+    TObjectPtr<UCurveFloat> Curve = nullptr;
+
+    // InFacing preset
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Distance",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::InFacing_Distance"))
     float Distance = 200.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Duration", meta=(EditCondition="Mode==EAreaMoveNotifyKind::InFacing_Duration"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Duration",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::InFacing_Duration"))
     float Speed_Time = 2400.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Duration", meta=(EditCondition="Mode==EAreaMoveNotifyKind::InFacing_Duration"))
-    float Duration = 0.2f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Target", meta=(EditCondition="Mode==EAreaMoveNotifyKind::TowardsActor_Timed"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Duration",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::InFacing_Duration"))
+    float Duration = 0.20f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Direction",
+        meta=(EditCondition="bUseCustomSpec==false && (Mode==EAreaMoveNotifyKind::InFacing_Distance || Mode==EAreaMoveNotifyKind::InFacing_Duration)"))
+    ERelMoveDir FacingDir = ERelMoveDir::Forward;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Direction",
+        meta=(EditCondition="bUseCustomSpec==false && (Mode==EAreaMoveNotifyKind::InFacing_Distance || Mode==EAreaMoveNotifyKind::InFacing_Duration) && FacingDir==ERelMoveDir::CustomYaw"))
+    float YawOffsetDeg = 0.f;
+
+    // ★ InFacing에서 FacingDir=Target일 때 타깃 해석
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Direction",
+        meta=(EditCondition="bUseCustomSpec==false && (Mode==EAreaMoveNotifyKind::InFacing_Distance || Mode==EAreaMoveNotifyKind::InFacing_Duration) && FacingDir==ERelMoveDir::Target"))
+    bool bFacingUseLockOnTarget = true;
+
+    // Toward preset
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Target",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::TowardsActor_Timed"))
     bool bUseLockOnTarget = true;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Target", meta=(EditCondition="Mode==EAreaMoveNotifyKind::TowardsActor_Timed"))
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Policy",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::TowardsActor_Timed"))
+    ETowardPolicy TowardPolicy = ETowardPolicy::ReachStopDistance;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Target",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::TowardsActor_Timed && TowardPolicy==ETowardPolicy::ReachStopDistance"))
     float StopDistance = 120.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Target", meta=(EditCondition="Mode==EAreaMoveNotifyKind::TowardsActor_Timed"))
-    float Speed_Toward = 2000.f;
 
-    // 동작 옵션
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window")
-    bool bStartOnBegin = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Policy",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::TowardsActor_Timed && TowardPolicy==ETowardPolicy::FixedTravel"))
+    float TravelDistance = 300.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window", meta=(EditCondition="Mode==EAreaMoveNotifyKind::TowardsActor_Timed"))
-    bool bUpdateTargetEveryTick = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Toward|Target",
+        meta=(EditCondition="bUseCustomSpec==false && Mode==EAreaMoveNotifyKind::TowardsActor_Timed"))
+    float Speed_Toward = 2400.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window")
-    bool bStopOnEnd = true;
+    // 창 옵션
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window") bool bStartOnBegin = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window",
+        meta=(EditCondition="Mode==EAreaMoveNotifyKind::TowardsActor_Timed")) bool bUpdateTargetEveryTick = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window") bool bStopOnEnd = true;
 
-    virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
-    virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) override;
-    virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
+    // UE5 API
+    virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+                             float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
+    virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+                            float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) override;
+    virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+                           const FAnimNotifyEventReference& EventReference) override;
 };

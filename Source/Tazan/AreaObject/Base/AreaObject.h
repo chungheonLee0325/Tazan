@@ -165,47 +165,16 @@ public:
 
 	// Move 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category="Move")
-	void MoveActorTo(const FVector& Target, float Duration,
-	                 EMovementInterpolationType Interp = EMovementInterpolationType::Linear,
-	                 bool bStickToGround = false, int32 Priority = 100, int32 SourceId = 0, bool bSlideOnBlock = true,
-	                 UCurveFloat* Curve = nullptr);
+	void StartMoveSpec(const FAreaMoveSpec& Spec);
 
 	UFUNCTION(BlueprintCallable, Category="Move")
-	void MoveActorToWithSpeed(const FVector& Target, float Speed,
-	                          EMovementInterpolationType Interp = EMovementInterpolationType::Linear,
-	                          bool bStickToGround = false, int32 Priority = 100, int32 SourceId = 0,
-	                          bool bSlideOnBlock = true, UCurveFloat* Curve = nullptr);
+	void UpdateMoveSpec(const FAreaMoveUpdate& Update);
 
 	UFUNCTION(BlueprintCallable, Category="Move")
-	void MoveInFacing(float Distance, float Speed,
-	                  EMovementInterpolationType Interp = EMovementInterpolationType::EaseOut,
-	                  bool bStickToGround = true, int32 Priority = 100, int32 SourceId = 0, bool bSlideOnBlock = true,
-	                  UCurveFloat* Curve = nullptr);
+	void StopMoveBySourceId(int32 SourceId, EMoveFinishReason Reason = EMoveFinishReason::Canceled);
 
 	UFUNCTION(BlueprintCallable, Category="Move")
-	void MoveTowardsActor(AActor* TargetActor, float StopDistance, float Speed,
-	                      EMovementInterpolationType Interp = EMovementInterpolationType::EaseOut,
-	                      bool bStickToGround = true, int32 Priority = 100, int32 SourceId = 0,
-	                      bool bSlideOnBlock = true, UCurveFloat* Curve = nullptr);
-
-	UFUNCTION(BlueprintCallable, Category="Move")
-	void MoveInFacingTimed(float Speed, float Duration,
-	                       EMovementInterpolationType Interp = EMovementInterpolationType::EaseOut,
-	                       bool bStickToGround = true, int32 Priority = 100, int32 SourceId = 0,
-	                       bool bSlideOnBlock = true, UCurveFloat* Curve = nullptr);
-
-	UFUNCTION(BlueprintCallable, Category="Move")
-	void MoveTowardsActorTimed(AActor* TargetActor, float StopDistance, float Speed, float MaxDuration,
-	                           EMovementInterpolationType Interp = EMovementInterpolationType::EaseOut,
-	                           bool bStickToGround = true, int32 Priority = 100, int32 SourceId = 0,
-	                           bool bSlideOnBlock = true, UCurveFloat* Curve = nullptr);
-
-	UFUNCTION(BlueprintCallable, Category="Move")
-	bool UpdateMoveToTarget(const FVector& NewTarget, bool bChangeSpeed, float NewSpeedOrDuration,
-	                        bool bRequireSameSourceId = true, int32 SourceId = 0);
-
-	UFUNCTION(BlueprintCallable, Category="Move")
-	void StopMove(EMoveFinishReason Reason = EMoveFinishReason::Canceled);
+	void StopAllMoves(EMoveFinishReason Reason = EMoveFinishReason::Canceled);
 
 	// Rotate 기능 퍼사드 제공
 	UFUNCTION(BlueprintCallable, Category = "Rotation")
