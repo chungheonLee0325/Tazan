@@ -173,6 +173,12 @@ enum class EMovementInterpolationType : uint8
 	EaseInOut UMETA(DisplayName = "Ease In Out"),
 	EaseOutBounce UMETA(DisplayName = "Ease Out Bounce"),
 	EaseOutElastic UMETA(DisplayName = "Ease Out Elastic"),
+	ExpoIn UMETA(DisplayName = "Expo In"),
+	ExpoOut UMETA(DisplayName = "Expo Out"),
+	ExpoInOut UMETA(DisplayName = "Expo In Out"),
+	ElasticIn UMETA(DisplayName = "Elastic In"),
+	ElasticOut UMETA(DisplayName = "Elastic Out"),
+	ElasticInOut UMETA(DisplayName = "Elastic In Out"),
 };
 
 UENUM(BlueprintType)

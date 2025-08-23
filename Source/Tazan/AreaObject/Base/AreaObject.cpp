@@ -514,16 +514,67 @@ bool AAreaObject::ExchangeDead() const
 	return m_ConditionComponent->ExchangeDead();
 }
 
-void AAreaObject::MoveActorTo(const FVector& TargetPosition, float Duration, EMovementInterpolationType InterpType,
-                              bool bStickToGround)
+void AAreaObject::MoveActorTo(const FVector& Target, float Duration, EMovementInterpolationType Interp,
+                              bool bStickToGround, int32 Priority, int32 SourceId, bool bSlideOnBlock,
+                              UCurveFloat* Curve)
 {
-	m_MoveUtilComponent->MoveActorTo(TargetPosition, Duration, InterpType, bStickToGround);
+	if (m_MoveUtilComponent) m_MoveUtilComponent->MoveActorTo(Target, Duration, Interp, bStickToGround, Priority,
+	                                                          SourceId, bSlideOnBlock, Curve);
 }
 
-void AAreaObject::MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
-                                       EMovementInterpolationType InterpType, bool bStickToGround)
+void AAreaObject::MoveActorToWithSpeed(const FVector& Target, float Speed, EMovementInterpolationType Interp,
+                                       bool bStickToGround, int32 Priority, int32 SourceId, bool bSlideOnBlock,
+                                       UCurveFloat* Curve)
 {
-	m_MoveUtilComponent->MoveActorToWithSpeed(TargetPosition, Speed, InterpType, bStickToGround);
+	if (m_MoveUtilComponent) m_MoveUtilComponent->MoveActorToWithSpeed(Target, Speed, Interp, bStickToGround, Priority,
+	                                                                   SourceId, bSlideOnBlock, Curve);
+}
+
+void AAreaObject::MoveInFacing(float Distance, float Speed, EMovementInterpolationType Interp, bool bStickToGround,
+                               int32 Priority, int32 SourceId, bool bSlideOnBlock, UCurveFloat* Curve)
+{
+	if (m_MoveUtilComponent) m_MoveUtilComponent->MoveInFacing(Distance, Speed, Interp, bStickToGround, Priority,
+	                                                           SourceId, bSlideOnBlock, Curve);
+}
+
+void AAreaObject::MoveTowardsActor(AActor* TargetActor, float StopDistance, float Speed,
+                                   EMovementInterpolationType Interp, bool bStickToGround, int32 Priority,
+                                   int32 SourceId, bool bSlideOnBlock, UCurveFloat* Curve)
+{
+	if (m_MoveUtilComponent) m_MoveUtilComponent->MoveTowardsActor(TargetActor, StopDistance, Speed, Interp,
+	                                                               bStickToGround, Priority, SourceId, bSlideOnBlock,
+	                                                               Curve);
+}
+
+bool AAreaObject::UpdateMoveToTarget(const FVector& NewTarget, bool bChangeSpeed, float NewSpeedOrDuration,
+                                     bool bRequireSameSourceId, int32 SourceId)
+{
+	return m_MoveUtilComponent
+		       ? m_MoveUtilComponent->UpdateMovementTarget(NewTarget, bChangeSpeed, NewSpeedOrDuration,
+		                                                   bRequireSameSourceId, SourceId)
+		       : false;
+}
+
+void AAreaObject::StopMove(EMoveFinishReason Reason)
+{
+	if (m_MoveUtilComponent) m_MoveUtilComponent->StopMovement(Reason);
+}
+
+void AAreaObject::MoveInFacingTimed(float Speed, float Duration, EMovementInterpolationType Interp,
+                                    bool bStickToGround, int32 Priority, int32 SourceId,
+                                    bool bSlideOnBlock, UCurveFloat* Curve)
+{
+	if (m_MoveUtilComponent) m_MoveUtilComponent->MoveInFacingTimed(Speed, Duration, Interp, bStickToGround, Priority,
+	                                                                SourceId, bSlideOnBlock, Curve);
+}
+
+void AAreaObject::MoveTowardsActorTimed(AActor* TargetActor, float StopDistance, float Speed, float MaxDuration,
+                                        EMovementInterpolationType Interp, bool bStickToGround,
+                                        int32 Priority, int32 SourceId, bool bSlideOnBlock, UCurveFloat* Curve)
+{
+	if (m_MoveUtilComponent) m_MoveUtilComponent->MoveTowardsActorTimed(TargetActor, StopDistance, Speed, MaxDuration,
+	                                                                    Interp, bStickToGround, Priority, SourceId,
+	                                                                    bSlideOnBlock, Curve);
 }
 
 void AAreaObject::LookAtLocation(const FVector& TargetLocation, EPMRotationMode Mode, float DurationOrSpeed,

@@ -1,225 +1,370 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿#include "MoveUtilComponent.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
+#include "Components/CapsuleComponent.h"
 
-
-#include "MoveUtilComponent.h"
-
-
-// Sets default values for this component's properties
 UMoveUtilComponent::UMoveUtilComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.bCanEverTick = true;
 }
 
-
-// Called when the game starts
 void UMoveUtilComponent::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 }
 
-
-// Called every frame
-void UMoveUtilComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                       FActorComponentTickFunction* ThisTickFunction)
+void UMoveUtilComponent::MoveActorTo(const FVector& Target, float Duration,
+                                     EMovementInterpolationType Interp,
+                                     bool bStickToGround,
+                                     int32 Priority, int32 SourceId,
+                                     bool bSlideOnBlock,
+                                     UCurveFloat* Curve)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	const float CurrentTime = GetWorld()->GetTimeSeconds();
-	if (CurrentTime - LastUpdateTime < MinUpdateInterval)
-	{
-		return;
-	}
-	LastUpdateTime = CurrentTime;
-
-	// Update Movement
-	if (MovementState.IsActive())
-	{
-		MovementState.Update(DeltaTime);
-		const float Alpha = MovementState.GetProgress();
-		const float InterpolatedAlpha = CalculateInterpolationAlpha(Alpha, MovementState.InterpType);
-
-		// 실제 이동 적용
-		const FVector NewPosition = FMath::Lerp(MovementState.StartPos, MovementState.TargetPos, InterpolatedAlpha);
-		AActor* Owner = GetOwner();
-		Owner->SetActorLocation(NewPosition, true);
-
-
-		if (Alpha >= 1.0f)
-		{
-			MovementState.Stop();
-		}
-	}
-	// Debug Visualization
-	if (bShowDebugPath)
-	{
-		DrawDebugVisuals();
-	}
+    StartNewMovement(Target, EPMMovementMode::Duration, Duration, Interp, bStickToGround, Priority, SourceId, bSlideOnBlock, Curve);
 }
 
-
-void UMoveUtilComponent::MoveActorTo(const FVector& TargetPosition, float Duration,
-                                     EMovementInterpolationType InterpType, bool bStickToGround)
+void UMoveUtilComponent::MoveActorToWithSpeed(const FVector& Target, float Speed,
+                                              EMovementInterpolationType Interp,
+                                              bool bStickToGround,
+                                              int32 Priority, int32 SourceId,
+                                              bool bSlideOnBlock,
+                                              UCurveFloat* Curve)
 {
-	if (!GetOwner()) return;
-
-	FVector AdjustedTargetPosition = TargetPosition;
-
-	if (bStickToGround)
-	{
-		// 라인 트레이스를 통해 지형의 높이를 감지
-		FHitResult HitResult;
-		FVector TraceStart = TargetPosition + FVector(0.0f, 0.0f, 1000.0f); // 위에서 시작
-		FVector TraceEnd = TargetPosition - FVector(0.0f, 0.0f, 1000.0f); // 아래로 트레이스
-
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(GetOwner());
-
-		if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_WorldStatic, QueryParams))
-		{
-			AdjustedTargetPosition.Z = HitResult.Location.Z;
-		}
-	}
-
-	StartNewMovement(AdjustedTargetPosition, EPMMovementMode::Duration, Duration, InterpType);
+    StartNewMovement(Target, EPMMovementMode::Speed, Speed, Interp, bStickToGround, Priority, SourceId, bSlideOnBlock, Curve);
 }
 
-void UMoveUtilComponent::MoveActorToWithSpeed(const FVector& TargetPosition, float Speed,
-                                              EMovementInterpolationType InterpType, bool bStickToGround)
+void UMoveUtilComponent::MoveInFacing(float Distance, float Speed,
+                                      EMovementInterpolationType Interp,
+                                      bool bStickToGround,
+                                      int32 Priority, int32 SourceId,
+                                      bool bSlideOnBlock,
+                                      UCurveFloat* Curve)
 {
-	if (!GetOwner()) return;
-
-	FVector AdjustedTargetPosition = TargetPosition;
-
-	if (bStickToGround)
-	{
-		// 라인 트레이스를 통해 지형의 높이를 감지
-		FHitResult HitResult;
-		FVector TraceStart = TargetPosition + FVector(0.0f, 0.0f, 1000.0f); // 위에서 시작
-		FVector TraceEnd = TargetPosition - FVector(0.0f, 0.0f, 1000.0f); // 아래로 트레이스
-
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(GetOwner());
-
-		if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_WorldStatic, QueryParams))
-		{
-			AdjustedTargetPosition.Z = HitResult.Location.Z;
-		}
-	}
-
-	StartNewMovement(AdjustedTargetPosition, EPMMovementMode::Speed, Speed, InterpType);
+    if (!GetOwner()) return;
+    const FVector Forward = GetOwner()->GetActorForwardVector();
+    const FVector Target = GetOwner()->GetActorLocation() + Forward * Distance;
+    MoveActorToWithSpeed(Target, Speed, Interp, bStickToGround, Priority, SourceId, bSlideOnBlock, Curve);
 }
 
-void UMoveUtilComponent::StopMovement()
+void UMoveUtilComponent::MoveTowardsActor(AActor* TargetActor, float StopDistance, float Speed,
+                                          EMovementInterpolationType Interp,
+                                          bool bStickToGround,
+                                          int32 Priority, int32 SourceId,
+                                          bool bSlideOnBlock,
+                                          UCurveFloat* Curve)
 {
-	if (!MovementState.IsActive()) return;
+    if (!GetOwner() || !TargetActor) return;
 
-	AActor* Owner = GetOwner();
-	const FVector CurrentPos = Owner->GetActorLocation();
-	Owner->SetActorLocation(CurrentPos);
+    FVector OwnerLoc = GetOwner()->GetActorLocation();
+    FVector TargetLoc = TargetActor->GetActorLocation();
 
-	MovementState = FMovementState();
+    // 2D 방향으로 계산(지면 전제)
+    FVector Dir = (TargetLoc - OwnerLoc);
+    Dir.Z = 0.f;
+    Dir = Dir.GetSafeNormal();
+
+    float ExtraRadius = 0.f;
+    if (const ACharacter* Ch = Cast<ACharacter>(GetOwner()))
+    {
+        if (const UCapsuleComponent* Cap = Ch->GetCapsuleComponent())
+            ExtraRadius += Cap->GetScaledCapsuleRadius();
+    }
+    if (const ACharacter* ChT = Cast<ACharacter>(TargetActor))
+    {
+        if (const UCapsuleComponent* CapT = ChT->GetCapsuleComponent())
+            ExtraRadius += CapT->GetScaledCapsuleRadius();
+    }
+
+    const float Stop = FMath::Max(StopDistance, 0.f) + ExtraRadius;
+    const float Dist = FVector::Dist2D(TargetLoc, OwnerLoc);
+    const float Travel = FMath::Max(Dist - Stop, 0.f);
+
+    const FVector FinalTarget = OwnerLoc + Dir * Travel;
+    MoveActorToWithSpeed(FinalTarget, Speed, Interp, bStickToGround, Priority, SourceId, bSlideOnBlock, Curve);
 }
 
-void UMoveUtilComponent::StartNewMovement(const FVector& Target, EPMMovementMode Mode,
-                                          float SpeedOrDuration, EMovementInterpolationType InterpType)
+bool UMoveUtilComponent::UpdateMovementTarget(const FVector& NewTarget,
+                                              bool bChangeSpeed, float NewSpeedOrDuration,
+                                              bool bRequireSameSourceId,
+                                              int32 SourceId)
 {
-	StopMovement();
+    if (!MovementState.IsActive()) return false;
+    if (bRequireSameSourceId && MovementState.SourceId != SourceId) return false;
 
+    MovementState.TargetPos = NewTarget;
 
-	MovementState.StartPos = GetOwner()->GetActorLocation();
-	MovementState.TargetPos = Target;
-	MovementState.MovementMode = Mode;
-	MovementState.InterpType = InterpType;
-
-	if (Mode == EPMMovementMode::Duration)
-	{
-		MovementState.Duration = SpeedOrDuration;
-		MovementState.Speed = 0.0f;
-	}
-	else
-	{
-		MovementState.Speed = SpeedOrDuration;
-		MovementState.Duration = (Target - MovementState.StartPos).Size() / SpeedOrDuration;
-	}
-
-	MovementState.CurrentTime = 0.0f;
-	MovementState.bIsActive = true;
+    if (bChangeSpeed)
+    {
+        if (MovementState.MovementMode == EPMMovementMode::Speed)
+        {
+            MovementState.Speed = NewSpeedOrDuration;
+            const float Dist = (MovementState.TargetPos - MovementState.StartPos).Size();
+            MovementState.Duration = (MovementState.Speed > KINDA_SMALL_NUMBER) ? Dist / MovementState.Speed : 0.f;
+        }
+        else
+        {
+            MovementState.Duration = NewSpeedOrDuration;
+        }
+        MovementState.CurrentTime = FMath::Min(MovementState.CurrentTime, MovementState.Duration);
+    }
+    return true;
 }
 
-float UMoveUtilComponent::CalculateInterpolationAlpha(float RawAlpha, EMovementInterpolationType InterpType)
+void UMoveUtilComponent::CancelBySourceId(int32 InSourceId, EMoveFinishReason Reason)
 {
-	const float n1 = 7.5625;
-	const float d1 = 2.75;
-	const float c4 = (2 * PI) / 3;
-	switch (InterpType)
-	{
-	case EMovementInterpolationType::Linear:
-		return RawAlpha;
-	case EMovementInterpolationType::EaseIn:
-		return RawAlpha * RawAlpha;
-	case EMovementInterpolationType::EaseOut:
-		return 1.0f - FMath::Square(1.0f - RawAlpha);
-	case EMovementInterpolationType::EaseInOut:
-		return RawAlpha < 0.5f ? 2.0f * RawAlpha * RawAlpha : 1.0f - FMath::Pow(-2.0f * RawAlpha + 2.0f, 2.0f) / 2.0f;
-	case EMovementInterpolationType::EaseOutBounce:
-		if (RawAlpha < 1 / d1)
-		{
-			return n1 * RawAlpha * RawAlpha;
-		}
-		else if (RawAlpha < 2 / d1)
-		{
-			return n1 * (RawAlpha -= 1.5 / d1) * RawAlpha + 0.75;
-		}
-		else if (RawAlpha < 2.5 / d1)
-		{
-			return n1 * (RawAlpha -= 2.25 / d1) * RawAlpha + 0.9375;
-		}
-		else
-		{
-			return n1 * (RawAlpha -= 2.625 / d1) * RawAlpha + 0.984375;
-		}
-	case EMovementInterpolationType::EaseOutElastic:
-		return RawAlpha == 0
-			       ? 0
-			       : RawAlpha == 1
-			       ? 1
-			       : FMath::Pow(2, -10 * RawAlpha) * FMath::Sin((RawAlpha * 10 - 0.75) * c4) + 1;
-	default:
-		return RawAlpha;
-	}
+    if (MovementState.IsActive() && MovementState.SourceId == InSourceId)
+    {
+        ClearCancelTimer(InSourceId); 
+        StopMovement(Reason);
+    }
 }
 
-void FMovementState::Update(float DeltaTime)
+void UMoveUtilComponent::StopMovement(EMoveFinishReason Reason)
 {
-	if (!bIsActive) return;
-
-	CurrentTime += DeltaTime;
-	if (MovementMode == EPMMovementMode::Speed)
-	{
-		Duration = (TargetPos - StartPos).Size() / Speed;
-	}
+    if (!MovementState.IsActive()) return;
+    const int32 FinishedSource = MovementState.SourceId;
+    MovementState.Stop();
+    ClearCancelTimer(FinishedSource);
+    OnMoveFinished.Broadcast(Reason, FinishedSource);
 }
 
-void FMovementState::Stop()
+void UMoveUtilComponent::StartNewMovement(const FVector& Target, EPMMovementMode Mode, float SpeedOrDuration,
+                                          EMovementInterpolationType Interp, bool bStickToGround,
+                                          int32 Priority, int32 SourceId, bool bSlideOnBlock, UCurveFloat* Curve)
 {
-	bIsActive = false;
-	CurrentTime = 0.0f;
-	Duration = 0.0f;
-	Speed = 0.0f;
-	StartPos = FVector::ZeroVector;
-	TargetPos = FVector::ZeroVector;
-	MovementMode = EPMMovementMode::Duration;
-	InterpType = EMovementInterpolationType::Linear;
+    // Priority: ignore if lower than current
+    if (MovementState.IsActive() && Priority < MovementState.Priority)
+    {
+        return;
+    }
+
+    // Replace current
+    if (MovementState.IsActive())
+    {
+        StopMovement(EMoveFinishReason::Replaced);
+    }
+
+    MovementState = FMovementState{};
+    MovementState.StartPos = GetOwner()->GetActorLocation();
+    MovementState.TargetPos = Target;
+    MovementState.MovementMode = Mode;
+    MovementState.InterpType = Interp;
+    MovementState.bStickToGround = bStickToGround;
+    MovementState.bSlideOnBlock = bSlideOnBlock;
+    MovementState.Priority = Priority;
+    MovementState.SourceId = SourceId;
+    MovementState.Curve = Curve;
+
+    if (Mode == EPMMovementMode::Duration)
+    {
+        MovementState.Duration = SpeedOrDuration;
+        MovementState.Speed = 0.f;
+    }
+    else
+    {
+        MovementState.Speed = SpeedOrDuration;
+        const float Dist = (Target - MovementState.StartPos).Size();
+        MovementState.Duration = (SpeedOrDuration > KINDA_SMALL_NUMBER) ? Dist / SpeedOrDuration : 0.f;
+    }
+
+    MovementState.CurrentTime = 0.f;
+    MovementState.bIsActive = true;
+}
+
+static float EaseElastic(float A)
+{
+    // simple elastic
+    return FMath::Sin(-13.f * (PI/2.f) * (A + 1.f)) * FMath::Pow(2.f, -10.f * A) + 1.f;
+}
+
+float UMoveUtilComponent::CalculateInterpolationAlpha(float RawAlpha, EMovementInterpolationType InterpType, const UCurveFloat* Curve)
+{
+    float A = FMath::Clamp(RawAlpha, 0.f, 1.f);
+    if (Curve) return Curve->GetFloatValue(A);
+
+    switch (InterpType)
+    {
+        case EMovementInterpolationType::Linear:      return A;
+        case EMovementInterpolationType::EaseIn:      return FMath::InterpEaseIn(0.f, 1.f, A, 2.f);
+        case EMovementInterpolationType::EaseOut:     return FMath::InterpEaseOut(0.f, 1.f, A, 2.f);
+        case EMovementInterpolationType::EaseInOut:   return FMath::InterpEaseInOut(0.f, 1.f, A, 2.f);
+        case EMovementInterpolationType::ExpoIn:      return FMath::Pow(2.f, 10.f * (A - 1.f));
+        case EMovementInterpolationType::ExpoOut:     return (A >= 1.f) ? 1.f : (1.f - FMath::Pow(2.f, -10.f * A));
+        case EMovementInterpolationType::ExpoInOut:   return (A < 0.5f) ? 0.5f * FMath::Pow(2.f, (20.f * A) - 10.f)
+                                                                      : 1.f - 0.5f * FMath::Pow(2.f, (-20.f * A) + 10.f);
+        case EMovementInterpolationType::ElasticIn:   return 1.f - EaseElastic(1.f - A);
+        case EMovementInterpolationType::ElasticOut:  return EaseElastic(A);
+        case EMovementInterpolationType::ElasticInOut: return (A < 0.5f) ? 0.5f * (1.f - EaseElastic(1.f - 2.f*A))
+                                                                        : 0.5f * (EaseElastic(2.f*A - 1.f) + 1.f);
+        default: return A;
+    }
+}
+
+void UMoveUtilComponent::ApplyGroundStick(FVector& P) const
+{
+    if (!GetOwner()) return;
+
+    const FVector Start = P + FVector(0, 0, MovementState.TraceUp);
+    const FVector End   = P - FVector(0, 0, MovementState.TraceDown);
+
+    FHitResult Hit;
+    FCollisionQueryParams QParams(SCENE_QUERY_STAT(MoveUtil_GroundStick), false);
+    QParams.AddIgnoredActor(GetOwner());
+
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_WorldStatic, QParams))
+    {
+        P.Z = Hit.Location.Z;
+    }
+}
+
+bool UMoveUtilComponent::SafeMoveOwner(const FVector& Delta, FHitResult& OutHit)
+{
+    if (!GetOwner()) return false;
+
+    if (ACharacter* Ch = Cast<ACharacter>(GetOwner()))
+    {
+        if (UCharacterMovementComponent* CMC = Ch->GetCharacterMovement())
+        {
+            CMC->SafeMoveUpdatedComponent(Delta, Ch->GetActorRotation(), true, OutHit);
+            const bool bBlocked = OutHit.bBlockingHit;
+
+            if (bBlocked && !MovementState.bSlideOnBlock)
+            {
+                // 슬라이드 금지 모드: 즉시 차단 끝내기
+                return false; // 호출부에서 StopMovement(Blocked)
+            }
+            return true;
+        }
+    }
+
+    const FVector NewPos = GetOwner()->GetActorLocation() + Delta;
+    return GetOwner()->SetActorLocation(NewPos, true, &OutHit, ETeleportType::None);
 }
 
 void UMoveUtilComponent::DrawDebugVisuals() const
 {
-	if (!GetWorld()) return;
+    if (!bShowDebugPath || !GetWorld() || !MovementState.IsActive()) return;
 
-	if (bShowDebugPath && MovementState.IsActive())
-	{
-		DrawDebugLine(GetWorld(), MovementState.StartPos, MovementState.TargetPos,
-		              FColor::Green, false, 1.0f, 0, 2.0f);
-		DrawDebugPoint(GetWorld(), MovementState.TargetPos, 10.0f, FColor::Red, false, 1.0f);
-	}
+    DrawDebugLine(GetWorld(), MovementState.StartPos, MovementState.TargetPos, FColor::Cyan, false, 0.f, 0, 1.f);
+    DrawDebugSphere(GetWorld(), MovementState.TargetPos, 8.f, 12, FColor::Green, false, 0.f);
+}
+
+void UMoveUtilComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    if (!MovementState.IsActive())
+    {
+        if (bShowDebugPath) DrawDebugVisuals();
+        return;
+    }
+
+    // Perf budget
+    if (MinUpdateInterval > 0.f)
+    {
+        LastUpdateTime += DeltaTime;
+        if (LastUpdateTime < MinUpdateInterval) return;
+        DeltaTime = LastUpdateTime; // accumulate
+        LastUpdateTime = 0.f;
+    }
+
+    MovementState.CurrentTime += DeltaTime;
+    const float Alpha = MovementState.GetProgress();
+
+    const float InterpAlpha = CalculateInterpolationAlpha(Alpha, MovementState.InterpType, MovementState.Curve);
+    FVector Desired = FMath::Lerp(MovementState.StartPos, MovementState.TargetPos, InterpAlpha);
+
+    // Continuous ground follow
+    if (MovementState.bStickToGround)
+    {
+        ApplyGroundStick(Desired);
+    }
+
+    AActor* Owner = GetOwner();
+    if (!Owner) { StopMovement(EMoveFinishReason::Canceled); return; }
+
+    FVector Delta = Desired - Owner->GetActorLocation();
+    if (Delta.SizeSquared() < FMath::Square(LocationUpdateThreshold))
+    {
+        if (Alpha >= 1.f) { StopMovement(EMoveFinishReason::Reached); }
+        return;
+    }
+
+    FHitResult Hit;
+    const bool bMoved = SafeMoveOwner(Delta, Hit);
+    const bool bBlocked = (!bMoved) || Hit.bBlockingHit;
+
+    if (bBlocked && !MovementState.bSlideOnBlock)
+    {
+        StopMovement(EMoveFinishReason::Blocked);
+        return;
+    }
+
+    if (Alpha >= 1.f)
+    {
+        StopMovement(EMoveFinishReason::Reached);
+    }
+
+    if (bShowDebugPath) DrawDebugVisuals();
+}
+
+void UMoveUtilComponent::MoveInFacingTimed(float Speed, float Duration,
+                                           EMovementInterpolationType Interp,
+                                           bool bStickToGround,
+                                           int32 Priority, int32 SourceId,
+                                           bool bSlideOnBlock,
+                                           UCurveFloat* Curve)
+{
+    if (!GetOwner()) return;
+    const FVector Start = GetOwner()->GetActorLocation();
+    const FVector Fwd   = GetOwner()->GetActorForwardVector();
+    const FVector Target = Start + (Fwd * FMath::Max(Speed, 0.f) * FMath::Max(Duration, 0.f));
+    // Duration 모드로 고정 시간 보간
+    StartNewMovement(Target, EPMMovementMode::Duration, Duration, Interp, bStickToGround, Priority, SourceId, bSlideOnBlock, Curve);
+}
+
+void UMoveUtilComponent::MoveTowardsActorTimed(AActor* TargetActor, float StopDistance, float Speed, float MaxDuration,
+                                               EMovementInterpolationType Interp,
+                                               bool bStickToGround,
+                                               int32 Priority, int32 SourceId,
+                                               bool bSlideOnBlock,
+                                               UCurveFloat* Curve)
+{
+    // 기존 로직 재사용
+    MoveTowardsActor(TargetActor, StopDistance, Speed, Interp, bStickToGround, Priority, SourceId, bSlideOnBlock, Curve);
+
+    if (MaxDuration > 0.f)
+    {
+        StartCancelTimer(MaxDuration, SourceId, EMoveFinishReason::Timeout);
+    }
+}
+
+void UMoveUtilComponent::StartCancelTimer(float Seconds, int32 SourceId, EMoveFinishReason Reason)
+{
+    if (!GetWorld()) return;
+    ClearCancelTimer(SourceId);
+
+    FTimerHandle& Handle = CancelTimers.FindOrAdd(SourceId);
+    GetWorld()->GetTimerManager().SetTimer(
+        Handle,
+        FTimerDelegate::CreateWeakLambda(this, [this, SourceId, Reason]()
+        {
+            // SourceId가 일치하는 이동만 취소
+            CancelBySourceId(SourceId, Reason);
+        }),
+        Seconds,
+        false
+    );
+}
+
+void UMoveUtilComponent::ClearCancelTimer(int32 SourceId)
+{
+    if (!GetWorld()) return;
+    if (FTimerHandle* Handle = CancelTimers.Find(SourceId))
+    {
+        GetWorld()->GetTimerManager().ClearTimer(*Handle);
+        CancelTimers.Remove(SourceId);
+    }
 }
