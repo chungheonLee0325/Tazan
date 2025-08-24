@@ -43,14 +43,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> MissionCompleteClass;
 
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	float AnimMoveOffsetScale = 1.0f;
+
 private:
 	// UI
 	UPROPERTY()
 	class UUserWidget* CompleteWidget;
 
 	FVector StartPelvisWS;
-	FVector PrevPelvisWS;
+	FVector EndPelvisWS;
 	bool bIsAnimMoving = false;
+
 		
 protected:
 	virtual void BeginPlay() override;
@@ -106,6 +110,8 @@ public:
 	void EndAnimMove();
 	UFUNCTION(BlueprintCallable)
 	void AnimMove();
+	UFUNCTION(BlueprintCallable)
+	void AnimMoveOffset();
 
 private:
 	virtual void InitializeHUD() override;

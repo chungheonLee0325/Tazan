@@ -8,7 +8,7 @@
 
 UY_ComboSkill::UY_ComboSkill()
 {
-	MontageBlendTime = 0.3f;
+	MontageBlendTime = 0.0f;
 }
 
 void UY_ComboSkill::OnCastStart(class AAreaObject* Caster, AAreaObject* Target)

@@ -72,6 +72,7 @@ void UBaseAnimInstance::StopCurrentMontage(float BlendOutTime)
 {
 	if (!IsPlayingMontage()) return;
 
+	UE_LOG(LogTemp,Warning,TEXT("몽타주 종료"));
 	Montage_Stop(BlendOutTime, CurrentMontage.Montage);
 }
 

@@ -17,4 +17,6 @@ class TAZAN_API UY_BaseSkill : public UCollisionSkill
 	
 public:
 	UY_BaseSkill();
+
+	virtual void OnCastEnd() override;
 };

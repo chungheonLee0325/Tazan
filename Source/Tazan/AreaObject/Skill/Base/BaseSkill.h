@@ -124,9 +124,10 @@ protected:
 	//OnCastEnd에서 사용할 몽타주 종료시 블렌드
 	float MontageBlendTime = 0.1f;
 	
+	FOnMontageEnded EndDelegate;
+	FOnMontageBlendingOutStarted CompleteDelegate;
+	
 private:
 	float m_CurrentCoolTime;
 
-	FOnMontageEnded EndDelegate;
-	FOnMontageBlendingOutStarted CompleteDelegate;
 };

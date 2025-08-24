@@ -68,19 +68,19 @@ static void FillCommon(FAreaMoveSpec& S, const UAnimNotifyState_MovementWindow* 
     S.Curve         = N->Curve;
 }
 
-static void AutoResolveTargetsIfNeeded(FAreaMoveSpec& S, AAreaObject* Area, bool bUseLockOnToward, bool bUseLockOnFacing)
-{
-    if (!Area) return;
-
-    if (S.Intent == EMoveIntent::TowardActor && !S.TowardActor.IsValid())
-    {
-        S.TowardActor = ResolveAreaTarget(Area, bUseLockOnToward);
-    }
-    if (S.Intent == EMoveIntent::InFacing && S.FacingDir == ERelMoveDir::Target && !S.TargetActor.IsValid())
-    {
-        S.TargetActor = ResolveAreaTarget(Area, bUseLockOnFacing);
-    }
-}
+// static void AutoResolveTargetsIfNeeded(FAreaMoveSpec& S, AAreaObject* Area, bool bUseLockOnToward, bool bUseLockOnFacing)
+// {
+//     if (!Area) return;
+//
+//     if (S.Intent == EMoveIntent::TowardActor && !S.TowardActor.IsValid())
+//     {
+//         S.TowardActor = ResolveAreaTarget(Area, bUseLockOnToward);
+//     }
+//     if (S.Intent == EMoveIntent::InFacing && S.FacingDir == ERelMoveDir::Target && !S.TargetActor.IsValid())
+//     {
+//         S.TargetActor = ResolveAreaTarget(Area, bUseLockOnFacing);
+//     }
+// }
 
 void UAnimNotifyState_MovementWindow::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                                   float TotalDuration, const FAnimNotifyEventReference& EventReference)
@@ -96,7 +96,7 @@ void UAnimNotifyState_MovementWindow::NotifyBegin(USkeletalMeshComponent* MeshCo
             FAreaMoveSpec S = CustomSpec;
             if (bAutoResolveTargetsForSpec)
             {
-                AutoResolveTargetsIfNeeded(S, Area, /*toward*/true, /*facing*/true);
+                //AutoResolveTargetsIfNeeded(S, Area, /*toward*/true, /*facing*/true);
             }
             Area->StartMoveSpec(S);
             return;

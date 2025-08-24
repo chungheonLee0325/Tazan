@@ -3,6 +3,7 @@
 #include "BaseSkill.h"
 
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
+#include "Tazan/AreaObject/Monster/Variants/BossMonsters/Yetuga/Yetuga.h"
 #include "Tazan/Contents/TazanGameInstance.h"
 
 UBaseSkill::UBaseSkill(): m_TargetPos(), m_SkillData(nullptr)
@@ -117,6 +118,11 @@ void UBaseSkill::OnCastEnd()
 
 		// 현재 재생중인 몽타주 정지
 		AnimInstance->Montage_Stop(MontageBlendTime, m_SkillData->Montage);
+		AYetuga* y = Cast<AYetuga>(m_Caster);
+		if (y)
+		{
+			y->AnimMoveOffset();
+		}
 	}
 
 	m_Caster->ClearThisCurrentSkill(this);
