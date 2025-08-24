@@ -15,94 +15,94 @@ AKazanPlayerController::AKazanPlayerController()
 {
 	// Enhanced Input Setting
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> tempInputMapping(
-		TEXT("/Script/EnhancedInput.InputMappingContext'/Game/_Input/IMC_Kazan.IMC_Kazan'"));
+		TEXT("/Script/EnhancedInput.InputMappingContext'/Game/_BluePrints/AreaObject/Player/Input/IMC_Player.IMC_Player'"));
 	if (tempInputMapping.Succeeded())
 	{
 		DefaultMappingContext = tempInputMapping.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempMoveAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanMove.IA_KazanMove'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Move.IA_Move'"));
 	if (tempMoveAction.Succeeded())
 	{
 		MoveAction = tempMoveAction.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempLookAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanLook.IA_KazanLook'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Look.IA_Look'"));
 	if (tempLookAction.Succeeded())
 	{
 		LookAction = tempLookAction.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempSprintAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_Sprint.IA_Sprint'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Sprint.IA_Sprint'"));
 	if (tempSprintAction.Succeeded())
 	{
 		SprintAction = tempSprintAction.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempSkill1Action(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanSkill1.IA_KazanSkill1'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Skill1.IA_Skill1'"));
 	if (tempSkill1Action.Succeeded())
 	{
 		Skill_1_Action = tempSkill1Action.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempSkill2Action(
-	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanSkill2.IA_KazanSkill2'"));
+	TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Skill2.IA_Skill2'"));
 	if (tempSkill2Action.Succeeded())
 	{
 		Skill_2_Action = tempSkill2Action.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempSkill3Action(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanSkill3.IA_KazanSkill3'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Skill3.IA_Skill3'"));
 	if (tempSkill3Action.Succeeded())
 	{
 		Skill_3_Action = tempSkill3Action.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> tempAttackCAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_C.IA_KazanAttack_C'"));
-	if (tempAttackCAction.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempLBAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_LB_Attack.IA_LB_Attack'"));
+	if (tempLBAction.Succeeded())
 	{
-		AttackCAction = tempAttackCAction.Object;
+		LBAction = tempLBAction.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> tempAttackSAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanAttack_S.IA_KazanAttack_S'"));
-	if (tempAttackSAction.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempRBSAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_RB_Attack.IA_RB_Attack'"));
+	if (tempRBSAction.Succeeded())
 	{
-		AttackSAction = tempAttackSAction.Object;
+		RBAction = tempRBSAction.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> tempParryAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanParry.IA_KazanParry'"));
-	if (tempParryAction.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UInputAction> tempGuardAction(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Guard.IA_Guard'"));
+	if (tempGuardAction.Succeeded())
 	{
-		GuardAction = tempParryAction.Object;
+		GuardAction = tempGuardAction.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempEvadeAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanEvade.IA_KazanEvade'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Evade.IA_Evade'"));
 	if (tempEvadeAction.Succeeded())
 	{
 		EvadeAction = tempEvadeAction.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempLockOnAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_LockOn.IA_LockOn'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_LockOn.IA_LockOn'"));
 	if (tempLockOnAction.Succeeded())
 	{
 		LockOnAction = tempLockOnAction.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempSwitchTargetAction(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_SwitchTarget.IA_SwitchTarget'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_SwitchTarget.IA_SwitchTarget'"));
 	if (tempSwitchTargetAction.Succeeded())
 	{
 		SwitchTargetAction = tempSwitchTargetAction.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempRecoverHP(
-		TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_KazanHpRecover.IA_KazanHpRecover'"));
+		TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_HP_Recover.IA_HP_Recover'"));
 	if (tempRecoverHP.Succeeded())
 	{
 		HPRecoverAction = tempRecoverHP.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> tempRestart(
-	TEXT("/Script/EnhancedInput.InputAction'/Game/_Input/IA_Restart.IA_Restart'"));
+	TEXT("/Script/EnhancedInput.InputAction'/Game/_BluePrints/AreaObject/Player/Input/IA_Restart.IA_Restart'"));
 	if (tempRestart.Succeeded())
 	{
 		RestartAction = tempRestart.Object;
@@ -189,13 +189,13 @@ void AKazanPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AKazanPlayerController::OnLook);
 
 		// Attack
-		EnhancedInputComponent->BindAction(AttackCAction, ETriggerEvent::Started, this,
+		EnhancedInputComponent->BindAction(LBAction, ETriggerEvent::Started, this,
 		                                   &AKazanPlayerController::On_Attack_Weak_Pressed);
-		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Started, this,
+		EnhancedInputComponent->BindAction(RBAction, ETriggerEvent::Started, this,
 		                                   &AKazanPlayerController::On_Attack_Strong_Pressed);
-		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Completed, this,
+		EnhancedInputComponent->BindAction(RBAction, ETriggerEvent::Completed, this,
 		                                   &AKazanPlayerController::On_Attack_Strong_Released);
-		EnhancedInputComponent->BindAction(AttackSAction, ETriggerEvent::Triggered, this,
+		EnhancedInputComponent->BindAction(RBAction, ETriggerEvent::Triggered, this,
 		                                   &AKazanPlayerController::On_Attack_Strong_Triggered);
 
 		// Sprint
@@ -292,7 +292,7 @@ void AKazanPlayerController::On_Attack_Strong_Released(const FInputActionValue& 
 
 void AKazanPlayerController::On_Attack_Strong_Triggered(const FInputActionValue& InputActionValue)
 {
-	//LOG_PRINT(TEXT("Trigger"));
+	Kazan->Attack_Strong_Triggered();
 }
 
 void AKazanPlayerController::On_Parry_Pressed(const FInputActionValue& InputActionValue)
