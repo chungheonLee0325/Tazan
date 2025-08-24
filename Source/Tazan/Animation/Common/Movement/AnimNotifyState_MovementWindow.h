@@ -58,7 +58,7 @@ public:
         meta=(EditCondition="bUseCustomSpec==false && (Mode==EAreaMoveNotifyKind::InFacing_Distance || Mode==EAreaMoveNotifyKind::InFacing_Duration) && FacingDir==ERelMoveDir::CustomYaw"))
     float YawOffsetDeg = 0.f;
 
-    // ★ InFacing에서 FacingDir=Target일 때 타깃 해석
+    // InFacing에서 FacingDir=Target일 때 타깃 해석
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Direction",
         meta=(EditCondition="bUseCustomSpec==false && (Mode==EAreaMoveNotifyKind::InFacing_Distance || Mode==EAreaMoveNotifyKind::InFacing_Duration) && FacingDir==ERelMoveDir::Target"))
     bool bFacingUseLockOnTarget = true;
@@ -89,8 +89,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window",
         meta=(EditCondition="Mode==EAreaMoveNotifyKind::TowardsActor_Timed")) bool bUpdateTargetEveryTick = true;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Window") bool bStopOnEnd = true;
-
-    // UE5 API
+    
     virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                              float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
     virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,

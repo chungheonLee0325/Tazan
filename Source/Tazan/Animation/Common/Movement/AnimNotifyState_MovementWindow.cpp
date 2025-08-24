@@ -7,56 +7,6 @@
 #include "Tazan/AreaObject/Player/Component/LockOnComponent.h"
 #include "Tazan/AreaObject/Monster/BaseMonster.h"
 
-static AActor* ResolveAreaTarget(AAreaObject* Area, bool bUseLockOn)
-{
-    if (!Area) return nullptr;
-
-    if (bUseLockOn)
-    {
-        if (auto* Player = Cast<APlayer_Kazan>(Area))
-        {
-            if (auto* L = Player->GetLockOnComponent())
-            {
-                if (L->IsLockOnMode())
-                {
-                    if (AActor* T = L->GetCurrentTarget()) return T;
-                }
-            }
-        }
-    }
-
-    if (auto* Monster = Cast<ABaseMonster>(Area))
-    {
-        if (AActor* Aggro = Monster->GetAggroTarget()) return Aggro;
-    }
-
-    return nullptr;
-}
-
-static FVector ComputeTowardTargetPos(AActor* Owner, AActor* Target, float StopDistance)
-{
-    if (!Owner || !Target) return Owner ? Owner->GetActorLocation() : FVector::ZeroVector;
-
-    FVector OwnerLoc = Owner->GetActorLocation();
-    FVector TargetLoc = Target->GetActorLocation();
-
-    FVector Dir = TargetLoc - OwnerLoc; Dir.Z = 0.f;
-    const float Dist2D = Dir.Size2D();
-    Dir = (Dist2D > KINDA_SMALL_NUMBER) ? Dir / Dist2D : FVector::ForwardVector;
-
-    float ExtraRadius = 0.f;
-    if (const ACharacter* C = Cast<ACharacter>(Owner))
-        if (const UCapsuleComponent* Cap = C->GetCapsuleComponent())
-            ExtraRadius += Cap->GetScaledCapsuleRadius();
-    if (const ACharacter* CT = Cast<ACharacter>(Target))
-        if (const UCapsuleComponent* CapT = CT->GetCapsuleComponent())
-            ExtraRadius += CapT->GetScaledCapsuleRadius();
-
-    const float Stop  = FMath::Max(0.f, StopDistance) + ExtraRadius;
-    const float Travel= FMath::Max(0.f, Dist2D - Stop);
-
-    return OwnerLoc + Dir * Travel;
-}
 
 static void FillCommon(FAreaMoveSpec& S, const UAnimNotifyState_MovementWindow* N)
 {
@@ -74,11 +24,11 @@ static void AutoResolveTargetsIfNeeded(FAreaMoveSpec& S, AAreaObject* Area, bool
 
     if (S.Intent == EMoveIntent::TowardActor && !S.TowardActor.IsValid())
     {
-        S.TowardActor = ResolveAreaTarget(Area, bUseLockOnToward);
+        S.TowardActor = UMoveUtilComponent::ResolveAreaTarget(Area, bUseLockOnToward);
     }
     if (S.Intent == EMoveIntent::InFacing && S.FacingDir == ERelMoveDir::Target && !S.TargetActor.IsValid())
     {
-        S.TargetActor = ResolveAreaTarget(Area, bUseLockOnFacing);
+        S.TargetActor = UMoveUtilComponent::ResolveAreaTarget(Area, bUseLockOnFacing);
     }
 }
 
@@ -115,7 +65,7 @@ void UAnimNotifyState_MovementWindow::NotifyBegin(USkeletalMeshComponent* MeshCo
             S.YawOffsetDeg = YawOffsetDeg;
             FillCommon(S, this);
             if (FacingDir == ERelMoveDir::Target)
-                S.TargetActor = ResolveAreaTarget(Area, bFacingUseLockOnTarget);
+                S.TargetActor = UMoveUtilComponent::ResolveAreaTarget(Area, bFacingUseLockOnTarget);
             Area->StartMoveSpec(S);
             break;
 
@@ -128,7 +78,7 @@ void UAnimNotifyState_MovementWindow::NotifyBegin(USkeletalMeshComponent* MeshCo
             S.YawOffsetDeg = YawOffsetDeg;
             FillCommon(S, this);
             if (FacingDir == ERelMoveDir::Target)
-                S.TargetActor = ResolveAreaTarget(Area, bFacingUseLockOnTarget);
+                S.TargetActor = UMoveUtilComponent::ResolveAreaTarget(Area, bFacingUseLockOnTarget);
             Area->StartMoveSpec(S);
             break;
 
@@ -137,7 +87,7 @@ void UAnimNotifyState_MovementWindow::NotifyBegin(USkeletalMeshComponent* MeshCo
             FAreaMoveSpec T;
             T.Intent       = EMoveIntent::TowardActor;
             T.Kinematics   = EKinematics::BySpeed;
-            T.TowardActor  = ResolveAreaTarget(Area, bUseLockOnTarget);
+            T.TowardActor  = UMoveUtilComponent::ResolveAreaTarget(Area, bUseLockOnTarget);
             if (!T.TowardActor.IsValid()) break;
 
             T.TowardPolicy = TowardPolicy;
@@ -167,9 +117,9 @@ void UAnimNotifyState_MovementWindow::NotifyTick(USkeletalMeshComponent* MeshCom
     {
         if (AAreaObject* Area = Cast<AAreaObject>(MeshComp->GetOwner()))
         {
-            if (AActor* Target = ResolveAreaTarget(Area, bUseLockOnTarget))
+            if (AActor* Target = UMoveUtilComponent::ResolveAreaTarget(Area, bUseLockOnTarget))
             {
-                const FVector NewTarget = ComputeTowardTargetPos(Area, Target, StopDistance);
+                const FVector NewTarget = UMoveUtilComponent::ComputeTowardTargetPos(Area, Target, StopDistance);
 
                 FAreaMoveUpdate U;
                 U.SourceId = SourceId;

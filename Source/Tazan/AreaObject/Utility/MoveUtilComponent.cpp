@@ -4,19 +4,93 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "Tazan/AreaObject/Monster/BaseMonster.h"
+#include "Tazan/AreaObject/Player/Player_Kazan.h"
+#include "Tazan/AreaObject/Player/Component/LockOnComponent.h"
 
 static float ToYawDeg(ERelMoveDir D, float Custom)
 {
 	switch (D)
 	{
-	case ERelMoveDir::Forward:  return 0.f;
+	case ERelMoveDir::Forward: return 0.f;
 	case ERelMoveDir::Backward: return 180.f;
-	case ERelMoveDir::Left:     return -90.f;
-	case ERelMoveDir::Right:    return 90.f;
-	case ERelMoveDir::Target:   return 0.f; // Target은 별도 처리
-	case ERelMoveDir::CustomYaw: default:   return Custom;
+	case ERelMoveDir::Left: return -90.f;
+	case ERelMoveDir::Right: return 90.f;
+	case ERelMoveDir::Target: return 0.f; // Target은 별도 처리
+	case ERelMoveDir::CustomYaw: default: return Custom;
 	}
 }
+
+
+AActor* UMoveUtilComponent::ResolveAreaTarget(AAreaObject* Area, bool bUseLockOn)
+{
+	if (!Area) return nullptr;
+
+	// 1) 플레이어: 락온 우선
+	if (bUseLockOn)
+	{
+		if (auto* Player = Cast<APlayer_Kazan>(Area))
+		{
+			if (auto* L = Player->GetLockOnComponent())
+			{
+				if (L->IsLockOnMode())
+				{
+					if (AActor* T = L->GetCurrentTarget()) return T;
+				}
+			}
+		}
+	}
+
+	// 2) 몬스터: 어그로 타깃
+	if (auto* Monster = Cast<ABaseMonster>(Area))
+	{
+		if (AActor* Aggro = Monster->GetAggroTarget()) return Aggro;
+	}
+
+	return nullptr;
+}
+
+void UMoveUtilComponent::AutoResolveTargetsIfNeeded(FAreaMoveSpec& S, AAreaObject* AreaObject,
+                                                    bool bUseLockOnToward, bool bUseLockOnFacing)
+{
+	if (!AreaObject) return;
+
+	if (S.Intent == EMoveIntent::TowardActor && !S.TowardActor.IsValid())
+	{
+		S.TowardActor = ResolveAreaTarget(AreaObject, bUseLockOnToward);
+	}
+	if (S.Intent == EMoveIntent::InFacing && S.FacingDir == ERelMoveDir::Target && !S.TargetActor.IsValid())
+	{
+		S.TargetActor = ResolveAreaTarget(AreaObject, bUseLockOnFacing);
+	}
+}
+
+FVector UMoveUtilComponent::ComputeTowardTargetPos(AActor* Owner, AActor* Target, float StopDistance)
+{
+	if (!Owner || !Target) return Owner ? Owner->GetActorLocation() : FVector::ZeroVector;
+
+	FVector OwnerLoc = Owner->GetActorLocation();
+	FVector TargetLoc = Target->GetActorLocation();
+
+	FVector Dir = TargetLoc - OwnerLoc;
+	Dir.Z = 0.f;
+	const float Dist2D = Dir.Size2D();
+	Dir = (Dist2D > KINDA_SMALL_NUMBER) ? Dir / Dist2D : FVector::ForwardVector;
+
+	float ExtraRadius = 0.f;
+	if (const ACharacter* C = Cast<ACharacter>(Owner))
+		if (const UCapsuleComponent* Cap = C->GetCapsuleComponent())
+			ExtraRadius += Cap->GetScaledCapsuleRadius();
+	if (const ACharacter* CT = Cast<ACharacter>(Target))
+		if (const UCapsuleComponent* CapT = CT->GetCapsuleComponent())
+			ExtraRadius += CapT->GetScaledCapsuleRadius();
+
+	const float Stop = FMath::Max(0.f, StopDistance) + ExtraRadius;
+	const float Travel = FMath::Max(0.f, Dist2D - Stop);
+
+	return OwnerLoc + Dir * Travel;
+}
+
 
 UMoveUtilComponent::UMoveUtilComponent()
 {
@@ -33,7 +107,8 @@ void UMoveUtilComponent::StartMove(const FAreaMoveSpec& Spec)
 	// 우선순위 비교
 	if (MovementState.bIsActive && Spec.Priority < MovementState.Priority)
 	{
-		return; // 낮은 우선순위 → 무시
+		// 낮은 우선순위 → 무시
+		return;
 	}
 
 	// 기존 이동 교체
@@ -48,10 +123,10 @@ void UMoveUtilComponent::StartMove(const FAreaMoveSpec& Spec)
 void UMoveUtilComponent::BeginNewMovement(const FAreaMoveSpec& Spec)
 {
 	MovementState.Reset();
-	MovementState.bIsActive     = true;
-	MovementState.Spec          = Spec;
-	MovementState.SourceId      = Spec.SourceId;
-	MovementState.Priority      = Spec.Priority;
+	MovementState.bIsActive = true;
+	MovementState.Spec = Spec;
+	MovementState.SourceId = Spec.SourceId;
+	MovementState.Priority = Spec.Priority;
 	MovementState.bSlideOnBlock = Spec.bSlideOnBlock;
 
 	AActor* Owner = GetOwner();
@@ -94,7 +169,7 @@ void UMoveUtilComponent::BeginNewMovement(const FAreaMoveSpec& Spec)
 		MovementState.Duration = MovementState.TotalDistance / Speed;
 	}
 
-	MovementState.CurrentTime      = 0.f;
+	MovementState.CurrentTime = 0.f;
 	MovementState.AccumulatedDelta = 0.f;
 
 	StartTimeoutTimerIfNeeded(Spec);
@@ -106,7 +181,11 @@ void UMoveUtilComponent::UpdateMove(const FAreaMoveUpdate& Update)
 	if (Update.SourceId != MovementState.SourceId) return;
 
 	AActor* Owner = GetOwner();
-	if (!Owner) { StopMovement(EMoveFinishReason::Canceled); return; }
+	if (!Owner)
+	{
+		StopMovement(EMoveFinishReason::Canceled);
+		return;
+	}
 
 	// 현재 위치를 새로운 시작점으로
 	MovementState.StartLoc = Owner->GetActorLocation();
@@ -144,7 +223,7 @@ void UMoveUtilComponent::UpdateMove(const FAreaMoveUpdate& Update)
 		// ByDuration은 Duration 유지
 	}
 
-	MovementState.CurrentTime      = 0.f;
+	MovementState.CurrentTime = 0.f;
 	MovementState.AccumulatedDelta = 0.f;
 }
 
@@ -170,25 +249,31 @@ void UMoveUtilComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (!MovementState.bIsActive) return;
-	if (DeltaTime <= 0.f)        return;
+	if (DeltaTime <= 0.f) return;
 
-	// 누적 스텝 업데이트(옵션)
+	// 누적 스텝 업데이트
 	MovementState.AccumulatedDelta += DeltaTime;
-	const bool  bUseStep = (MinUpdateInterval > 0.f);
-	const float Step     = bUseStep
-		? (MovementState.AccumulatedDelta >= MinUpdateInterval ? MovementState.AccumulatedDelta : 0.f)
-		: DeltaTime;
+	const bool bUseStep = (MinUpdateInterval > 0.f);
+	const float Step = bUseStep
+		                   ? (MovementState.AccumulatedDelta >= MinUpdateInterval
+			                      ? MovementState.AccumulatedDelta
+			                      : 0.f)
+		                   : DeltaTime;
 
 	if (Step <= 0.f) return;
 	MovementState.AccumulatedDelta = 0.f;
 
 	AActor* Owner = GetOwner();
-	if (!Owner) { StopMovement(EMoveFinishReason::Canceled); return; }
+	if (!Owner)
+	{
+		StopMovement(EMoveFinishReason::Canceled);
+		return;
+	}
 
 	MovementState.CurrentTime += Step;
 
 	const float RawAlpha = FMath::Clamp(MovementState.CurrentTime / MovementState.Duration, 0.f, 1.f);
-	const float Alpha    = CalcInterpAlpha(RawAlpha, MovementState.Spec.Interp, MovementState.Spec.Curve);
+	const float Alpha = CalcInterpAlpha(RawAlpha, MovementState.Spec.Interp, MovementState.Spec.Curve);
 
 	const FVector NewPosUnstuck = FMath::Lerp(MovementState.StartLoc, MovementState.TargetLoc, Alpha);
 	FVector NewPos = NewPosUnstuck;
@@ -202,7 +287,7 @@ void UMoveUtilComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	const FVector Delta = (NewPos - CurrentLoc);
 
 	FHitResult Hit;
-	const bool bMoved   = TryMoveOwner(Delta, Hit);
+	const bool bMoved = TryMoveOwner(Delta, Hit);
 	const bool bBlocked = (!bMoved) || Hit.bBlockingHit;
 
 	if (bBlocked && !MovementState.bSlideOnBlock)
@@ -235,7 +320,11 @@ void UMoveUtilComponent::StopMovement(EMoveFinishReason Reason)
 void UMoveUtilComponent::ComputeFacingTarget(const FAreaMoveSpec& Spec, FVector& OutTarget) const
 {
 	AActor* Owner = GetOwner();
-	if (!Owner) { OutTarget = FVector::ZeroVector; return; }
+	if (!Owner)
+	{
+		OutTarget = FVector::ZeroVector;
+		return;
+	}
 
 	// 기본 방향
 	FVector Dir;
@@ -261,7 +350,7 @@ void UMoveUtilComponent::ComputeFacingTarget(const FAreaMoveSpec& Spec, FVector&
 	else
 	{
 		const FVector Fwd = Owner->GetActorForwardVector();
-		const float   Yaw = ToYawDeg(Spec.FacingDir, Spec.YawOffsetDeg);
+		const float Yaw = ToYawDeg(Spec.FacingDir, Spec.YawOffsetDeg);
 		Dir = FRotationMatrix(FRotator(0.f, Yaw, 0.f)).TransformVector(Fwd).GetSafeNormal();
 	}
 
@@ -290,15 +379,24 @@ float UMoveUtilComponent::GetCombinedCapsuleRadius2D(const AActor* A, const AAct
 
 void UMoveUtilComponent::ComputeTowardTarget(const FAreaMoveSpec& Spec, FVector& OutTarget) const
 {
-	AActor* Owner  = GetOwner();
+	AActor* Owner = GetOwner();
 	AActor* Target = Spec.TowardActor.Get();
-	if (!Owner)  { OutTarget = FVector::ZeroVector; return; }
-	if (!Target) { OutTarget = Owner->GetActorLocation(); return; }
+	if (!Owner)
+	{
+		OutTarget = FVector::ZeroVector;
+		return;
+	}
+	if (!Target)
+	{
+		OutTarget = Owner->GetActorLocation();
+		return;
+	}
 
-	const FVector OwnerLoc  = Owner->GetActorLocation();
+	const FVector OwnerLoc = Owner->GetActorLocation();
 	const FVector TargetLoc = Target->GetActorLocation();
 
-	FVector Dir = TargetLoc - OwnerLoc; Dir.Z = 0.f;
+	FVector Dir = TargetLoc - OwnerLoc;
+	Dir.Z = 0.f;
 	const float Dist2D = Dir.Size2D();
 	Dir = (Dist2D > KINDA_SMALL_NUMBER) ? Dir / Dist2D : FVector::ForwardVector;
 
@@ -310,7 +408,8 @@ void UMoveUtilComponent::ComputeTowardTarget(const FAreaMoveSpec& Spec, FVector&
 		{
 			Travel = FMath::Max(0.f, Spec.Speed) * FMath::Max(0.f, Spec.Duration);
 		}
-		else // BySpeed
+		// BySpeed
+		else
 		{
 			Travel = FMath::Max(0.f, Spec.TravelDistance);
 		}
@@ -319,24 +418,25 @@ void UMoveUtilComponent::ComputeTowardTarget(const FAreaMoveSpec& Spec, FVector&
 	}
 
 	// ReachStopDistance (기존)
-	const float Stop   = FMath::Max(0.f, Spec.StopDistance) + GetCombinedCapsuleRadius2D(Owner, Target);
+	const float Stop = FMath::Max(0.f, Spec.StopDistance) + GetCombinedCapsuleRadius2D(Owner, Target);
 	const float Travel = FMath::Max(0.f, Dist2D - Stop);
 	OutTarget = OwnerLoc + Dir * Travel;
 }
 
 // ---------- 보간/지면/이동 ----------
 
-float UMoveUtilComponent::CalcInterpAlpha(float RawAlpha, EMovementInterpolationType InterpType, const UCurveFloat* Curve) const
+float UMoveUtilComponent::CalcInterpAlpha(float RawAlpha, EMovementInterpolationType InterpType,
+                                          const UCurveFloat* Curve) const
 {
 	if (Curve) return Curve->GetFloatValue(RawAlpha);
 
 	switch (InterpType)
 	{
-	case EMovementInterpolationType::Linear:    return RawAlpha;
-	case EMovementInterpolationType::EaseIn:    return RawAlpha * RawAlpha;
-	case EMovementInterpolationType::EaseOut:   return 1.f - FMath::Square(1.f - RawAlpha);
+	case EMovementInterpolationType::Linear: return RawAlpha;
+	case EMovementInterpolationType::EaseIn: return RawAlpha * RawAlpha;
+	case EMovementInterpolationType::EaseOut: return 1.f - FMath::Square(1.f - RawAlpha);
 	case EMovementInterpolationType::EaseInOut: return 0.5f - 0.5f * FMath::Cos(PI * RawAlpha);
-	default:                                    return RawAlpha;
+	default: return RawAlpha;
 	}
 }
 
@@ -345,8 +445,8 @@ void UMoveUtilComponent::ApplyGroundStick(FVector& InOutPosition) const
 	AActor* Owner = GetOwner();
 	if (!Owner) return;
 
-	const FVector Start = InOutPosition + FVector(0,0, GroundTraceUp);
-	const FVector End   = InOutPosition - FVector(0,0, GroundTraceDown);
+	const FVector Start = InOutPosition + FVector(0, 0, GroundTraceUp);
+	const FVector End = InOutPosition - FVector(0, 0, GroundTraceDown);
 
 	FHitResult Hit;
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(MoveUtil_GroundStick), false, Owner);
@@ -411,6 +511,6 @@ void UMoveUtilComponent::DrawDebug() const
 	const FVector B = MovementState.TargetLoc;
 
 	DrawDebugSphere(GetWorld(), A, 8.f, 8, FColor::Green, false, 0.05f);
-	DrawDebugSphere(GetWorld(), B, 8.f, 8, FColor::Red,   false, 0.05f);
-	DrawDebugLine  (GetWorld(), A, B,       FColor::Cyan,  false, 0.05f, 0, 2.f);
+	DrawDebugSphere(GetWorld(), B, 8.f, 8, FColor::Red, false, 0.05f);
+	DrawDebugLine(GetWorld(), A, B, FColor::Cyan, false, 0.05f, 0, 2.f);
 }

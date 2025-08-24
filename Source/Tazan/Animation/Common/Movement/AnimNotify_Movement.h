@@ -9,9 +9,12 @@
 UENUM(BlueprintType)
 enum class EAreaMoveNotifyKind : uint8
 {
-    InFacing_Distance,   // Distance + Speed_Dist (+ FacingDir)
-    InFacing_Duration,   // Speed_Time + Duration (+ FacingDir)
-    TowardsActor_Timed   // Stop/Speed/MaxDuration (+ TowardPolicy)
+    // Distance + Speed_Dist (+ FacingDir)
+    InFacing_Distance,
+    // Speed_Time + Duration (+ FacingDir)
+    InFacing_Duration,
+    // Stop/Speed/MaxDuration (+ TowardPolicy)
+    TowardsActor_Timed
 };
 
 UCLASS(meta=(DisplayName="Area: Move (Spec)"))
@@ -70,7 +73,7 @@ public:
         meta=(EditCondition="bUseCustomSpec==false && (Mode==EAreaMoveNotifyKind::InFacing_Distance || Mode==EAreaMoveNotifyKind::InFacing_Duration) && FacingDir==ERelMoveDir::CustomYaw"))
     float YawOffsetDeg = 0.f;
 
-    // ★ InFacing에서 FacingDir=Target일 때 타깃 해석
+    // InFacing에서 FacingDir=Target일 때 타깃 해석
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InFacing|Direction",
         meta=(EditCondition="bUseCustomSpec==false && (Mode==EAreaMoveNotifyKind::InFacing_Distance || Mode==EAreaMoveNotifyKind::InFacing_Duration) && FacingDir==ERelMoveDir::Target"))
     bool bFacingUseLockOnTarget = true;
