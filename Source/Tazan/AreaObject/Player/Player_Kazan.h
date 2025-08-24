@@ -194,12 +194,7 @@ private:
 	UKazanAnimInstance* KazanAnimInstance;
 	UPROPERTY()
 	AKazanPlayerController* KazanPlayerController;
-
-	// UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	// UAnimMontage* DodgeAnimMontage;
-	// UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	// UAnimMontage* BackDodgeAnimMontage;
-
+	
 	// 플레이어 상태 관리
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	EPlayerState CurrentPlayerState;
@@ -212,18 +207,6 @@ private:
 
 	// 가드 상태 변경 시 호출
 	virtual void SetGuardState(bool bIsGuarding) override;
-	//virtual void SetActionState(bool bIsAction);
-
-	//bool CanDodge = true;
-	//float DodgeCoolTime = 1.0f;
-	//UPROPERTY(EditDefaultsOnly, Category = "STATUS")
-	//float DODGE_COST = 30.f;
-
-	//bool CanAction = true;
-	//bool CanMove = true;
-	//bool CanOnlyRotate = false;
-
-	//TMap<EActionAbility, bool> ActionAbilityMap;
 
 	FTimerHandle DodgeTimerHandle;
 
@@ -242,10 +225,11 @@ private:
 	float SprintMaintainMinStamina = 0.1f;
 
 	// 가드 관련 변수들    
+	// 최소 가드 지속 시간
 	UPROPERTY(EditDefaultsOnly, Category = "Guard")
-	float MinGuardDuration = 0.5f; // 최소 가드 지속 시간
-
-	bool bIsGuardRequested = false; // 가드 해제 요청 상태
+	float MinGuardDuration = 0.5f;
+	// 가드 해제 요청 상태
+	bool bIsGuardRequested = false;
 	FTimerHandle GuardMinDurationTimer;
 
 	bool CanCombo;

@@ -701,41 +701,7 @@ void APlayer_Kazan::Dodge_Pressed()
 	{
 		SetPlayerState(EPlayerState::ACTION);
 		skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
-		//skill->OnSkillCancel.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
 	}
-
-	// Skill 기반 이전 회피 로직
-	/*
-	//if (CanDodge == false)
-	//{
-	//	return;
-	//}
-	//if (!CanUseStamina(DODGE_COST))
-	//{
-	//	return;
-	//}
-	//CanDodge = false;
-	//DecreaseStamina(DODGE_COST);
-	//
-	//if (GetCharacterMovement()->Velocity.Length() > 0.1f)
-	//{
-	//	PlayAnimMontage(DodgeAnimMontage);
-	//}
-	//else
-	//{
-	//	PlayAnimMontage(BackDodgeAnimMontage);
-	//}
-	//
-	//TWeakObjectPtr<APlayer_Kazan> weakThis = this;
-	//GetWorld()->GetTimerManager().SetTimer(DodgeTimerHandle, [weakThis]()
-	//{
-	//	APlayer_Kazan* StrongThis = weakThis.Get();
-	//	if (StrongThis != nullptr)
-	//	{
-	//		StrongThis->CanDodge = true;
-	//	}
-	//}, DodgeCoolTime, false);
-	*/
 }
 
 void APlayer_Kazan::On_Sprint_Pressed()
