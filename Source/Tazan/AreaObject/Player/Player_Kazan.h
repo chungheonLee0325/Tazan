@@ -118,6 +118,7 @@ public:
 	/** Called for attack input */
 	void Attack_Weak_Pressed();
 	void Attack_Strong_Pressed();
+	void Attack_Strong_Triggered();
 	void Attack_Strong_Released();
 	void ChargeTimerCallback();
 
@@ -216,6 +217,12 @@ private:
 	const float SPRINT_COST = 0.5f;
 	const float MAX_GUARD_WALK_SPEED = 200.f;
 
+	// ----- Charge Attack limits -----
+	// 유지 최저치
+	UPROPERTY(EditDefaultsOnly, Category="Sprint")
+	float ChargeAttackMaintainMinStamina = 10.f;
+
+
 	// ----- Sprint limits -----
 	// 시작 최소치
 	UPROPERTY(EditDefaultsOnly, Category="Sprint")
@@ -235,7 +242,7 @@ private:
 	bool CanCombo;
 	int NextComboSkillID = 0;
 
-	float MaxChargeTime = 1.2f;
+	float MaxChargeTime = 2.17f;
 	float CurrentChargeTime = 0.0f;
 	bool bIsCharging = false;
 	FTimerHandle ChargeTimerHandle;

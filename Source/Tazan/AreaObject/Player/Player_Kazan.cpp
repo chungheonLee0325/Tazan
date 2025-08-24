@@ -562,7 +562,6 @@ void APlayer_Kazan::Attack_Weak_Pressed()
 	{
 		SetPlayerState(EPlayerState::ACTION);
 		skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
-		//skill->OnSkillCancel.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
 	}
 }
 
@@ -585,9 +584,19 @@ void APlayer_Kazan::Attack_Strong_Pressed()
 			MaxChargeTime,
 			false
 		);
+	}
+}
 
-		//skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
-		//skill->OnSkillCancel.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
+void APlayer_Kazan::Attack_Strong_Triggered()
+{
+	// 차지 중이거나 액션 상태가 아닐 때는 소모/처리 금지
+	if (!bIsCharging || CurrentPlayerState != EPlayerState::ACTION)
+		return;
+
+	if (DecreaseStamina(0.1f, false) < ChargeAttackMaintainMinStamina)
+	{
+		Attack_Strong_Released();
+		return;
 	}
 }
 
@@ -602,23 +611,26 @@ void APlayer_Kazan::Attack_Strong_Released()
 		LOG_PRINT(TEXT("Charge Time: %f"), chargeTime);
 		GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
 
-		int strongAttackID = chargeTime >= 1.0f ? 22 : 21;
-		LOG_PRINT(TEXT("strongAttackID : %d"), strongAttackID);
-
-
+		int strongAttackID = 21;
+		if (chargeTime > 0.67f && chargeTime < 1.66f)
+		{
+			strongAttackID = 22;
+		}
+		else if (chargeTime > 1.66f)
+		{
+			strongAttackID = 23;
+		}
+		
 		TObjectPtr<UBaseSkill> skill = GetSkillByID(strongAttackID);
 		if (CastSkill(skill, this))
 		{
 			SetPlayerState(EPlayerState::ACTION);
+			skill->OnSkillComplete.BindUObject(this, &APlayer_Kazan::SetPlayerNormalState);
 		}
 		else
 		{
 			SetPlayerState(EPlayerState::NORMAL);
 		}
-
-		// Calculate charge power (0.0 to 1.0)
-		//float ChargePower = FMath::Clamp(CurrentChargeTime / MaxChargeTime, 0.0f, 1.0f);
-		//PerformHeavyAttack(ChargePower);
 	}
 }
 

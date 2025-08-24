@@ -116,11 +116,11 @@ private:
 
 	/** Attack_C Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* AttackCAction;
+	UInputAction* LBAction;
 
 	/** Attack_S Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* AttackSAction;
+	UInputAction* RBAction;
 
 	/** Skill 1 Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
