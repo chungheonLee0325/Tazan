@@ -108,6 +108,8 @@ enum class EStaggerType : uint8
 	ParryReaction UMETA(DisplayName = "ParryReaction"),
 	// Groggy
 	Groggy UMETA(DisplayName = "Groggy"),
+	// GuardBreak
+	GuardBreak UMETA(DisplayName = "GuardBreak"),
 };
 
 UENUM(BlueprintType)
