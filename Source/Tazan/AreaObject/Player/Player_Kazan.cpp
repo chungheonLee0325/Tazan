@@ -470,6 +470,9 @@ void APlayer_Kazan::Move(const FVector2D MovementVector)
 	// input is a Vector2D
 	if (Controller != nullptr)
 	{
+		// 입력 버퍼에 저장(anim notify, anim notify state에서 사용)
+		BufferMoveInput(MovementVector.X, MovementVector.Y);
+		
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -503,6 +506,44 @@ void APlayer_Kazan::Move(const FVector2D MovementVector)
 			LookAtLocation(targetLocation, EPMRotationMode::Speed, 1000.f);
 		}
 	}
+}
+
+static ETazanDir DirClassify(const FVector2D& N)
+{
+	if (N.Size() < KINDA_SMALL_NUMBER) return ETazanDir::Neutral;
+	if (FMath::Abs(N.Y) >= 0.707f) return (N.Y > 0.f) ? ETazanDir::Forward : ETazanDir::Backward;
+	if (FMath::Abs(N.X) >= 0.707f) return (N.X > 0.f) ? ETazanDir::Right : ETazanDir::Left;
+	return ETazanDir::Neutral;
+}
+
+ETazanDir APlayer_Kazan::GetBufferedIntent(float Timeout, float DeadZone) const
+{
+	const float now = GetWorld()->GetTimeSeconds();
+	if (now - LastSample.TimeSec > Timeout) return ETazanDir::Neutral;
+
+	const FVector2D n = LastSample.Dir;
+	if (n.Size() < DeadZone) return ETazanDir::Neutral;
+	return DirClassify(n);
+}
+
+ETazanDir APlayer_Kazan::ConsumeBufferedIntent(float Timeout, float DeadZone)
+{
+	const float now = GetWorld()->GetTimeSeconds();
+	// 같은 프레임/섹션에서 중복 소비 방지
+	if (LastConsumeTime >= 0.f && FMath::IsNearlyEqual(now, LastConsumeTime, 0.0001f))
+		return ETazanDir::Neutral;
+
+	LastConsumeTime = now;
+	return GetBufferedIntent(Timeout, DeadZone);
+}
+
+void APlayer_Kazan::BufferMoveInput(float AxisX, float AxisY)
+{
+	const FVector2D Raw(AxisX, AxisY);
+	if (Raw.IsNearlyZero()) return;
+
+	LastSample.Dir = Raw.GetSafeNormal();
+	LastSample.TimeSec = GetWorld()->GetTimeSeconds();
 }
 
 void APlayer_Kazan::Look(const FVector2D LookAxisVector)
@@ -620,7 +661,7 @@ void APlayer_Kazan::Attack_Strong_Released()
 		{
 			strongAttackID = 23;
 		}
-		
+
 		TObjectPtr<UBaseSkill> skill = GetSkillByID(strongAttackID);
 		if (CastSkill(skill, this))
 		{

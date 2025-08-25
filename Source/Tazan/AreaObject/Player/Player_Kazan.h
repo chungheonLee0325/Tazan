@@ -58,6 +58,15 @@ struct FActionRestrictions
 	bool bCanAction = true;
 };
 
+USTRUCT()
+struct FDirSample
+{
+	GENERATED_BODY()
+	// X=Right, Y=Forward 기준
+	FVector2D Dir = FVector2D::ZeroVector;
+	float TimeSec = 0.f;
+};
+
 UCLASS()
 class TAZAN_API APlayer_Kazan : public AAreaObject
 {
@@ -104,6 +113,14 @@ public:
 	// Movement
 	/** Called for movement input */
 	void Move(FVector2D MovementVector);
+
+	FDirSample LastSample;
+	float LastConsumeTime = -1.f;
+
+	ETazanDir GetBufferedIntent(float Timeout=0.18f, float DeadZone=0.35f) const;
+	ETazanDir ConsumeBufferedIntent(float Timeout=0.18f, float DeadZone=0.35f);
+	void BufferMoveInput(float AxisX, float AxisY);
+	void ResetIntentConsumed() { LastConsumeTime = -1.f; } // 새 몽타주/섹션 시작 시 리셋
 
 	// Camera Rotation
 	/** Called for looking input */
@@ -152,7 +169,7 @@ public:
 	virtual void HandlePerfectGuard(AActor* DamageCauser, const FVector& HitLocation, const FAttackData& Data) override;
 	virtual void HandleGroggy(float Duration) override;
 
- 	virtual void HandleStaggerBegin(EStaggerType Type, const FName& Direction) override;
+	virtual void HandleStaggerBegin(EStaggerType Type, const FName& Direction) override;
 	virtual void HandleStaggerEnd() override;
 
 	void Reward(FItemData* ItemData, int ItemValue) const;
@@ -195,7 +212,7 @@ private:
 	UKazanAnimInstance* KazanAnimInstance;
 	UPROPERTY()
 	AKazanPlayerController* KazanPlayerController;
-	
+
 	// 플레이어 상태 관리
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	EPlayerState CurrentPlayerState;

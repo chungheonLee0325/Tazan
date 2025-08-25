@@ -21,6 +21,52 @@ static float ToYawDeg(ERelMoveDir D, float Custom)
 	}
 }
 
+ETazanDir UMoveUtilComponent::ReadPlayerIntent(AAreaObject* Area, float Timeout, float DeadZone)
+{
+	if (APlayer_Kazan* P = Cast<APlayer_Kazan>(Area))
+	{
+		return P->ConsumeBufferedIntent(Timeout, DeadZone);
+	}
+	return ETazanDir::Neutral;
+}
+
+void UMoveUtilComponent::ApplyDirectionalOverride(FAreaMoveSpec& S, AAreaObject* Area, ETazanDir Dir)
+{
+	switch (Dir)
+	{
+	case ETazanDir::Forward:
+		// 전진: 있으면 Toward 유지, 없으면 InFacing Forward
+		if (S.Intent != EMoveIntent::TowardActor)
+		{
+			S.Intent    = EMoveIntent::InFacing;
+			S.FacingDir = ERelMoveDir::Forward;
+		}
+		// 속도/시간 기본치 보강
+		S.Speed      = FMath::Max(S.Speed, 2400.f);
+		S.MaxDuration= FMath::Max(S.MaxDuration, 0.25f);
+		break;
+
+	case ETazanDir::Backward:
+		// 백스텝: InFacing Backward + 짧은 Duration 기반
+		S.Intent     = EMoveIntent::InFacing;
+		S.FacingDir  = ERelMoveDir::Backward;
+		S.Kinematics = EKinematics::ByDuration;
+		S.Duration   = FMath::Max(S.Duration, 0.18f);
+		break;
+
+	case ETazanDir::Left:
+	case ETazanDir::Right:
+		S.Intent     = EMoveIntent::InFacing;
+		S.FacingDir  = (Dir==ETazanDir::Left? ERelMoveDir::Left : ERelMoveDir::Right);
+		S.Kinematics = EKinematics::BySpeed;
+		S.Distance   = FMath::Max(S.Distance, 200.f);
+		S.Speed      = FMath::Max(S.Speed, 2400.f);
+		break;
+
+	default: /* Neutral → 변경 없음 */ break;
+	}
+}
+
 
 AActor* UMoveUtilComponent::ResolveAreaTarget(AAreaObject* Area, bool bUseLockOn)
 {
@@ -90,7 +136,6 @@ FVector UMoveUtilComponent::ComputeTowardTargetPos(AActor* Owner, AActor* Target
 
 	return OwnerLoc + Dir * Travel;
 }
-
 
 UMoveUtilComponent::UMoveUtilComponent()
 {

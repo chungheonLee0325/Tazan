@@ -204,6 +204,10 @@ public:
 	UFUNCTION(BlueprintPure, Category="MoveUtil|Helpers")
 	static FVector ComputeTowardTargetPos(AActor* Owner, AActor* Target, float StopDistance);
 
+	/* Directional Helper: 플레이어의 입력버퍼를 읽어와 방향 덮어쓰기 */
+	static void ApplyDirectionalOverride(FAreaMoveSpec& S, AAreaObject* Area, ETazanDir Dir);
+	static ETazanDir ReadPlayerIntent(AAreaObject* Area, float Timeout=0.18f, float DeadZone=0.35f);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
