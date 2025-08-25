@@ -3,8 +3,6 @@
 
 #include "Y_ComboSkill.h"
 
-#include "Tazan/AreaObject/Base/AreaObject.h"
-#include "Tazan/Utilities/LogMacro.h"
 
 UY_ComboSkill::UY_ComboSkill()
 {

@@ -4,8 +4,6 @@
 #include "Yetuga.h"
 
 #include "Yetuga_RockS.h"
-#include "Components/BoxComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,7 +11,7 @@
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
-#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_ChargeAttack.h"
+
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 
