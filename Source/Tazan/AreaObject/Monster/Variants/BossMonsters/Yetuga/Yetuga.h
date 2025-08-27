@@ -47,6 +47,10 @@ private:
 	// UI
 	UPROPERTY()
 	class UUserWidget* CompleteWidget;
+
+	FVector StartPelvisWS;
+	FVector PrevPelvisWS;
+	bool bIsAnimMoving = false;
 		
 protected:
 	virtual void BeginPlay() override;
@@ -95,6 +99,13 @@ public:
 	void ShowRock();
 	UFUNCTION(BlueprintCallable)
 	void HideRock();
+
+	UFUNCTION(BlueprintCallable)
+	void StartAnimMove();
+	UFUNCTION(BlueprintCallable)
+	void EndAnimMove();
+	UFUNCTION(BlueprintCallable)
+	void AnimMove();
 
 private:
 	virtual void InitializeHUD() override;

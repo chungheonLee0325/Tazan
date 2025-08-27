@@ -4,8 +4,6 @@
 #include "Yetuga.h"
 
 #include "Yetuga_RockS.h"
-#include "Components/BoxComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,7 +11,7 @@
 #include "Tazan/AreaObject/Attribute/StaminaComponent.h"
 #include "Tazan/AreaObject/Monster/AI/Derived/AiMonster/Yetuga/YetugaFSM.h"
 #include "Tazan/AreaObject/Player/Player_Kazan.h"
-#include "Tazan/AreaObject/Skill/Monster/BossMonsters/Yetuga/Y_ChargeAttack.h"
+
 #include "Tazan/UI/Widget/PlayerStatusWidget.h"
 
 
@@ -222,6 +220,63 @@ void AYetuga::ShowRock()
 void AYetuga::HideRock()
 {
 	SmallRockMesh->SetVisibility(false);
+}
+
+void AYetuga::StartAnimMove()
+{
+	USkeletalMeshComponent* SK = GetMesh();
+	if (!SK)
+	{
+		UE_LOG(LogTemp, Error, TEXT("스켈레탈 메시 NULL"));
+		return;
+	}
+
+	// 애니메이션 시작 시 pelvis의 월드 위치 저장
+	StartPelvisWS = SK->GetSocketLocation("pelvis");
+	LOG_SCREEN("시작 위치:, X: %f, Y: %f, Z: %f ",StartPelvisWS.X,StartPelvisWS.Y,StartPelvisWS.Z);
+	UE_LOG(LogTemp,Warning,TEXT("pelvis 시작 위치:, X: %f, Y: %f, Z: %f "),StartPelvisWS.X,StartPelvisWS.Y,StartPelvisWS.Z);
+	UE_LOG(LogTemp,Error,TEXT("액터 시작 위치:, X: %f, Y: %f, Z: %f "),GetActorLocation().X,GetActorLocation().Y,GetActorLocation().Z);
+
+	bIsAnimMoving = true;
+}
+
+void AYetuga::EndAnimMove()
+{
+	USkeletalMeshComponent* SK = GetMesh();
+	if (!SK)
+	{
+		UE_LOG(LogTemp, Error, TEXT("스켈레탈 메시 NULL"));
+		return;
+	}
+
+	FVector EndPelvisWS = SK->GetSocketLocation("pelvis");
+	FVector Delta = EndPelvisWS - StartPelvisWS;
+
+	float scale = 2.0f;
+	AddActorWorldOffset(FVector(Delta.X * scale,Delta.Y * scale,0), true);
+	LOG_SCREEN("종료 위치:, X: %f, Y: %f, Z: %f ",EndPelvisWS.X,EndPelvisWS.Y,EndPelvisWS.Z);
+	UE_LOG(LogTemp,Warning,TEXT("pelvis 종료 위치:, X: %f, Y: %f, Z: %f "),EndPelvisWS.X,EndPelvisWS.Y,EndPelvisWS.Z);
+	UE_LOG(LogTemp,Warning,TEXT("보정 값:, X: %f, Y: %f, Z: %f "),Delta.X,Delta.Y,0.0f);
+	UE_LOG(LogTemp,Error,TEXT("액터 종료 위치:, X: %f, Y: %f, Z: %f "),GetActorLocation().X,GetActorLocation().Y,GetActorLocation().Z);
+
+	bIsAnimMoving = false;
+}
+
+void AYetuga::AnimMove()
+{
+	USkeletalMeshComponent* SK = GetMesh();
+	if (!bIsAnimMoving || !SK) return;
+
+	// pelvis의 현재 '컴포넌트 공간' 위치
+	FVector CurrentPelvisLS = SK->GetSocketTransform("pelvis", RTS_Component).GetLocation();
+	FVector DeltaLS = CurrentPelvisLS - PrevPelvisWS;
+
+	// 컴포넌트 방향에 맞춰 월드 공간 방향으로 변환
+	FVector DeltaWS = SK->GetComponentTransform().TransformVectorNoScale(DeltaLS);
+
+	AddActorWorldOffset(DeltaWS, true);
+
+	PrevPelvisWS = CurrentPelvisLS;
 }
 
 void AYetuga::InitializeHUD()
