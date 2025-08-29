@@ -120,7 +120,7 @@ AKazanPlayerController::AKazanPlayerController()
 	}
 
 	ConstructorHelpers::FClassFinder<UUserWidget> missionFailWidget(
-		TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_KazanHasFallen.WB_KazanHasFallen_C'"));
+		TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/_BluePrints/Widget/WB_MissionFail.WB_MissionFail_C'"));
 	if (missionFailWidget.Succeeded())
 	{
 		MissionFailClass = missionFailWidget.Class;

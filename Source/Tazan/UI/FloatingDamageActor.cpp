@@ -23,15 +23,12 @@ AFloatingDamageActor::AFloatingDamageActor()
 void AFloatingDamageActor::Initialize(float Damage, EFloatingDamageType DamageType, float Duration, float RiseSpeed)
 {
     LifeTime = Duration;
-    CurrentLifeTime = 0.0f;
-    MovementSpeed = RiseSpeed;
 
     // 랜덤 오프셋 계산
     float RandomX = FMath::RandRange(-RandomOffsetRange, RandomOffsetRange);
     float RandomY = FMath::RandRange(-RandomOffsetRange, RandomOffsetRange);
-    
-    // 기본적으로 위로 향하는 방향에 랜덤성 추가
-    MovementDirection = FVector(RandomX, RandomY, MovementSpeed).GetSafeNormal();
+
+    AddActorLocalOffset(FVector(RandomX, RandomY, 0.0f));
 
     if (UFloatingDamageWidget* Widget = Cast<UFloatingDamageWidget>(DamageWidget->GetUserWidgetObject()))
     {
@@ -45,8 +42,7 @@ void AFloatingDamageActor::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     // 설정된 방향으로 이동
-    FVector NewLocation = GetActorLocation() + (MovementDirection * MovementSpeed * DeltaTime);
-    SetActorLocation(NewLocation);
+    AddActorWorldOffset(FVector::UpVector * MovementSpeed * DeltaTime);
 
     CurrentLifeTime += DeltaTime;
     if (CurrentLifeTime >= LifeTime)

@@ -25,10 +25,8 @@ private:
 
     float LifeTime = 10.0f;
     float CurrentLifeTime;
-    float MovementSpeed = 50.f;
+    float MovementSpeed = 10.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
-    float RandomOffsetRange = 30.0f;  // 랜덤 오프셋 범위
-    
-    FVector MovementDirection;  // 이동 방향 (랜덤 오프셋 포함)
+    float RandomOffsetRange = 15.0f;  // 랜덤 오프셋 범위
 }; 
