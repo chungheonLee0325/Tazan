@@ -1,6 +1,6 @@
 # Tazan Project - 언리얼 C++ 소울라이크 게임 프로토타입
 
-![Project Banner](khazan.png) 
+![Project Banner](Doc/T_Title_Image_3.png) 
 
 ## 🎮 프로젝트 개요
 
