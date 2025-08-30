@@ -31,8 +31,8 @@ AYetuga::AYetuga()
 	bIsParrySkill = false;
 
 	SmallRockMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SmallRockMesh"));
-	SmallRockMesh->SetupAttachment(GetMesh(),FName("LeftHand"));
-	SmallRockMesh->SetWorldScale3D(FVector(0.25f, 0.25f, 0.25f));
+	SmallRockMesh->SetupAttachment(GetMesh(),FName("weapon_r_Socket"));
+	SmallRockMesh->SetWorldScale3D(FVector(0.15f, 0.15f, 0.15f));
 	SmallRockMesh->SetVisibility(false);
 	
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>rockMesh(TEXT("/Game/_Resource/Yetuga/Rock/Yetuga_SmallRock.Yetuga_SmallRock"));
@@ -158,7 +158,7 @@ void AYetuga::YetugaStart()
 	InitializeHUD();
 	
 	//시작시 어퍼컷 콤보공격 확정 실행
-	NextSkill = GetSkillByID(11000);
+	NextSkill = GetSkillByID(StartSkillID);
 	m_AiFSM->ChangeState(EAiStateType::Chase);
 }
 

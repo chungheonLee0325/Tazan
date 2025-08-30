@@ -18,7 +18,7 @@ void UY_ComboSkill::OnCastFire()
 {
 	if (bIsHitOnce)
 	{
-		m_NextSkillID = 11001;
+		// m_NextSkillID = 11001;
 		OnCastEnd();
 		return;
 	}

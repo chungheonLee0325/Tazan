@@ -25,6 +25,9 @@ public:
 	UPROPERTY()
 	UYetugaAnimInstance* YetugaABP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int StartSkillID = 11000;
+	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	USkeletalMeshComponent* SmallRockMesh;
 	
