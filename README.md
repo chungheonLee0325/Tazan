@@ -1,6 +1,6 @@
 # Tazan Project - 언리얼 C++ 소울라이크 게임 프로토타입
 
-![Project Banner](khazan.png) 
+![Project Banner](Doc/T_Title_Image_3.png) 
 
 ## 🎮 프로젝트 개요
 
@@ -210,9 +210,9 @@ Tazan/
 ## 👥 개발팀
 
 | 역할 | 담당자 | 주요 기여 |
-|------|--------|-----------|
-| **메인 프로그래머** | 김희연 | Base Class 구현, 플레이어 시스템, 스킬 시스템, 전투 시스템, Sword Skeleton, HalberdMan 구현 |
-| **보스 AI 프로그래머** | 이충헌 | Yetuga(보스 몬스터) AI와 스킬 룰렛 시스템 구현 |
+|------|-----|-----------|
+| **메인 프로그래머** | 이충헌 | Base Class 구현, 플레이어 시스템, 스킬 시스템, 전투 시스템, Sword Skeleton, HalberdMan 구현 |
+| **보스 AI 프로그래머** | 김희연 | Yetuga(보스 몬스터) AI와 스킬 룰렛 시스템 구현 |
 | **레벨 디자이너** | 최연택 | 맵 디자인 및 환경 구성 |
 
 ---
