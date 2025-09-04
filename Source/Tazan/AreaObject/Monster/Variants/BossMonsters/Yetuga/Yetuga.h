@@ -98,6 +98,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void FastBall();
+	void FastBallDestroy();
+	
 	UFUNCTION(BlueprintCallable)
 	void ShowRock();
 	UFUNCTION(BlueprintCallable)

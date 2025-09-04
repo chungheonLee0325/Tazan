@@ -201,7 +201,7 @@ void AYetuga::Recover()
 
 void AYetuga::FastBall()
 {
-	AYetuga_RockS* spawnedRock = GetWorld()->SpawnActor<AYetuga_RockS>(AYetuga_RockS::StaticClass(),GetActorLocation(),GetActorRotation());
+	AYetuga_RockS* spawnedRock = GetWorld()->SpawnActor<AYetuga_RockS>(AYetuga_RockS::StaticClass(),SmallRockMesh->GetComponentLocation(),SmallRockMesh->GetComponentRotation());
 	
 	if (spawnedRock)
 	{
@@ -211,6 +211,8 @@ void AYetuga::FastBall()
 		spawnedRock->Fire();
 	}
 }
+
+
 
 void AYetuga::ShowRock()
 {

@@ -51,5 +51,7 @@ public:
 	void InitRock(ABaseMonster* caster, AAreaObject* player);
 
 	void Fire();
-	void OnDestroy(UAnimMontage* AnimMontage, bool bArg);
+	
+	UFUNCTION()
+	void DoDestroy();
 };

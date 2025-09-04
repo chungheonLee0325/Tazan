@@ -24,7 +24,7 @@ AYetuga_RockS::AYetuga_RockS()
 	
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
-	Mesh->SetWorldScale3D(FVector(0.25f));
+	Mesh->SetWorldScale3D(FVector(0.4f));
 	
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>RockMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/_Resource/Yetuga/Rock/Yetuga_SmallRock.Yetuga_SmallRock'"));
 	if (RockMesh.Succeeded())
@@ -93,10 +93,6 @@ void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 
 		if (TargetDestroyAni != nullptr)
 		{
-			FOnMontageEnded MontageEndedDelegate;
-			MontageEndedDelegate.BindUObject(this, &AYetuga_RockS::OnDestroy);
-		
-			animInst->Montage_SetEndDelegate(MontageEndedDelegate, TargetDestroyAni);
 			animInst->Montage_Play(TargetDestroyAni);
 		}
 	}
@@ -106,11 +102,7 @@ void AYetuga_RockS::Overlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		
 		if (FloorDestroyAni != nullptr)
 		{
-			FOnMontageEnded MontageEndedDelegate;
-			MontageEndedDelegate.BindUObject(this, &AYetuga_RockS::OnDestroy);
-		
-			animInst->Montage_SetEndDelegate(MontageEndedDelegate, FloorDestroyAni);
-			animInst->Montage_Play(FloorDestroyAni);
+			animInst->Montage_Play(TargetDestroyAni);
 		}
 	}
 }
@@ -123,28 +115,42 @@ void AYetuga_RockS::InitRock(ABaseMonster* caster, AAreaObject* player)
 
 void AYetuga_RockS::Fire()
 {
-	FVector targetLoc = Target->GetActorLocation();
-	FVector startLoc = Caster->GetActorLocation();
-	float arcValue = 0.75f;
+	if (!Caster || !Target) return;
 
-	FVector outVelocity = FVector::ZeroVector;
-	if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), arcValue))
+	FVector StartLoc = GetActorLocation();
+	FVector TargetLoc = Target->GetActorLocation();
+
+	// 발사체 위치를 시작 위치로 이동
+	SetActorLocation(StartLoc);
+
+	FVector OutVelocity;
+	bool bHaveAimSolution = UGameplayStatics::SuggestProjectileVelocity(
+		this,
+		OutVelocity,
+		StartLoc,
+		TargetLoc,
+		3300.0f,
+		false,
+		0.0f,
+		GetWorld()->GetGravityZ(),
+		ESuggestProjVelocityTraceOption::DoNotTrace
+	);
+
+	if (bHaveAimSolution)
 	{
-		Root->SetGenerateOverlapEvents(true);
-		FPredictProjectilePathParams predictParams(20.0f, startLoc, outVelocity*100.0f, 15.0f);
-		
-		predictParams.OverrideGravityZ = GetWorld()->GetGravityZ();
-		FPredictProjectilePathResult result;
-		UGameplayStatics::PredictProjectilePath(this, predictParams, result);
-		
-		ProjectileMovement->Velocity = outVelocity;
+		ProjectileMovement->Velocity = OutVelocity;
+		ProjectileMovement->UpdatedComponent = Root;
 		ProjectileMovement->Activate();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("YetugaBall, No valid parabola solution!"));
 	}
 }
 
-void AYetuga_RockS::OnDestroy(UAnimMontage* AnimMontage, bool bArg)
+
+void AYetuga_RockS::DoDestroy()
 {
-	//LOG_SCREEN("돌 파괴");
 	Destroy();
 }
 
