@@ -17,4 +17,9 @@ class TAZAN_API UY_ParrySkill : public UY_BaseSkill
 public:
 	virtual void OnCastStart(class AAreaObject* Caster, AAreaObject* Target) override;
 	virtual void OnCastEnd() override;
+
+protected:
+	/*해당 스킬일 때 임시로 패리 스택을 변경합니다.*/
+	int SkillParryStackMax = 0;
+	int OriginParryStackMax = 0;
 };
