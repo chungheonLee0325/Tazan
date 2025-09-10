@@ -88,6 +88,7 @@ public:
 	void SetHPWidgetVisibility(bool IsVisible);
 	void SetHPWidgetVisibilityByDuration(float Duration);
 	FTimerHandle HPWidgetVisibleTimer;
+	
 protected:
 	// Combat System
 	void HandleStaggerBegin(EStaggerType Type, const FName& Direction) override;
@@ -162,6 +163,8 @@ public:
 	void AddSkillEntryByID(const int id);
 
 	// Perfect Guard Reaction
+	int GetParryStack() const { return ParryStack; }
+	void ChangeParryStackMax(int skillParryStackMax) { ParryStackMax = skillParryStackMax; }
 	virtual void AddParryStack();
 	void InitParryStack();
 
